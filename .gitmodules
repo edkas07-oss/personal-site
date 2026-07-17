@@ -1,0 +1,12 @@
+[submodule "themes/blowfish"]
+	path = themes/blowfish
+	url = https://github.com/nunocoracao/blowfish.git
+[submodule "themes/anank"]
+	path = themes/anank
+	url = https://github.com/gohugo-ananke/ananke
+[submodule "aboutme/themes/ananke"]
+	path = aboutme/themes/ananke
+	url = https://github.com/gohugo-ananke/ananke
+[submodule "themes/ananke"]
+	path = themes/ananke
+	url = https://github.com/gohugo-ananke/ananke
