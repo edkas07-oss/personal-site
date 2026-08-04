@@ -175,6 +175,7 @@ pipeline {
 
                     podman run \
                         --rm \
+                        --userns=keep-id \
                         --name "hugo-build-${BUILD_NUMBER}" \
                         --pull=missing \
                         -u "$(id -u):$(id -g)" \
@@ -266,6 +267,7 @@ pipeline {
                         podman run \
                             --rm \
                             --name "mc-${BUILD_NUMBER}" \
+                            --userns=keep-id \
                             -v "$WORKSPACE:/workspace:Z" \
                             ${MC_IMAGE} \
                             sh -c "
