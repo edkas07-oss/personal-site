@@ -18,13 +18,20 @@ pipeline {
 
         stage('Build Static Website') {
             steps {
-                sh 'hugo'
-            }
-        }
-
-        stage('Archive Build Artifact') {
-            steps {
-                archiveArtifacts artifacts: 'public/**', fingerprint: true
+                sh '''
+                podman run \
+                    --rm \
+                    --name "hugo-build-${BUILD_NUMBER}" \
+                    --pull=missing \
+                    -u "$(id -u):$(id -g)" \
+                    -e HUGO_CACHEDIR=/tmp \
+                    -v "$WORKSPACE:/src" \
+                    -w /src \
+                    klakegg/hugo:ext-alpine \
+                    hugo \
+                    --minify \
+                    --destination public
+                '''
             }
         }
 
