@@ -22,7 +22,7 @@ pipeline {
 
         ARTIFACT_NAME = "personal-site-${BUILD_NUMBER}.tar.gz"
 
-        MINIO_ALIAS  = 'artifact-storage'
+        MINIO_ALIAS  = 'artifact_storage'
         MINIO_BUCKET = 'personal-site'
 
         MINIO_URL = 'http://host.containers.internal:9000'
@@ -151,6 +151,12 @@ pipeline {
                             --rm \
                             -v "$WORKSPACE:/workspace:Z" \
                             -w /workspace \
+                            --env ARTIFACT_NAME \
+                            --env MINIO_ALIAS \
+                            --env MINIO_BUCKET \
+                            --env MINIO_URL \
+                            --env MINIO_USER \
+                            --env MINIO_PASSWORD \
                             --entrypoint /bin/sh \
                             "${MC_IMAGE}" \
                             -ec '
