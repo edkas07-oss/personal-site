@@ -151,22 +151,14 @@ pipeline {
                             --rm \
                             -v "$WORKSPACE:/workspace:Z" \
                             -w /workspace \
+                            --entrypoint /bin/sh \
                             "${MC_IMAGE}" \
-                            mc alias set "${MINIO_ALIAS}" "${MINIO_URL}" "$MINIO_USER" "$MINIO_PASSWORD"
-
-                        podman run \
-                            --rm \
-                            -v "$WORKSPACE:/workspace:Z" \
-                            -w /workspace \
-                            "${MC_IMAGE}" \
-                            mc cp "${ARTIFACT_NAME}" "${MINIO_ALIAS}/${MINIO_BUCKET}/${ARTIFACT_NAME}"
-
-                        podman run \
-                            --rm \
-                            -v "$WORKSPACE:/workspace:Z" \
-                            -w /workspace \
-                            "${MC_IMAGE}" \
-                            mc ls "${MINIO_ALIAS}/${MINIO_BUCKET}"
+                            -ec '
+                                mc alias set "${MINIO_ALIAS}" "${MINIO_URL}" "$MINIO_USER" "$MINIO_PASSWORD"
+                                mc mb --ignore-existing "${MINIO_ALIAS}/${MINIO_BUCKET}"
+                                mc cp "${ARTIFACT_NAME}" "${MINIO_ALIAS}/${MINIO_BUCKET}/${ARTIFACT_NAME}"
+                                mc ls "${MINIO_ALIAS}/${MINIO_BUCKET}/${ARTIFACT_NAME}"
+                            '
                     '''
                 }
             }
