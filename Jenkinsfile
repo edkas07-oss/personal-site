@@ -86,6 +86,7 @@ pipeline {
                     set -euo pipefail
 
                     podman run \
+                        --userns=keep-id
                         --rm \
                         --pull=missing \
                         -v "$WORKSPACE:/src:Z" \
