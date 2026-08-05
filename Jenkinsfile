@@ -92,7 +92,7 @@ pipeline {
                         --rm \\
                         --pull=missing \\
                         -v "\$WORKSPACE:/src:Z" \\
-                        --w /src \\
+                        -w /src \\
                         ${HUGO_IMAGE} \\
                         sh -c "hugo --minify --destination public"
                 """
