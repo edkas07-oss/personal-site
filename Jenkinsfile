@@ -94,7 +94,7 @@ pipeline {
                         -v "\$WORKSPACE:/src:Z" \\
                         -w /src \\
                         ${HUGO_IMAGE} \\
-                        sh -c "hugo --minify --destination public"
+                        hugo --minify --gc
                 """
 
             }
