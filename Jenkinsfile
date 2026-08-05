@@ -1,116 +1,42 @@
-/*
-===============================================================================
-Project : Personal Site
-File    : Jenkinsfile
-
-Description
------------
-CI Pipeline untuk membangun static website menggunakan Containerized Build
-Environment.
-
-Pipeline menerapkan prinsip:
-
-- Pipeline as Code
-- Stage-Based CI Pipeline
-- Containerized Pipeline Environment
-- Build Once, Deploy Many
-
-Pipeline Workflow
------------------
-
-Checkout Source Code
-        │
-        ▼
-Verify Build Environment
-        │
-        ▼
-Build Static Website
-        │
-        ▼
-Package Artifact
-        │
-        ▼
-Publish Artifact
-        │
-        ▼
-SUCCESS
-
-===============================================================================
-*/
-
 pipeline {
 
-    agent any
+    /**************************************************************************
+     * Menentukan Build Agent
+     *
+     * Seluruh proses build dijalankan pada Jenkins SSH Build Agent
+     * dengan label "builder".
+     **************************************************************************/
 
-    /*
-    ---------------------------------------------------------------------------
-    Pipeline Options
-    ---------------------------------------------------------------------------
-
-    timestamps()
-        Menambahkan timestamp pada setiap log sehingga memudahkan proses
-        troubleshooting dan audit pipeline.
-    */
-
-    options {
-
-        timestamps()
-
+    agent {
+        label 'builder'
     }
 
-    /*
-    ---------------------------------------------------------------------------
-    Environment Variables
-    ---------------------------------------------------------------------------
-
-    Seluruh konfigurasi pipeline ditempatkan pada satu lokasi agar mudah
-    dikelola dan digunakan kembali.
-
-    HUGO_IMAGE
-        Image Hugo yang digunakan untuk membangun static website.
-
-    MC_IMAGE
-        Image MinIO Client yang digunakan untuk mengunggah Build Artifact.
-
-    MINIO_ENDPOINT
-        Endpoint MinIO Artifact Storage.
-
-    ARTIFACT_BUCKET
-        Bucket tujuan penyimpanan Build Artifact.
-
-    PROJECT_NAME
-        Nama project.
-
-    ARTIFACT_NAME
-        Nama Build Artifact yang dihasilkan pada setiap build.
-    */
+    /**************************************************************************
+     * Environment Variables
+     **************************************************************************/
 
     environment {
 
-        HUGO_IMAGE = 'klakegg/hugo:ext-alpine'
+        HUGO_IMAGE   = 'docker.io/klakegg/hugo:ext-alpine'
+        MC_IMAGE     = 'quay.io/minio/mc:latest'
 
-        MC_IMAGE = 'quay.io/minio/mc:latest'
+        ARTIFACT_NAME = "personal-site-${BUILD_NUMBER}.tar.gz"
 
-        MINIO_ENDPOINT = 'http://host.containers.internal:9000'
+        MINIO_ALIAS  = 'artifact-storage'
+        MINIO_BUCKET = 'personal-site'
 
-        ARTIFACT_BUCKET = 'personal-site'
-
-        PROJECT_NAME = 'personal-site'
-
-        ARTIFACT_NAME = "${PROJECT_NAME}-${BUILD_NUMBER}.tar.gz"
+        MINIO_URL = 'http://host.containers.internal:9000'
 
     }
 
     stages {
 
-        /*
-        -----------------------------------------------------------------------
-        Checkout Source Code
-
-        Mengambil source code dari Git Repository ke Jenkins Workspace.
-        Seluruh stage berikutnya menggunakan Workspace yang sama.
-        -----------------------------------------------------------------------
-        */
+        /**********************************************************************
+         * Checkout Source Code
+         *
+         * Jenkins melakukan checkout source code ke Workspace
+         * pada Build Agent.
+         **********************************************************************/
 
         stage('Checkout Source Code') {
 
@@ -122,18 +48,13 @@ pipeline {
 
         }
 
-        /*
-        -----------------------------------------------------------------------
-        Verify Build Environment
+        /**********************************************************************
+         * Verify Build Agent
+         *
+         * Memastikan Build Agent siap digunakan.
+         **********************************************************************/
 
-        Memastikan Container Runtime tersedia sebelum Build Pipeline dijalankan.
-
-        Tahap ini merupakan validasi awal agar kegagalan akibat environment dapat
-        diketahui sebelum proses build dimulai.
-        -----------------------------------------------------------------------
-        */
-
-        stage('Verify Build Environment') {
+        stage('Verify Build Agent') {
 
             steps {
 
@@ -142,29 +63,39 @@ pipeline {
 
                     echo
                     echo "========================================"
-                    echo "Build Environment"
+                    echo "Build Agent"
                     echo "========================================"
-                    echo
 
-                    podman --version
+                    hostname
+
+                    echo
+                    whoami
+
+                    echo
+                    pwd
+
+                    echo
+                    echo "Workspace"
+                    echo "----------------------------------------"
+                    echo "$WORKSPACE"
+
+                    echo
+                    echo "Podman"
+                    echo "----------------------------------------"
+
+                    podman version
                 '''
 
             }
 
         }
 
-        /*
-        -----------------------------------------------------------------------
-        Build Static Website
-
-        Menjalankan Hugo menggunakan Build Container.
-
-        Jenkins Controller tidak menginstal Hugo secara langsung.
-
-        Build dilakukan menggunakan Container Runtime (Podman) sesuai
-        PS-ADR-0007.
-        -----------------------------------------------------------------------
-        */
+        /**********************************************************************
+         * Build Static Website
+         *
+         * Menjalankan Hugo di dalam Container menggunakan Workspace
+         * Jenkins sebagai source code.
+         **********************************************************************/
 
         stage('Build Static Website') {
 
@@ -175,33 +106,23 @@ pipeline {
 
                     podman run \
                         --rm \
-                        --userns=keep-id \
-                        --name "hugo-build-${BUILD_NUMBER}" \
                         --pull=missing \
-                        -u "$(id -u):$(id -g)" \
-                        -e HUGO_CACHEDIR=/tmp \
                         -v "$WORKSPACE:/src:Z" \
                         -w /src \
                         ${HUGO_IMAGE} \
-                        hugo \
-                            --minify \
-                            --destination public
+                        --minify \
+                        --destination public
                 '''
 
             }
 
         }
 
-        /*
-        -----------------------------------------------------------------------
-        Package Artifact
-
-        Mengemas hasil build menjadi satu file artifact.
-
-        Artifact digunakan sebagai output resmi CI Pipeline dan akan
-        dipublikasikan ke Artifact Storage.
-        -----------------------------------------------------------------------
-        */
+        /**********************************************************************
+         * Package Artifact
+         *
+         * Mengemas hasil build menjadi satu file artifact.
+         **********************************************************************/
 
         stage('Package Artifact') {
 
@@ -216,27 +137,20 @@ pipeline {
                     echo "========================================"
                     echo "Artifact"
                     echo "========================================"
-                    echo
 
                     ls -lh "${ARTIFACT_NAME}"
-
-                    echo
                 '''
 
             }
 
         }
 
-        /*
-        -----------------------------------------------------------------------
-        Publish Artifact
-
-        Mengunggah Build Artifact ke MinIO.
-
-        MinIO Client dijalankan sebagai ephemeral container sehingga Jenkins
-        Controller tidak perlu menginstal tool tambahan.
-        -----------------------------------------------------------------------
-        */
+        /**********************************************************************
+         * Publish Artifact
+         *
+         * Mengunggah Build Artifact ke MinIO menggunakan
+         * MinIO Client Container.
+         **********************************************************************/
 
         stage('Publish Artifact') {
 
@@ -244,52 +158,34 @@ pipeline {
 
                 withCredentials([
                     usernamePassword(
-                        credentialsId: 'MINIO_CREDENTIAL',
-                        usernameVariable: 'MINIO_ACCESS_KEY',
-                        passwordVariable: 'MINIO_SECRET_KEY'
+                        credentialsId: 'minio-root',
+                        usernameVariable: 'MINIO_USER',
+                        passwordVariable: 'MINIO_PASSWORD'
                     )
                 ]) {
 
                     sh '''
                         set -euo pipefail
 
-                        echo
-                        echo "========================================"
-                        echo "Publish Artifact"
-                        echo "========================================"
-                        echo
-
-                        echo "Artifact : ${ARTIFACT_NAME}"
-                        echo "Bucket   : ${ARTIFACT_BUCKET}"
-
-                        echo
-
                         podman run \
                             --rm \
-                            --name "mc-${BUILD_NUMBER}" \
-                            --userns=keep-id \
                             -v "$WORKSPACE:/workspace:Z" \
+                            -w /workspace \
                             ${MC_IMAGE} \
                             sh -c "
-                                mc alias set minio \
-                                    ${MINIO_ENDPOINT} \
-                                    ${MINIO_ACCESS_KEY} \
-                                    ${MINIO_SECRET_KEY}
+                                mc alias set ${MINIO_ALIAS} ${MINIO_URL} ${MINIO_USER} ${MINIO_PASSWORD}
 
                                 mc cp \
-                                    /workspace/${ARTIFACT_NAME} \
-                                    minio/${ARTIFACT_BUCKET}/
+                                    ${ARTIFACT_NAME} \
+                                    ${MINIO_ALIAS}/${MINIO_BUCKET}/${ARTIFACT_NAME}
 
-                                mc ls \
-                                    minio/${ARTIFACT_BUCKET}/
+                                echo
+                                echo '========================================'
+                                echo 'Artifact Repository'
+                                echo '========================================'
+
+                                mc ls ${MINIO_ALIAS}/${MINIO_BUCKET}
                             "
-
-                        echo
-                        echo "========================================"
-                        echo "Artifact published successfully."
-                        echo "========================================"
-                        echo
-
                     '''
 
                 }
@@ -300,32 +196,15 @@ pipeline {
 
     }
 
-    /*
-    ---------------------------------------------------------------------------
-    Post Actions
-
-    Menampilkan status akhir pipeline.
-
-    Bagian ini dapat dikembangkan untuk kebutuhan notifikasi seperti:
-
-    - Microsoft Teams
-    - Email
-    - Slack
-    - Telegram
-    ---------------------------------------------------------------------------
-    */
+    /**************************************************************************
+     * Post Actions
+     **************************************************************************/
 
     post {
 
-        success {
+        always {
 
-            echo 'Pipeline completed successfully.'
-
-        }
-
-        failure {
-
-            echo 'Pipeline failed.'
+            archiveArtifacts artifacts: '*.tar.gz'
 
         }
 
