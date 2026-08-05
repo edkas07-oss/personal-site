@@ -82,8 +82,8 @@ pipeline {
 
             steps {
 
-                sh '''
-                    set -eu
+                sh '''#!/usr/bin/env bash
+                    set -euo pipefail
 
                     podman run \
                         --userns=keep-id
