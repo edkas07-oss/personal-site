@@ -137,9 +137,7 @@ pipeline {
          **********************************************************************/
 
         stage('Publish Artifact') {
-
             steps {
-
                 withCredentials([
                     usernamePassword(
                         credentialsId: 'minio-root',
@@ -147,7 +145,6 @@ pipeline {
                         passwordVariable: 'MINIO_PASSWORD'
                     )
                 ]) {
-
                     sh """
                         set -eu
 
@@ -156,26 +153,24 @@ pipeline {
                             -v "\$WORKSPACE:/workspace:Z" \\
                             -w /workspace \\
                             ${MC_IMAGE} \\
-                            sh -c "
-                                mc alias set ${MINIO_ALIAS} ${MINIO_URL} \$MINIO_USER \$MINIO_PASSWORD
+                            mc alias set ${MINIO_ALIAS} ${MINIO_URL} "\$MINIO_USER" "\$MINIO_PASSWORD"
 
-                                mc cp \\
-                                    ${ARTIFACT_NAME} \\
-                                    ${MINIO_ALIAS}/${MINIO_BUCKET}/${ARTIFACT_NAME}
+                        podman run \\
+                            --rm \\
+                            -v "\$WORKSPACE:/workspace:Z" \\
+                            -w /workspace \\
+                            ${MC_IMAGE} \\
+                            mc cp ${ARTIFACT_NAME} ${MINIO_ALIAS}/${MINIO_BUCKET}/${ARTIFACT_NAME}
 
-                                echo
-                                echo '========================================'
-                                echo 'Artifact Repository'
-                                echo '========================================'
-
-                                mc ls ${MINIO_ALIAS}/${MINIO_BUCKET}
-                            "
+                        podman run \\
+                            --rm \\
+                            -v "\$WORKSPACE:/workspace:Z" \\
+                            -w /workspace \\
+                            ${MC_IMAGE} \\
+                            mc ls ${MINIO_ALIAS}/${MINIO_BUCKET}
                     """
-
                 }
-
             }
-
         }
 
     }
