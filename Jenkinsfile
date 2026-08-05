@@ -55,21 +55,23 @@ pipeline {
          **********************************************************************/
 
         stage('Verify Build Agent') {
-    steps {
-        sh '''
-            echo "========================================"
-            echo "VERIFY BUILD AGENT"
-            echo "========================================"
+            steps {
+                sh """
+                    set -eu
 
-            echo "Hostname : $(hostname)"
-            echo "User     : $(whoami)"
-            echo "Home     : $HOME"
-            echo "Workspace: $WORKSPACE"
+                    echo "========================================"
+                    echo "VERIFY BUILD AGENT"
+                    echo "========================================"
 
-            podman info --format "Rootless={{.Host.Security.Rootless}}"
-        '''
-    }
-}
+                    echo "Hostname : \$(hostname)"
+                    echo "User     : \$(whoami)"
+                    echo "Home     : \$HOME"
+                    echo "Workspace: \$WORKSPACE"
+
+                    podman info --format "Rootless={{.Host.Security.Rootless}}"
+                """
+            }
+        }
 
         /**********************************************************************
          * Build Static Website
@@ -82,19 +84,19 @@ pipeline {
 
             steps {
 
-                sh '''#!/usr/bin/env bash
-                    set -euo pipefail
+                sh """
+                    set -eu
 
-                    podman run \
-                        --userns=keep-id
-                        --rm \
-                        --pull=missing \
-                        -v "$WORKSPACE:/src:Z" \
-                        -w /src \
-                        ${HUGO_IMAGE} \
-                        --minify \
+                    podman run \\
+                        --userns=keep-id \\
+                        --rm \\
+                        --pull=missing \\
+                        -v "\$WORKSPACE:/src:Z" \\
+                        -w /src \\
+                        ${HUGO_IMAGE} \\
+                        --minify \\
                         --destination public
-                '''
+                """
 
             }
 
@@ -110,8 +112,8 @@ pipeline {
 
             steps {
 
-                sh '''
-                    set -euo pipefail
+                sh """
+                    set -eu
 
                     tar czf "${ARTIFACT_NAME}" public
 
@@ -121,7 +123,7 @@ pipeline {
                     echo "========================================"
 
                     ls -lh "${ARTIFACT_NAME}"
-                '''
+                """
 
             }
 
@@ -146,19 +148,19 @@ pipeline {
                     )
                 ]) {
 
-                    sh '''
-                        set -euo pipefail
+                    sh """
+                        set -eu
 
-                        podman run \
-                            --rm \
-                            -v "$WORKSPACE:/workspace:Z" \
-                            -w /workspace \
-                            ${MC_IMAGE} \
+                        podman run \\
+                            --rm \\
+                            -v "\$WORKSPACE:/workspace:Z" \\
+                            -w /workspace \\
+                            ${MC_IMAGE} \\
                             sh -c "
-                                mc alias set ${MINIO_ALIAS} ${MINIO_URL} ${MINIO_USER} ${MINIO_PASSWORD}
+                                mc alias set ${MINIO_ALIAS} ${MINIO_URL} \$MINIO_USER \$MINIO_PASSWORD
 
-                                mc cp \
-                                    ${ARTIFACT_NAME} \
+                                mc cp \\
+                                    ${ARTIFACT_NAME} \\
                                     ${MINIO_ALIAS}/${MINIO_BUCKET}/${ARTIFACT_NAME}
 
                                 echo
@@ -168,7 +170,7 @@ pipeline {
 
                                 mc ls ${MINIO_ALIAS}/${MINIO_BUCKET}
                             "
-                    '''
+                    """
 
                 }
 
