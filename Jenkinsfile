@@ -55,40 +55,21 @@ pipeline {
          **********************************************************************/
 
         stage('Verify Build Agent') {
+    steps {
+        sh '''
+            echo "========================================"
+            echo "VERIFY BUILD AGENT"
+            echo "========================================"
 
-            steps {
+            echo "Hostname : $(hostname)"
+            echo "User     : $(whoami)"
+            echo "Home     : $HOME"
+            echo "Workspace: $WORKSPACE"
 
-                sh '''
-                    set -euo pipefail
-
-                    echo
-                    echo "========================================"
-                    echo "Build Agent"
-                    echo "========================================"
-
-                    hostname
-
-                    echo
-                    whoami
-
-                    echo
-                    pwd
-
-                    echo
-                    echo "Workspace"
-                    echo "----------------------------------------"
-                    echo "$WORKSPACE"
-
-                    echo
-                    echo "Podman"
-                    echo "----------------------------------------"
-
-                    podman version
-                '''
-
-            }
-
-        }
+            podman info --format "Rootless={{.Host.Security.Rootless}}"
+        '''
+    }
+}
 
         /**********************************************************************
          * Build Static Website
