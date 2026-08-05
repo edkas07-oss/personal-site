@@ -82,7 +82,7 @@ pipeline {
 
             steps {
 
-                sh '''
+                sh '''#!/usr/bin/env bash
                     set -euo pipefail
 
                     podman run \
