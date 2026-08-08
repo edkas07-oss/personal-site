@@ -195,7 +195,10 @@ pipeline {
 
                     . deployment/CONFIG
                     umask 077
-                    podman volume create "$CONTENT_VOLUME" >/dev/null
+
+                    if ! podman volume exists "$CONTENT_VOLUME"; then
+                        podman volume create "$CONTENT_VOLUME" >/dev/null
+                    fi
 
                     podman run \
                         --rm \

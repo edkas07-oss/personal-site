@@ -5,7 +5,9 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 source "${SCRIPT_DIR}/CONFIG"
 
-podman volume create "${CONTENT_VOLUME}" >/dev/null
+if ! podman volume exists "${CONTENT_VOLUME}"; then
+    podman volume create "${CONTENT_VOLUME}" >/dev/null
+fi
 podman rm -f "${CONTAINER_NAME}" 2>/dev/null || true
 
 podman run \
