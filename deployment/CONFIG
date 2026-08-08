@@ -1,18 +1,18 @@
-PROJECT_NAME=personal-site
-ARTIFACT_PREFIX=personal-site
+export PROJECT_NAME=personal-site
+export ARTIFACT_PREFIX=personal-site
 
-HUGO_IMAGE=docker.io/klakegg/hugo:ext-alpine
-MC_IMAGE=quay.io/minio/mc:latest
-MINIO_ALIAS=artifact_storage
-MINIO_BUCKET=personal-site
-MINIO_URL=http://host.containers.internal:9000
+export HUGO_IMAGE=docker.io/klakegg/hugo:ext-alpine
+export MC_IMAGE=quay.io/minio/mc:latest
+export MINIO_ALIAS=artifact_storage
+export MINIO_BUCKET=personal-site
+export MINIO_URL=http://host.containers.internal:9000
 
-CONTAINER_NAME=personal-site-web
-NGINX_IMAGE=localhost/nginx-image:1.0
-CONTENT_VOLUME=www-personal-site
-PODMAN_NETWORK=web
-LOADER_CONTAINER=personal-site-volume-loader
+export CONTAINER_NAME=personal-site-web
+export NGINX_IMAGE=localhost/nginx-image:1.0
+export CONTENT_VOLUME=www-personal-site
+export PODMAN_NETWORK=web
+export LOADER_CONTAINER=personal-site-volume-loader
 
-SSH_HOST_PORT=2224
-HTTP_HOST_PORT=8091
-HTTPS_HOST_PORT=8443
+export SSH_HOST_PORT=2224
+export HTTP_HOST_PORT=8091
+export HTTPS_HOST_PORT=8443
