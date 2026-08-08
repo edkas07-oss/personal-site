@@ -1,10 +1,10 @@
 pipeline {
 
     /**************************************************************************
-     * Menentukan Build Agent
+     * Build Agent
      *
-     * Seluruh proses build dijalankan pada Jenkins SSH Build Agent
-     * dengan label "builder".
+     * Seluruh proses CI dijalankan pada Jenkins SSH agent dengan label
+     * "builder" dan menggunakan rootless Podman.
      **************************************************************************/
 
     agent {
@@ -12,127 +12,106 @@ pipeline {
     }
 
     /**************************************************************************
-     * Environment Variables
+     * Shared Configuration
+     *
+     * Konfigurasi non-secret CI dan CD dikelola pada deployment/CONFIG.
+     * Credential tetap dikelola menggunakan Jenkins Credentials.
      **************************************************************************/
-
-    environment {
-
-        HUGO_IMAGE   = 'docker.io/klakegg/hugo:ext-alpine'
-        MC_IMAGE     = 'quay.io/minio/mc:latest'
-
-        ARTIFACT_NAME = "personal-site-${BUILD_NUMBER}.tar.gz"
-
-        MINIO_ALIAS  = 'artifact_storage'
-        MINIO_BUCKET = 'personal-site'
-
-        MINIO_URL = 'http://host.containers.internal:9000'
-
-    }
 
     stages {
 
         /**********************************************************************
          * Checkout Source Code
-         *
-         * Jenkins melakukan checkout source code ke Workspace
-         * pada Build Agent.
          **********************************************************************/
 
         stage('Checkout Source Code') {
-
             steps {
-
                 checkout scm
-
             }
-
         }
 
         /**********************************************************************
          * Verify Build Agent
-         *
-         * Memastikan Build Agent siap digunakan.
          **********************************************************************/
 
         stage('Verify Build Agent') {
             steps {
-                sh """
+                sh '''
                     set -eu
+
+                    . deployment/CONFIG
 
                     echo "========================================"
                     echo "VERIFY BUILD AGENT"
                     echo "========================================"
+                    echo "Hostname : $(hostname)"
+                    echo "User     : $(whoami)"
+                    echo "Home     : $HOME"
+                    echo "Workspace: $WORKSPACE"
 
-                    echo "Hostname : \$(hostname)"
-                    echo "User     : \$(whoami)"
-                    echo "Home     : \$HOME"
-                    echo "Workspace: \$WORKSPACE"
-
-                    podman info --format "Rootless={{.Host.Security.Rootless}}"
-                """
+                    test "$(podman info --format '{{.Host.Security.Rootless}}')" = 'true'
+                '''
             }
         }
 
         /**********************************************************************
          * Build Static Website
          *
-         * Menjalankan Hugo di dalam Container menggunakan Workspace
-         * Jenkins sebagai source code.
+         * Hugo dijalankan sebagai ephemeral container. Workspace Jenkins
+         * dipasang sebagai source directory dan menghasilkan public/.
          **********************************************************************/
 
         stage('Build Static Website') {
-
             steps {
-
-                sh """
+                sh '''
                     set -eu
 
-                    podman run \\
-                        --userns=keep-id \\
-                        --rm \\
-                        --pull=missing \\
-                        -v "\$WORKSPACE:/src:Z" \\
-                        -w /src \\
-                        ${HUGO_IMAGE} \\
+                    . deployment/CONFIG
+
+                    podman run \
+                        --userns=keep-id \
+                        --rm \
+                        --pull=missing \
+                        --volume "$WORKSPACE:/src:Z" \
+                        --workdir /src \
+                        "$HUGO_IMAGE" \
                         --minify --destination public
-                """
-
+                '''
             }
-
         }
 
         /**********************************************************************
          * Package Artifact
          *
-         * Mengemas hasil build menjadi satu file artifact.
+         * Static website dikemas menggunakan nama yang dapat ditelusuri ke
+         * nomor build Jenkins.
          **********************************************************************/
 
         stage('Package Artifact') {
-
             steps {
-
-                sh """
+                sh '''
                     set -eu
 
-                    tar czf "${ARTIFACT_NAME}" public
+                    . deployment/CONFIG
+                    ARTIFACT_NAME="${ARTIFACT_PREFIX}-${BUILD_NUMBER}.tar.gz"
+
+                    rm -f "${ARTIFACT_PREFIX}-"*.tar.gz
+                    tar czf "$ARTIFACT_NAME" public
 
                     echo
                     echo "========================================"
                     echo "Artifact"
                     echo "========================================"
-
-                    ls -lh "${ARTIFACT_NAME}"
-                """
-
+                    ls -lh "$ARTIFACT_NAME"
+                '''
             }
-
         }
 
         /**********************************************************************
          * Publish Artifact
          *
-         * Mengunggah Build Artifact ke MinIO menggunakan
-         * MinIO Client Container.
+         * Artifact diunggah ke MinIO menggunakan ephemeral MinIO Client.
+         * Credential hanya tersedia selama stage ini.
          **********************************************************************/
 
         stage('Publish Artifact') {
@@ -147,10 +126,13 @@ pipeline {
                     sh '''
                         set -eu
 
+                        . deployment/CONFIG
+                        ARTIFACT_NAME="${ARTIFACT_PREFIX}-${BUILD_NUMBER}.tar.gz"
+
                         podman run \
                             --rm \
-                            -v "$WORKSPACE:/workspace:Z" \
-                            -w /workspace \
+                            --volume "$WORKSPACE:/workspace:Z" \
+                            --workdir /workspace \
                             --env ARTIFACT_NAME \
                             --env MINIO_ALIAS \
                             --env MINIO_BUCKET \
@@ -158,18 +140,17 @@ pipeline {
                             --env MINIO_USER \
                             --env MINIO_PASSWORD \
                             --entrypoint /bin/sh \
-                            "${MC_IMAGE}" \
+                            "$MC_IMAGE" \
                             -ec '
-                                mc alias set "${MINIO_ALIAS}" "${MINIO_URL}" "$MINIO_USER" "$MINIO_PASSWORD"
-                                mc mb --ignore-existing "${MINIO_ALIAS}/${MINIO_BUCKET}"
-                                mc cp "${ARTIFACT_NAME}" "${MINIO_ALIAS}/${MINIO_BUCKET}/${ARTIFACT_NAME}"
-                                mc ls "${MINIO_ALIAS}/${MINIO_BUCKET}/${ARTIFACT_NAME}"
+                                mc alias set "$MINIO_ALIAS" "$MINIO_URL" "$MINIO_USER" "$MINIO_PASSWORD"
+                                mc mb --ignore-existing "$MINIO_ALIAS/$MINIO_BUCKET"
+                                mc cp "$ARTIFACT_NAME" "$MINIO_ALIAS/$MINIO_BUCKET/$ARTIFACT_NAME"
+                                mc ls "$MINIO_ALIAS/$MINIO_BUCKET/$ARTIFACT_NAME"
                             '
                     '''
                 }
             }
         }
-
     }
 
     /**************************************************************************
@@ -177,13 +158,8 @@ pipeline {
      **************************************************************************/
 
     post {
-
         always {
-
             archiveArtifacts artifacts: '*.tar.gz'
-
         }
-
     }
-
 }

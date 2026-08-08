@@ -1,31 +1,68 @@
 pipeline {
+
+    /**************************************************************************
+     * Deployment Agent
+     *
+     * Pipeline CD berjalan pada host runtime melalui node builder-01.
+     * Agent menggunakan rootless Podman user yang memiliki container,
+     * network, image, dan volume aplikasi.
+     **************************************************************************/
+
     agent {
         label 'builder-01'
     }
+
+    /**************************************************************************
+     * Pipeline Safety
+     *
+     * Hanya satu deployment boleh mengubah container dan volume aplikasi
+     * pada satu waktu. Timeout mencegah job menunggu tanpa batas.
+     **************************************************************************/
+
+    options {
+        disableConcurrentBuilds()
+        timeout(time: 20, unit: 'MINUTES')
+    }
+
+    /**************************************************************************
+     * Deployment Parameter
+     *
+     * Artifact dipilih secara eksplisit agar deployment dapat ditelusuri ke
+     * nomor build CI yang menghasilkan artifact tersebut.
+     **************************************************************************/
 
     parameters {
         string(
             name: 'ARTIFACT_NAME',
             defaultValue: '',
-            description: 'MinIO artifact name, for example personal-site-42.tar.gz'
+            description: 'MinIO artifact name, for example personal-site-57.tar.gz',
+            trim: true
         )
     }
 
-    environment {
-        MC_IMAGE         = 'quay.io/minio/mc:latest'
-        MINIO_ALIAS      = 'artifact_storage'
-        MINIO_BUCKET     = 'personal-site'
-        MINIO_URL        = 'http://host.containers.internal:9000'
-        LOADER_CONTAINER = 'personal-site-volume-loader'
-    }
+    /**************************************************************************
+     * Shared Configuration
+     *
+     * Setiap shell stage membaca konfigurasi non-secret dari
+     * deployment/CONFIG. Credential MinIO tetap dikelola oleh Jenkins.
+     **************************************************************************/
 
     stages {
+
+        /**********************************************************************
+         * Verify Deployment Agent
+         *
+         * Memastikan konfigurasi tersedia dan rootless Podman memiliki image
+         * serta network yang dibutuhkan oleh deployment.
+         **********************************************************************/
+
         stage('Verify Deployment Agent') {
             steps {
                 sh '''
                     set -eu
 
                     . deployment/CONFIG
+
                     test "$(id -u)" -ne 0
                     test "$(podman info --format '{{.Host.Security.Rootless}}')" = 'true'
                     podman image exists "$NGINX_IMAGE"
@@ -34,13 +71,22 @@ pipeline {
             }
         }
 
+        /**********************************************************************
+         * Validate Parameters
+         *
+         * Menolak input kosong, path, dan nama artifact di luar format yang
+         * dihasilkan oleh pipeline CI.
+         **********************************************************************/
+
         stage('Validate Parameters') {
             steps {
                 sh '''
                     set -eu
 
+                    . deployment/CONFIG
+
                     printf '%s\n' "$ARTIFACT_NAME" \
-                        | grep -Eq '^personal-site-[0-9]+\.tar\.gz$' \
+                        | grep -Eq "^${ARTIFACT_PREFIX}-[0-9]+\\.tar\\.gz$" \
                         || {
                             echo "Invalid artifact name: $ARTIFACT_NAME" >&2
                             exit 1
@@ -48,6 +94,13 @@ pipeline {
                 '''
             }
         }
+
+        /**********************************************************************
+         * Download Artifact
+         *
+         * MinIO Client dijalankan sebagai ephemeral container. Credential
+         * di-inject oleh Jenkins hanya selama stage download.
+         **********************************************************************/
 
         stage('Download Artifact') {
             steps {
@@ -61,6 +114,7 @@ pipeline {
                     sh '''
                         set -eu
 
+                        . deployment/CONFIG
                         rm -f "$ARTIFACT_NAME"
 
                         podman run \
@@ -87,27 +141,49 @@ pipeline {
             }
         }
 
+        /**********************************************************************
+         * Verify Artifact
+         *
+         * Archive diperiksa sebelum ekstraksi. Seluruh entry harus berada di
+         * bawah public/ dan tidak boleh menggunakan absolute atau parent path.
+         **********************************************************************/
+
         stage('Verify Artifact') {
             steps {
                 sh '''
                     set -eu
 
-                    rm -rf deploy-staging
-                    mkdir -p deploy-staging
+                    rm -rf deploy-staging deployment-state
+                    mkdir -p deploy-staging deployment-state
 
-                    tar -tzf "$ARTIFACT_NAME" \
-                        | awk '
-                            /^\// { invalid = 1 }
-                            /(^|\/)\.\.($|\/)/ { invalid = 1 }
-                            $0 != "public" && $0 != "public/" && $0 !~ /^public\// { invalid = 1 }
-                            END { exit invalid }
-                        '
+                    tar -tzf "$ARTIFACT_NAME" > deployment-state/archive.list
 
-                    tar -xzf "$ARTIFACT_NAME" -C deploy-staging
+                    awk '
+                        /^\// { invalid = 1 }
+                        /(^|\/)\.\.($|\/)/ { invalid = 1 }
+                        $0 != "public" && $0 != "public/" && $0 !~ /^public\// { invalid = 1 }
+                        END { exit invalid }
+                    ' deployment-state/archive.list
+
+                    tar \
+                        --extract \
+                        --gzip \
+                        --file "$ARTIFACT_NAME" \
+                        --directory deploy-staging \
+                        --no-same-owner \
+                        --no-same-permissions
+
                     test -s deploy-staging/public/index.html
                 '''
             }
         }
+
+        /**********************************************************************
+         * Prepare Rollback
+         *
+         * Konten aktif hanya disimpan jika volume sudah memiliki index.html.
+         * Pada deployment pertama tidak ada rollback target palsu.
+         **********************************************************************/
 
         stage('Prepare Rollback') {
             steps {
@@ -115,8 +191,7 @@ pipeline {
                     set -eu
 
                     . deployment/CONFIG
-                    rm -rf deployment-state
-                    mkdir -p deployment-state
+                    umask 077
                     podman volume create "$CONTENT_VOLUME" >/dev/null
 
                     podman run \
@@ -125,10 +200,22 @@ pipeline {
                         --volume "$WORKSPACE/deployment-state:/backup:Z" \
                         --entrypoint /bin/sh \
                         "$NGINX_IMAGE" \
-                        -ec 'tar -czf /backup/previous-content.tar.gz -C /source .'
+                        -ec '
+                            if [ -s /source/index.html ]; then
+                                tar -czf /backup/previous-content.tar.gz -C /source .
+                                touch /backup/rollback-available
+                            fi
+                        '
                 '''
             }
         }
+
+        /**********************************************************************
+         * Populate Content Volume
+         *
+         * Container aktif dihentikan sebelum volume dibersihkan. Ephemeral
+         * loader mengisi static content dan kemudian langsung dihapus.
+         **********************************************************************/
 
         stage('Populate Content Volume') {
             steps {
@@ -136,6 +223,7 @@ pipeline {
                     set -eu
 
                     . deployment/CONFIG
+
                     podman rm -f "$CONTAINER_NAME" 2>/dev/null || true
                     podman rm -f "$LOADER_CONTAINER" 2>/dev/null || true
                     touch deployment-state/volume-update-started
@@ -168,6 +256,13 @@ pipeline {
             }
         }
 
+        /**********************************************************************
+         * Deploy NGINX
+         *
+         * Application deployment script menjalankan generic NGINX image
+         * menggunakan parameter dari deployment/CONFIG.
+         **********************************************************************/
+
         stage('Deploy NGINX') {
             steps {
                 sh '''
@@ -177,12 +272,20 @@ pipeline {
             }
         }
 
+        /**********************************************************************
+         * Validate Deployment
+         *
+         * Pipeline menunggu HTTP endpoint dan container health check, lalu
+         * memastikan content volume dipasang read-only.
+         **********************************************************************/
+
         stage('Validate Deployment') {
             steps {
                 sh '''
                     set -eu
 
                     . deployment/CONFIG
+
                     attempt=1
                     while [ "$attempt" -le 12 ]; do
                         if curl --fail --silent --show-error \
@@ -199,6 +302,24 @@ pipeline {
                         attempt=$((attempt + 1))
                     done
 
+                    attempt=1
+                    while [ "$attempt" -le 18 ]; do
+                        health_status=$(podman inspect "$CONTAINER_NAME" \
+                            --format '{{.State.Health.Status}}')
+
+                        if [ "$health_status" = 'healthy' ]; then
+                            break
+                        fi
+
+                        if [ "$health_status" = 'unhealthy' ] || [ "$attempt" -eq 18 ]; then
+                            podman logs "$CONTAINER_NAME"
+                            exit 1
+                        fi
+
+                        sleep 5
+                        attempt=$((attempt + 1))
+                    done
+
                     test "$(podman inspect "$CONTAINER_NAME" \
                         --format '{{range .Mounts}}{{if eq .Destination "/var/www/html"}}{{.RW}}{{end}}{{end}}')" = 'false'
                 '''
@@ -206,15 +327,29 @@ pipeline {
         }
     }
 
+    /**************************************************************************
+     * Post Actions
+     *
+     * Failure memulihkan backup jika runtime sebelumnya memang tersedia.
+     * Always menghapus helper container dan temporary deployment files.
+     **************************************************************************/
+
     post {
         failure {
             sh '''
                 set +e
 
+                if [ ! -f deployment/CONFIG ]; then
+                    exit 0
+                fi
+
                 . deployment/CONFIG
+
                 if [ -f deployment-state/volume-update-started ] \
+                    && [ -f deployment-state/rollback-available ] \
                     && [ -s deployment-state/previous-content.tar.gz ]; then
                     echo 'Deployment failed; restoring previous volume content.'
+
                     podman rm -f "$CONTAINER_NAME" 2>/dev/null || true
                     podman rm -f "$LOADER_CONTAINER" 2>/dev/null || true
 
@@ -230,14 +365,23 @@ pipeline {
                         '
 
                     ./deployment/deploy.sh
+                else
+                    echo 'No previous runtime content is available for rollback.'
                 fi
             '''
         }
 
         always {
             sh '''
+                if [ -f deployment/CONFIG ]; then
+                    . deployment/CONFIG
+                else
+                    LOADER_CONTAINER=personal-site-volume-loader
+                fi
+
                 podman rm -f "$LOADER_CONTAINER" 2>/dev/null || true
                 rm -rf deploy-staging deployment-state
+                rm -f personal-site-*.tar.gz
             '''
         }
     }

@@ -1,7 +1,17 @@
+PROJECT_NAME=personal-site
+ARTIFACT_PREFIX=personal-site
+
+HUGO_IMAGE=docker.io/klakegg/hugo:ext-alpine
+MC_IMAGE=quay.io/minio/mc:latest
+MINIO_ALIAS=artifact_storage
+MINIO_BUCKET=personal-site
+MINIO_URL=http://host.containers.internal:9000
+
 CONTAINER_NAME=personal-site-web
 NGINX_IMAGE=localhost/nginx-image:1.0
 CONTENT_VOLUME=www-personal-site
 PODMAN_NETWORK=web
+LOADER_CONTAINER=personal-site-volume-loader
 
 SSH_HOST_PORT=2224
 HTTP_HOST_PORT=8091
