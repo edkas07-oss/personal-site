@@ -33,7 +33,7 @@ pipeline {
 
     parameters {
         string(
-            name: 'ARTIFACT_NAME',
+            name: 'personal-site-59.tar.gz',
             defaultValue: '',
             description: 'MinIO artifact name, for example personal-site-57.tar.gz',
             trim: true
