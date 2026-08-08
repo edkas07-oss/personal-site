@@ -20,6 +20,11 @@ podman run \
     --volume /etc/localtime:/etc/localtime:ro \
     --volume /etc/timezone:/etc/timezone:ro \
     --volume "${CONTENT_VOLUME}:/var/www/html:ro" \
+    --health-cmd 'curl -fsS http://localhost/ || exit 1' \
+    --health-interval 10s \
+    --health-timeout 5s \
+    --health-start-period 10s \
+    --health-retries 3 \
     "${NGINX_IMAGE}"
 
 echo "Container '${CONTAINER_NAME}' started."

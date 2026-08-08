@@ -308,6 +308,14 @@ pipeline {
                         attempt=$((attempt + 1))
                     done
 
+                    health_config=$(podman inspect "$CONTAINER_NAME" \
+                        --format '{{if .Config.Healthcheck}}configured{{else}}none{{end}}')
+
+                    if [ "$health_config" != 'configured' ]; then
+                        echo 'Container healthcheck is not configured.' >&2
+                        exit 1
+                    fi
+
                     attempt=1
                     while [ "$attempt" -le 18 ]; do
                         health_status=$(podman inspect "$CONTAINER_NAME" \
