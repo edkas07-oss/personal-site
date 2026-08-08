@@ -1,0 +1,69 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="1510" viewBox="0 0 1600 1510" role="img" aria-labelledby="title desc">
+  <title id="title">Personal Site CI Pipeline</title>
+  <desc id="desc">Diagram of the Jenkins pipeline from Gitea trigger to Hugo build, archive, and MinIO upload.</desc>
+  <defs>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth"><path d="M0,0 L0,6 L9,3 z" fill="#64748b"/></marker>
+    <style>
+      .bg{fill:#f8fafc}.cluster{fill:#fff;stroke:#cbd5e1;stroke-width:2}.stage{stroke-width:1.5}.checkout{fill:#eff6ff;stroke:#60a5fa}.verify{fill:#f5f3ff;stroke:#a78bfa}.build{fill:#ecfdf5;stroke:#34d399}.package{fill:#fff7ed;stroke:#fb923c}.publish{fill:#fdf2f8;stroke:#f472b6}.post{fill:#f1f5f9;stroke:#94a3b8}.node{fill:#fff;stroke:#64748b;stroke-width:1.7}.container{fill:#eff6ff;stroke:#2563eb;stroke-width:1.7}.store{fill:#ecfdf5;stroke:#059669;stroke-width:1.8}.credential{fill:#fff7ed;stroke:#ea580c;stroke-width:1.7}.title{font:700 24px Arial,sans-serif;fill:#0f172a}.clusterTitle{font:700 18px Arial,sans-serif;fill:#1e293b}.stageTitle{font:700 15px Arial,sans-serif;fill:#334155}.label{font:600 14px Arial,sans-serif;fill:#172554}.body{font:13px Arial,sans-serif;fill:#334155}.small{font:12px Arial,sans-serif;fill:#475569}.line{fill:none;stroke:#64748b;stroke-width:2;marker-end:url(#arrow)}.dash{fill:none;stroke:#64748b;stroke-width:1.8;stroke-dasharray:6 5;marker-end:url(#arrow)}.note{font:12px Arial,sans-serif;fill:#475569}
+    </style>
+  </defs>
+  <rect class="bg" width="1600" height="1510"/>
+  <text x="800" y="42" text-anchor="middle" class="title">Personal Site CI/CD Artifact Pipeline</text>
+
+  <!-- Trigger -->
+  <rect class="cluster" x="60" y="75" width="1480" height="155" rx="14"/>
+  <text x="85" y="108" class="clusterTitle">1. Trigger Phase</text>
+  <rect class="node" x="205" y="132" width="260" height="62" rx="10"/>
+  <text x="335" y="158" text-anchor="middle" class="label">Developer / User</text><text x="335" y="179" text-anchor="middle" class="body">Push code or start build</text>
+  <rect class="node" x="1080" y="120" width="300" height="84" rx="10"/>
+  <text x="1230" y="149" text-anchor="middle" class="label">Gitea SCM</text><text x="1230" y="171" text-anchor="middle" class="body">Repository: personal-site</text><text x="1230" y="190" text-anchor="middle" class="small">HTTP token authentication</text>
+  <path class="line" d="M465 163 H1075"/><text x="770" y="151" text-anchor="middle" class="note">trigger build</text>
+
+  <!-- Agent -->
+  <rect class="cluster" x="60" y="265" width="1080" height="1110" rx="14"/>
+  <text x="85" y="298" class="clusterTitle">2. Jenkins Agent Executing Phase — label: builder</text>
+  <rect class="node" x="395" y="320" width="410" height="58" rx="10"/>
+  <text x="600" y="346" text-anchor="middle" class="label">Jenkins SSH Agent (builder-01)</text><text x="600" y="366" text-anchor="middle" class="body">Runs rootless Podman jobs</text>
+
+  <!-- stages -->
+  <rect class="stage checkout" x="95" y="410" width="1010" height="135" rx="12"/>
+  <text x="118" y="437" class="stageTitle">Stage: Checkout Source Code</text>
+  <rect class="node" x="195" y="458" width="285" height="62" rx="9"/><text x="338" y="484" text-anchor="middle" class="label">Checkout SCM</text><text x="338" y="505" text-anchor="middle" class="body">Clone source from Gitea</text>
+  <rect class="store" x="690" y="452" width="300" height="72" rx="9"/><text x="840" y="480" text-anchor="middle" class="label">Agent Workspace</text><text x="840" y="501" text-anchor="middle" class="body">$WORKSPACE</text>
+  <path class="line" d="M480 489 H683"/>
+
+  <rect class="stage verify" x="95" y="570" width="1010" height="105" rx="12"/>
+  <text x="118" y="597" class="stageTitle">Stage: Verify Build Agent</text>
+  <rect class="node" x="280" y="612" width="640" height="42" rx="9"/><text x="600" y="638" text-anchor="middle" class="body">Verify hostname, current user, workspace, and rootless Podman status</text>
+
+  <rect class="stage build" x="95" y="700" width="1010" height="185" rx="12"/>
+  <text x="118" y="727" class="stageTitle">Stage: Build Static Website</text>
+  <rect class="container" x="185" y="754" width="300" height="91" rx="10"/><text x="335" y="782" text-anchor="middle" class="label">Hugo Container</text><text x="335" y="804" text-anchor="middle" class="body">klakegg/hugo:ext-alpine</text><text x="335" y="824" text-anchor="middle" class="small">ephemeral Podman container</text>
+  <rect class="node" x="565" y="764" width="220" height="69" rx="9"/><text x="675" y="791" text-anchor="middle" class="label">Hugo command</text><text x="675" y="813" text-anchor="middle" class="small">--minify --destination public</text>
+  <rect class="store" x="860" y="754" width="180" height="91" rx="10"/><text x="950" y="782" text-anchor="middle" class="label">public/</text><text x="950" y="805" text-anchor="middle" class="body">HTML + assets</text><text x="950" y="825" text-anchor="middle" class="small">build output</text>
+  <path class="line" d="M485 799 H558"/><path class="line" d="M785 799 H853"/>
+  <path class="dash" d="M840 524 V730 H490"/><text x="665" y="716" text-anchor="middle" class="note">mount $WORKSPACE:/src:Z</text>
+
+  <rect class="stage package" x="95" y="910" width="1010" height="135" rx="12"/>
+  <text x="118" y="937" class="stageTitle">Stage: Package Artifact</text>
+  <rect class="node" x="205" y="958" width="330" height="62" rx="9"/><text x="370" y="984" text-anchor="middle" class="label">tar czf</text><text x="370" y="1005" text-anchor="middle" class="body">Compress public/ directory</text>
+  <rect class="store" x="715" y="950" width="290" height="77" rx="10"/><text x="860" y="978" text-anchor="middle" class="label">Artifact Archive</text><text x="860" y="999" text-anchor="middle" class="body">personal-site-BUILD_NUMBER.tar.gz</text><text x="860" y="1017" text-anchor="middle" class="small">*.tar.gz</text>
+  <path class="line" d="M535 989 H708"/>
+
+  <rect class="stage publish" x="95" y="1070" width="1010" height="260" rx="12"/>
+  <text x="118" y="1097" class="stageTitle">Stage: Publish Artifact</text>
+  <rect class="credential" x="145" y="1125" width="220" height="80" rx="10"/><text x="255" y="1153" text-anchor="middle" class="label">Jenkins Credentials</text><text x="255" y="1175" text-anchor="middle" class="body">ID: minio-root</text><text x="255" y="1194" text-anchor="middle" class="small">MINIO_USER / PASSWORD</text>
+  <rect class="container" x="435" y="1125" width="270" height="80" rx="10"/><text x="570" y="1153" text-anchor="middle" class="label">MinIO Client Container</text><text x="570" y="1175" text-anchor="middle" class="body">quay.io/minio/mc:latest</text><text x="570" y="1194" text-anchor="middle" class="small">single ephemeral container</text>
+  <rect class="node" x="765" y="1118" width="290" height="178" rx="10"/><text x="910" y="1147" text-anchor="middle" class="label">Sub-shell (-ec)</text><text x="790" y="1174" class="body">1. mc alias set</text><text x="790" y="1201" class="body">2. mc mb --ignore-existing</text><text x="790" y="1228" class="body">3. mc cp artifact</text><text x="790" y="1255" class="body">4. mc ls artifact</text>
+  <path class="dash" d="M365 1165 H428"/><path class="line" d="M705 1165 H758"/><path class="dash" d="M860 1027 V1110 H705"/><text x="783" y="1096" text-anchor="middle" class="note">mount $WORKSPACE:/workspace:Z</text>
+
+  <rect class="stage post" x="95" y="1340" width="1010" height="27" rx="8"/>
+  <text x="118" y="1360" class="stageTitle">Post action: archiveArtifacts stores *.tar.gz in Jenkins</text>
+
+  <!-- External target -->
+  <rect class="cluster" x="1180" y="400" width="360" height="430" rx="14"/>
+  <text x="1205" y="433" class="clusterTitle">3. Target Storage</text>
+  <rect class="store" x="1230" y="535" width="260" height="125" rx="14"/><text x="1360" y="570" text-anchor="middle" class="label">MinIO Object Store</text><text x="1360" y="597" text-anchor="middle" class="body">Bucket: personal-site</text><text x="1360" y="622" text-anchor="middle" class="small">S3-compatible HTTP endpoint</text>
+  <path class="line" d="M1055 1228 H1150 V598 H1223"/><text x="1168" y="920" text-anchor="middle" class="note">upload archive</text>
+  <path class="dash" d="M1230 163 V350 H338 V450"/><text x="790" y="338" text-anchor="middle" class="note">source code pulled by Jenkins</text>
+</svg>

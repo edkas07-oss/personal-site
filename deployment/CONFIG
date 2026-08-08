@@ -1,0 +1,8 @@
+CONTAINER_NAME=personal-site-web
+NGINX_IMAGE=localhost/nginx-image:1.0
+CONTENT_VOLUME=www-personal-site
+PODMAN_NETWORK=web
+
+SSH_HOST_PORT=2224
+HTTP_HOST_PORT=8091
+HTTPS_HOST_PORT=8443

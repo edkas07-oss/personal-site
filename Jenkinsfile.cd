@@ -1,0 +1,244 @@
+pipeline {
+    agent {
+        label 'builder-01'
+    }
+
+    parameters {
+        string(
+            name: 'ARTIFACT_NAME',
+            defaultValue: '',
+            description: 'MinIO artifact name, for example personal-site-42.tar.gz'
+        )
+    }
+
+    environment {
+        MC_IMAGE         = 'quay.io/minio/mc:latest'
+        MINIO_ALIAS      = 'artifact_storage'
+        MINIO_BUCKET     = 'personal-site'
+        MINIO_URL        = 'http://host.containers.internal:9000'
+        LOADER_CONTAINER = 'personal-site-volume-loader'
+    }
+
+    stages {
+        stage('Verify Deployment Agent') {
+            steps {
+                sh '''
+                    set -eu
+
+                    . deployment/CONFIG
+                    test "$(id -u)" -ne 0
+                    test "$(podman info --format '{{.Host.Security.Rootless}}')" = 'true'
+                    podman image exists "$NGINX_IMAGE"
+                    podman network exists "$PODMAN_NETWORK"
+                '''
+            }
+        }
+
+        stage('Validate Parameters') {
+            steps {
+                sh '''
+                    set -eu
+
+                    printf '%s\n' "$ARTIFACT_NAME" \
+                        | grep -Eq '^personal-site-[0-9]+\.tar\.gz$' \
+                        || {
+                            echo "Invalid artifact name: $ARTIFACT_NAME" >&2
+                            exit 1
+                        }
+                '''
+            }
+        }
+
+        stage('Download Artifact') {
+            steps {
+                withCredentials([
+                    usernamePassword(
+                        credentialsId: 'minio-root',
+                        usernameVariable: 'MINIO_USER',
+                        passwordVariable: 'MINIO_PASSWORD'
+                    )
+                ]) {
+                    sh '''
+                        set -eu
+
+                        rm -f "$ARTIFACT_NAME"
+
+                        podman run \
+                            --rm \
+                            --volume "$WORKSPACE:/workspace:Z" \
+                            --workdir /workspace \
+                            --env ARTIFACT_NAME \
+                            --env MINIO_ALIAS \
+                            --env MINIO_BUCKET \
+                            --env MINIO_URL \
+                            --env MINIO_USER \
+                            --env MINIO_PASSWORD \
+                            --entrypoint /bin/sh \
+                            "$MC_IMAGE" \
+                            -ec '
+                                mc alias set "$MINIO_ALIAS" "$MINIO_URL" "$MINIO_USER" "$MINIO_PASSWORD"
+                                mc stat "$MINIO_ALIAS/$MINIO_BUCKET/$ARTIFACT_NAME"
+                                mc cp "$MINIO_ALIAS/$MINIO_BUCKET/$ARTIFACT_NAME" "/workspace/$ARTIFACT_NAME"
+                            '
+
+                        test -s "$ARTIFACT_NAME"
+                    '''
+                }
+            }
+        }
+
+        stage('Verify Artifact') {
+            steps {
+                sh '''
+                    set -eu
+
+                    rm -rf deploy-staging
+                    mkdir -p deploy-staging
+
+                    tar -tzf "$ARTIFACT_NAME" \
+                        | awk '
+                            /^\// { invalid = 1 }
+                            /(^|\/)\.\.($|\/)/ { invalid = 1 }
+                            $0 != "public" && $0 != "public/" && $0 !~ /^public\// { invalid = 1 }
+                            END { exit invalid }
+                        '
+
+                    tar -xzf "$ARTIFACT_NAME" -C deploy-staging
+                    test -s deploy-staging/public/index.html
+                '''
+            }
+        }
+
+        stage('Prepare Rollback') {
+            steps {
+                sh '''
+                    set -eu
+
+                    . deployment/CONFIG
+                    rm -rf deployment-state
+                    mkdir -p deployment-state
+                    podman volume create "$CONTENT_VOLUME" >/dev/null
+
+                    podman run \
+                        --rm \
+                        --volume "$CONTENT_VOLUME:/source:ro" \
+                        --volume "$WORKSPACE/deployment-state:/backup:Z" \
+                        --entrypoint /bin/sh \
+                        "$NGINX_IMAGE" \
+                        -ec 'tar -czf /backup/previous-content.tar.gz -C /source .'
+                '''
+            }
+        }
+
+        stage('Populate Content Volume') {
+            steps {
+                sh '''
+                    set -eu
+
+                    . deployment/CONFIG
+                    podman rm -f "$CONTAINER_NAME" 2>/dev/null || true
+                    podman rm -f "$LOADER_CONTAINER" 2>/dev/null || true
+                    touch deployment-state/volume-update-started
+
+                    podman run \
+                        --rm \
+                        --volume "$CONTENT_VOLUME:/target" \
+                        --entrypoint /bin/sh \
+                        "$NGINX_IMAGE" \
+                        -ec 'find /target -mindepth 1 -maxdepth 1 -exec rm -rf -- {} +'
+
+                    podman create \
+                        --name "$LOADER_CONTAINER" \
+                        --volume "$CONTENT_VOLUME:/var/www/html" \
+                        --entrypoint /bin/sh \
+                        "$NGINX_IMAGE" \
+                        -c 'true'
+
+                    podman cp deploy-staging/public/. "$LOADER_CONTAINER:/var/www/html/"
+                    podman rm "$LOADER_CONTAINER"
+
+                    podman run \
+                        --rm \
+                        --volume "$CONTENT_VOLUME:/target" \
+                        --env ARTIFACT_NAME \
+                        --entrypoint /bin/sh \
+                        "$NGINX_IMAGE" \
+                        -ec 'printf "%s\n" "$ARTIFACT_NAME" > /target/.artifact-name'
+                '''
+            }
+        }
+
+        stage('Deploy NGINX') {
+            steps {
+                sh '''
+                    set -eu
+                    ./deployment/deploy.sh
+                '''
+            }
+        }
+
+        stage('Validate Deployment') {
+            steps {
+                sh '''
+                    set -eu
+
+                    . deployment/CONFIG
+                    attempt=1
+                    while [ "$attempt" -le 12 ]; do
+                        if curl --fail --silent --show-error \
+                            "http://127.0.0.1:$HTTP_HOST_PORT/" >/dev/null; then
+                            break
+                        fi
+
+                        if [ "$attempt" -eq 12 ]; then
+                            podman logs "$CONTAINER_NAME"
+                            exit 1
+                        fi
+
+                        sleep 5
+                        attempt=$((attempt + 1))
+                    done
+
+                    test "$(podman inspect "$CONTAINER_NAME" \
+                        --format '{{range .Mounts}}{{if eq .Destination "/var/www/html"}}{{.RW}}{{end}}{{end}}')" = 'false'
+                '''
+            }
+        }
+    }
+
+    post {
+        failure {
+            sh '''
+                set +e
+
+                . deployment/CONFIG
+                if [ -f deployment-state/volume-update-started ] \
+                    && [ -s deployment-state/previous-content.tar.gz ]; then
+                    echo 'Deployment failed; restoring previous volume content.'
+                    podman rm -f "$CONTAINER_NAME" 2>/dev/null || true
+                    podman rm -f "$LOADER_CONTAINER" 2>/dev/null || true
+
+                    podman run \
+                        --rm \
+                        --volume "$CONTENT_VOLUME:/target" \
+                        --volume "$WORKSPACE/deployment-state:/backup:ro,Z" \
+                        --entrypoint /bin/sh \
+                        "$NGINX_IMAGE" \
+                        -ec '
+                            find /target -mindepth 1 -maxdepth 1 -exec rm -rf -- {} +
+                            tar -xzf /backup/previous-content.tar.gz -C /target
+                        '
+
+                    ./deployment/deploy.sh
+                fi
+            '''
+        }
+
+        always {
+            sh '''
+                podman rm -f "$LOADER_CONTAINER" 2>/dev/null || true
+                rm -rf deploy-staging deployment-state
+            '''
+        }
+    }
+}
