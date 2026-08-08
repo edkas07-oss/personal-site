@@ -10,7 +10,9 @@ if ! podman volume exists "${CONTENT_VOLUME}"; then
 fi
 podman rm -f "${CONTAINER_NAME}" 2>/dev/null || true
 
-podman run \
+# Prevent Jenkins ProcessTreeKiller from treating the detached Podman runtime
+# as a process that must be terminated when this shell step completes.
+JENKINS_NODE_COOKIE=dontKillMe podman run \
     --detach \
     --name "${CONTAINER_NAME}" \
     --network "${PODMAN_NETWORK}" \
