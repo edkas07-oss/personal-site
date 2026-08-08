@@ -1,7 +1,7 @@
 export PROJECT_NAME=personal-site
 export ARTIFACT_PREFIX=personal-site
 
-export HUGO_IMAGE=docker.io/klakegg/hugo:ext-alpine
+export HUGO_IMAGE=ghcr.io/gohugoio/hugo:v0.160.1
 export MC_IMAGE=quay.io/minio/mc:latest
 export MINIO_ALIAS=artifact_storage
 export MINIO_BUCKET=personal-site

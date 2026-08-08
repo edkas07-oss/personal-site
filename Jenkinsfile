@@ -27,6 +27,14 @@ pipeline {
         stage('Checkout Source Code') {
             steps {
                 checkout scm
+
+                sh '''
+                    set -eu
+
+                    git submodule sync --recursive
+                    git submodule update --init --recursive themes/ananke
+                    test -s themes/ananke/theme.toml
+                '''
             }
         }
 
@@ -76,6 +84,8 @@ pipeline {
                         --workdir /src \
                         "$HUGO_IMAGE" \
                         --minify --destination public
+
+                    test -s public/index.html
                 '''
             }
         }
@@ -93,7 +103,7 @@ pipeline {
                     set -eu
 
                     . deployment/CONFIG
-                    ARTIFACT_NAME="${ARTIFACT_PREFIX}-${BUILD_NUMBER}.tar.gz"
+                    export ARTIFACT_NAME="${ARTIFACT_PREFIX}-${BUILD_NUMBER}.tar.gz"
 
                     rm -f "${ARTIFACT_PREFIX}-"*.tar.gz
                     tar czf "$ARTIFACT_NAME" public
@@ -127,7 +137,7 @@ pipeline {
                         set -eu
 
                         . deployment/CONFIG
-                        ARTIFACT_NAME="${ARTIFACT_PREFIX}-${BUILD_NUMBER}.tar.gz"
+                        export ARTIFACT_NAME="${ARTIFACT_PREFIX}-${BUILD_NUMBER}.tar.gz"
 
                         podman run \
                             --rm \
