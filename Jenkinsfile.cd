@@ -159,9 +159,9 @@ pipeline {
                     tar -tzf "$ARTIFACT_NAME" > deployment-state/archive.list
 
                     awk '
-                        /^\// { invalid = 1 }
-                        /(^|\/)\.\.($|\/)/ { invalid = 1 }
-                        $0 != "public" && $0 != "public/" && $0 !~ /^public\// { invalid = 1 }
+                        substr($0, 1, 1) == "/" { invalid = 1 }
+                        /(^|[/])[.][.]($|[/])/ { invalid = 1 }
+                        $0 != "public" && $0 != "public/" && $0 !~ /^public[/]/ { invalid = 1 }
                         END { exit invalid }
                     ' deployment-state/archive.list
 
