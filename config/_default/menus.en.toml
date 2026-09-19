@@ -1,0 +1,15 @@
+[[main]]
+  name = "Articles"
+  pageRef = "articles"
+  weight = 10
+
+[[main]]
+  identifier = "github"
+  pre = "github"
+  url = "https://github.com/edkas07-oss"
+  weight = 100
+
+[[footer]]
+  name = "Articles"
+  pageRef = "articles"
+  weight = 10

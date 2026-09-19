@@ -1,0 +1,18 @@
+theme = "blowfish"
+baseURL = "https://edkas07-oss.github.io/personal-site/"
+defaultContentLanguage = "en"
+
+enableRobotsTXT = true
+summaryLength = 30
+buildDrafts = false
+buildFuture = false
+enableEmoji = true
+
+[taxonomies]
+  tag = "tags"
+  category = "categories"
+  author = "authors"
+  series = "series"
+
+[outputs]
+  home = ["HTML", "RSS", "JSON"]

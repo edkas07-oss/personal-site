@@ -1,0 +1,18 @@
+locale = "en"
+label = "English"
+weight = 1
+title = "Eddy Wiyatno"
+
+[params]
+  displayName = "English"
+  isoCode = "en"
+  dateFormat = "2 January 2006"
+  description = "Engineering Journal, SRE Case Studies, and DevOps Architecture by Eddy Wiyatno."
+
+[params.author]
+  name = "Eddy Wiyatno"
+  headline = "Senior DevOps & SRE Engineer | Platform & Cloud Infrastructure"
+  bio = "Specializing in High-Availability Architecture, Deterministic Incident Diagnostics, Container Runtimes, and SRE Automation."
+  links = [
+    { github = "https://github.com/edkas07-oss" }
+  ]

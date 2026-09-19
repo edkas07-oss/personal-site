@@ -1,0 +1,32 @@
+<div class="main-menu flex items-center w-full gap-2 p-1 pl-0">
+  <a href="{{ "" | relLangURL }}" class="text-base font-semibold truncate min-w-0 shrink hover:text-primary-500">
+    Home
+  </a>
+  <div class="flex items-center ms-auto">
+    <div class="hidden md:flex">
+      {{ partial "header/components/desktop-menu.html" . }}
+    </div>
+    <div class="flex md:hidden">
+      {{ partial "header/components/mobile-menu.html" . }}
+    </div>
+  </div>
+</div>
+
+{{ if .Site.Params.highlightCurrentMenuArea }}
+  <script>
+    (function () {
+      var mainmenu = document.querySelector(".main-menu");
+      if (!mainmenu) return;
+
+      var path = window.location.pathname;
+      var links = mainmenu.querySelectorAll('a[href="' + path + '"]');
+
+      links.forEach(function (link) {
+        var targets = link.querySelectorAll("span");
+        targets.forEach(function (el) {
+          el.classList.add("active");
+        });
+      });
+    })();
+  </script>
+{{ end }}

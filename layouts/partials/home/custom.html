@@ -1,0 +1,93 @@
+{{/* Custom homepage: full-width hero + article grid */}}
+
+{{/* ── 1. HERO BANNER ──────────────────────────────────────────────── */}}
+<section class="ew-hero">
+  <div class="ew-hero__inner">
+
+    <div class="ew-hero__left">
+      <p class="ew-hero__eyebrow">Platform Engineering · SRE · DevOps</p>
+      <h1 class="ew-hero__name">Eddy Wiyatno</h1>
+      <p class="ew-hero__role">Senior DevOps &amp; Site Reliability Engineer</p>
+      <div class="ew-hero__divider"></div>
+      <p class="ew-hero__bio">
+        Jurnal rekayasa dan studi kasus sistem enterprise — dari
+        <em>Autonomous Incident Diagnostics</em> &amp; <em>Zero Auto-Remediation</em>
+        hingga <em>Multi-OS Fleet Orchestration</em> dan <em>Deep JVM Observability</em>.
+      </p>
+
+      <div class="ew-hero__cta">
+        <a href="{{ "/articles/" | relLangURL }}" class="ew-btn ew-btn--primary">
+          Baca Artikel →
+        </a>
+        <a href="https://github.com/edkas07-oss" target="_blank" rel="noopener" class="ew-btn ew-btn--ghost">
+          GitHub
+        </a>
+      </div>
+    </div>
+
+    <div class="ew-hero__right">
+      <div class="ew-stack__grid">
+        <span class="ew-stack__item">Observability</span>
+        <span class="ew-stack__item">Container Technology</span>
+        <span class="ew-stack__item">System Integration</span>
+        <span class="ew-stack__item">Incident Response</span>
+        <span class="ew-stack__item">Platform Engineering</span>
+        <span class="ew-stack__item">Infrastructure as Code</span>
+        <span class="ew-stack__item">CI/CD Pipeline</span>
+        <span class="ew-stack__item">GitOps</span>
+        <span class="ew-stack__item">SRE Governance</span>
+        <span class="ew-stack__item">High Availability</span>
+        <span class="ew-stack__item">Fleet Orchestration</span>
+        <span class="ew-stack__item">Cloud Native</span>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+{{/* ── 2. RECENT ARTICLES ───────────────────────────────────────────── */}}
+<section class="ew-articles">
+  <div class="ew-articles__header">
+    <h2 class="ew-articles__title">Artikel Teknis Terbaru</h2>
+    <a href="{{ "/articles/" | relLangURL }}" class="ew-articles__more">Lihat Semua →</a>
+  </div>
+
+  {{ $articles := where .Site.RegularPages "Section" "articles" }}
+  <div class="ew-grid">
+    {{ range first 6 $articles }}
+    <article class="ew-card">
+      <div class="ew-card__body">
+        {{/* Categories */}}
+        <div class="ew-card__cats">
+          {{ with .Params.categories }}
+            {{ range . }}
+            <span class="ew-tag ew-tag--cat">{{ . }}</span>
+            {{ end }}
+          {{ end }}
+          <span class="ew-card__meta">{{ .Date.Format "2 Jan 2006" }} · {{ .ReadingTime }} min</span>
+        </div>
+
+        {{/* Title */}}
+        <h3 class="ew-card__title">
+          <a href="{{ .RelPermalink }}" class="ew-card__link">{{ .Title }}</a>
+        </h3>
+
+        {{/* Summary */}}
+        {{ with .Params.summary }}
+        <p class="ew-card__summary">{{ . }}</p>
+        {{ end }}
+      </div>
+
+      {{/* Tags */}}
+      <div class="ew-card__footer">
+        {{ with .Params.tags }}
+          {{ range first 3 . }}
+          <span class="ew-tag">#{{ . }}</span>
+          {{ end }}
+        {{ end }}
+        <a href="{{ $.RelPermalink }}" class="ew-card__read">Baca →</a>
+      </div>
+    </article>
+    {{ end }}
+  </div>
+</section>
