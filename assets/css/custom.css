@@ -343,8 +343,20 @@ section.prose.flex        { max-width: none !important; }
   border-color: rgb(96 165 250 / 0.5);
 }
 
-.ew-card__body { flex: 1; }
-.ew-card__cats { display: flex; flex-wrap: wrap; align-items: center; gap: 0.4rem; margin-bottom: 0.75rem; }
+/* Body: grid dengan 3 baris fixed agar title sejajar antar card */
+.ew-card__body {
+  flex: 1;
+  display: grid;
+  grid-template-rows: auto auto 1fr auto;
+  gap: 0;
+}
+.ew-card__cats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  margin-bottom: 0.5rem;
+  min-height: 1.6rem; /* pastikan baris badges tingginya konsisten */
+}
 
 /* Tags & category badges */
 .ew-tag {
@@ -367,7 +379,12 @@ section.prose.flex        { max-width: none !important; }
 }
 .dark .ew-tag--cat { background: rgb(29 78 216); }
 
-.ew-card__meta { font-size: 0.72rem; color: rgb(107 114 128); margin-left: auto; }
+.ew-card__meta {
+  display: block;
+  font-size: 0.72rem;
+  color: rgb(107 114 128);
+  margin-bottom: 0.6rem;
+}
 .dark .ew-card__meta { color: rgb(148 163 184); }
 
 .ew-card__title {

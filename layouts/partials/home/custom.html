@@ -148,15 +148,17 @@
     {{ range first 6 $articles }}
     <article class="ew-card">
       <div class="ew-card__body">
-        {{/* Categories */}}
+        {{/* Category badges */}}
         <div class="ew-card__cats">
           {{ with .Params.categories }}
             {{ range . }}
             <span class="ew-tag ew-tag--cat">{{ . }}</span>
             {{ end }}
           {{ end }}
-          <span class="ew-card__meta">{{ .Date.Format "2 Jan 2006" }} · {{ .ReadingTime }} min</span>
         </div>
+
+        {{/* Date & reading time — own row, left-aligned */}}
+        <div class="ew-card__meta">{{ .Date.Format "2 Jan 2006" }} · {{ .ReadingTime }} min</div>
 
         {{/* Title */}}
         <h3 class="ew-card__title">
