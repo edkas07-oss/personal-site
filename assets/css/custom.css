@@ -346,6 +346,7 @@ section.prose.flex        { max-width: none !important; }
 /* Body: 5-baris grid agar semua elemen sejajar antar card */
 .ew-card__body {
   flex: 1;
+  height: 100%;
   display: grid;
   grid-template-rows: auto auto auto 1fr auto;
   gap: 0;
