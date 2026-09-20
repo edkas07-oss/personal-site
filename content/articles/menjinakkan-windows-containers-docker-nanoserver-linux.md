@@ -2,7 +2,7 @@
 title = "Menjinakkan Windows Containers: Menjalankan Monitoring Stack di Windows Docker NanoServer & Linux Tanpa Ganti Kode"
 date = "2026-09-21T06:08:00+07:00"
 draft = false
-summary = "Bedah rekayasa menjalankan stack pemantauan modern (Prometheus, Alertmanager, Diagnostic Engine, Go daemons) secara simetris di Windows Docker NanoServer dan Linux. Menuntaskan friksi kernel mismatch, isolasi hak akses non-admin ContainerUser, otomatisasi ACL NTFS (TM-ADR-0031), arsitektur Two-Tier Storage tm_home (TM-ADR-0030), dan unifikasi tooling tmctl (TM-ADR-0027) tanpa mengubah satu baris pun kode aplikasi."
+summary = "Panduan mendalam menjinakkan Windows Containers di lingkungan enterprise: strategi menjalankan kontainer secara simetris di Windows Docker NanoServer dan Linux tanpa mengubah basis kode. Mengupas tuntas tantangan kernel matching LTSC, pembatasan hak akses non-admin ContainerUser, otomatisasi DACL NTFS, serta standardisasi storage multi-OS."
 author = "Eddy Wiyatno"
 categories = ["DevOps", "Infrastructure"]
 tags = ["windows-containers", "docker", "nanoserver", "devops", "sre", "security", "powershell"]
