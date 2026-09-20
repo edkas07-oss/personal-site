@@ -393,6 +393,13 @@ section.prose.flex        { max-width: none !important; }
   line-height: 1.4;
   margin: 0 0 0.6rem 0;
   color: rgb(17 24 39);
+  /* Clamp ke 3 baris agar tinggi title konsisten antar card */
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  /* Pastikan grid row ini punya tinggi minimum 3 baris */
+  min-height: calc(1.05rem * 1.4 * 3);
 }
 .dark .ew-card__title { color: rgb(248 250 252); }
 
