@@ -12,6 +12,21 @@ Jurnal rekayasa, studi kasus sistem berskala enterprise, dan dokumentasi arsitek
 
 ---
 
+### 🚀 Platform Rekayasa Unggulan
+
+> [!NOTE]
+> **[Tomcat Monitoring & Autonomous Diagnostic Platform]({{< ref "projects/tomcat-monitoring" >}})**
+> Platform observabilitas end-to-end dan penentu keputusan insiden otonom untuk runtime Apache Tomcat di lingkungan multi-OS (Linux Podman rootless & Windows Server Docker). 
+> 
+> Didukung oleh tiga modul terpadu:
+> * **[`tmctl`]({{< ref "projects/tomcat-monitoring/tmctl" >}})** — Cross-Platform Operator CLI berbasis Go untuk orkestrasi via Container Engine Socket API.
+> * **[`tm-agent`]({{< ref "projects/tomcat-monitoring/tm-agent" >}})** — High-Throughput Event Collector Daemon berbasis Go dengan *atomic spool evidence*.
+> * **[`diagnostic service`]({{< ref "projects/tomcat-monitoring/diagnostic-service" >}})** — Mesin triage insiden deterministik berbasis Node.js 24 LTS dengan laporan 7-seksi kanonikal.
+> 
+> [👉 **Telusuri Blueprint Arsitektur Platform →**]({{< ref "projects/tomcat-monitoring" >}})
+
+---
+
 ### Fokus Rekayasa
 
 **🛡️ Autonomous Incident Diagnostics & SRE Governance**
@@ -25,3 +40,4 @@ Portabilitas multi-engine — Podman rootless di Linux dan Docker di Windows Ser
 
 **⚙️ Pipeline as Code & Immutable Delivery**
 Ephemeral build environment berbasis container (DooD), artefak CI *immutable*, dan orkestrasi rilis terpisah antara Jenkins dan Ansible.
+

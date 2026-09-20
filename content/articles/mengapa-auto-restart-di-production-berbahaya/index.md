@@ -39,19 +39,23 @@ Pada skenario kedua, script otomatis yang tidak memiliki kesadaran konteks (*con
 
 Mengapa tindakan me-restart proses secara otomatis pada lapisan pemantauan awal membawa risiko katastropik? Berdasarkan kajian arsitektur kami, terdapat 4 bahaya teknis utama:
 
-```mermaid
+{{< mermaid >}}
 flowchart TD
-    FAIL["Insiden Terdeteksi (TomcatDown)"] --> AR["Tindakan Auto-Restart Otomatis"]
-    AR --> R1["1. Reboot Loop & Action Flapping<br/>(Beban Host & Badai Koneksi DB)"]
-    AR --> R2["2. Penghapusan Bukti Forensik<br/>(Hilangnya Heap Dump & Crash Log)"]
-    AR --> R3["3. Pelanggaran Least-Privilege<br/>(Eskalasi Root / Socket Exposure)"]
-    AR --> R4["4. Pemulihan Semu<br/>(Menutupi Memory Leak & Masalah Kronis)"]
+    classDef danger fill:#7f1d1d,stroke:#ef4444,stroke-width:1.5px,color:#ffffff;
+    classDef disaster fill:#450a0a,stroke:#dc2626,stroke-width:2px,color:#fca5a5;
+    classDef neutral fill:#1e293b,stroke:#3b82f6,stroke-width:1.5px,color:#ffffff;
+
+    FAIL["Insiden Terdeteksi (TomcatDown)"]:::neutral --> AR["Tindakan Auto-Restart Otomatis"]:::danger
+    AR --> R1["1. Reboot Loop & Action Flapping<br/>(Beban Host & Badai Koneksi DB)"]:::danger
+    AR --> R2["2. Penghapusan Bukti Forensik<br/>(Hilangnya Heap Dump & Crash Log)"]:::danger
+    AR --> R3["3. Pelanggaran Least-Privilege<br/>(Eskalasi Root / Socket Exposure)"]:::danger
+    AR --> R4["4. Pemulihan Semu<br/>(Menutupi Memory Leak & Masalah Kronis)"]:::danger
     
-    R1 --> DISASTER["Downtime Diperpanjang & Kerusakan Data"]
+    R1 --> DISASTER["Downtime Diperpanjang & Kerusakan Data"]:::disaster
     R2 --> DISASTER
     R3 --> DISASTER
     R4 --> DISASTER
-```
+{{< /mermaid >}}
 
 ### 1. Perulangan Kegagalan & Badai Sumber Daya (*Reboot Loop & Flapping*)
 Ketika akar masalah bersifat persisten—misalnya direktori log penuh (`No space left on device`), *connection pool* database jenuh, atau kegagalan *permission* file—proses Tomcat akan langsung *exit* seketika setelah inisialisasi. 
@@ -86,36 +90,45 @@ Untuk mengatasi dilema di atas, pada proyek **Tomcat Monitoring Platform** kami 
 
 Layanan diagnostik kami (**Tomcat Diagnostic Service**) dirancang murni sebagai **sistem penasihat independen (*read-only advisory engine*)**, bukan eksekutor tindakan.
 
-```mermaid
+{{< mermaid >}}
 flowchart TD
+    classDef obs fill:#1e3a8a,stroke:#3b82f6,stroke-width:1.5px,color:#ffffff;
+    classDef evidence fill:#064e3b,stroke:#10b981,stroke-width:1.5px,color:#ffffff;
+    classDef eval fill:#4c1d95,stroke:#8b5cf6,stroke-width:1.5px,color:#ffffff;
+    classDef delivery fill:#1e293b,stroke:#64748b,stroke-width:1.5px,color:#ffffff;
+    classDef blocked fill:#7f1d1d,stroke:#ef4444,stroke-width:2px,stroke-dasharray: 5 5,color:#fca5a5;
+
     subgraph OBSERVABILITY["Lapisan Observabilitas & Alerting"]
-        PROM["Prometheus"] -->|Scrape Telemetry| TGT["Target Tomcat"]
-        PROM -->|Alert Trigger| AM["Alertmanager"]
-        AM -->|HTTPS Webhook POST| DS["Diagnostic Service<br/>(Read-Only Boundary)"]
+        PROM["Prometheus"]:::obs -->|Scrape Telemetry| TGT["Target Tomcat"]:::obs
+        PROM -->|Alert Trigger| AM["Alertmanager"]:::obs
+        AM -->|HTTPS Webhook POST| DS["Diagnostic Service<br/>(Read-Only Boundary)"]:::eval
     end
 
     subgraph EVIDENCE_COLLECTION["Pengumpulan Bukti Terisolasi"]
-        DS -->|HTTP Pull :ro| PROM_TEL["Metrik Prometheus"]
-        DS -->|Volume Mount :ro,z| LOGS["catalina.out<br/>(Max 500 lines / 512 KiB)"]
-        DS -->|Spool Read :ro| SPOOL["Event Spool Host<br/>(Normalized JSON 0700)"]
+        DS -->|HTTP Pull :ro| PROM_TEL["Metrik Prometheus"]:::evidence
+        DS -->|Volume Mount :ro,z| LOGS["catalina.out<br/>(Max 500 lines / 512 KiB)"]:::evidence
+        DS -->|Spool Read :ro| SPOOL["Event Spool Host<br/>(Normalized JSON 0700)"]:::evidence
     end
 
     subgraph EVALUATION["Mesin Keputusan Deterministik"]
-        DS --> DISPATCHER["Multi-Domain Dispatcher"]
-        DISPATCHER --> RULEPACK["Declarative Rulepack Engine<br/>(SQLite State & Memory Cache)"]
+        DS --> DISPATCHER["Multi-Domain Dispatcher"]:::eval
+        DISPATCHER --> RULEPACK["Declarative Rulepack Engine<br/>(SQLite State & Memory Cache)"]:::eval
     end
 
     subgraph DELIVERY["Otoritas Notifikasi & Human-in-the-Loop"]
-        RULEPACK --> REPORT["Canonical 7-Section SRE Incident Report"]
-        REPORT -->|SMTP Delivery| MAIL["Mailpit / On-Call Inbox"]
+        RULEPACK --> REPORT["Canonical 7-Section SRE Incident Report"]:::delivery
+        REPORT -->|SMTP Delivery| MAIL["Mailpit / On-Call Inbox"]:::delivery
         
-        DS -.->|BLOCKED / DILARANG| MUTATE["Mutasi Container / Host Restart"]
+        DS -.->|BLOCKED / DILARANG| MUTATE["Mutasi Container / Host Restart"]:::blocked
         
-        MAIL --> OPERATOR["👨‍💻 SRE On-Call Operator<br/>(Triage Terarah & Eksekusi SOP Manual)"]
+        MAIL --> OPERATOR["👨‍💻 SRE On-Call Operator<br/>(Triage Terarah & Eksekusi SOP Manual)"]:::delivery
     end
 
-    style MUTATE fill:#ffdddd,stroke:#ff0000,stroke-width:2px,stroke-dasharray: 5 5;
-```
+    style OBSERVABILITY fill:#0b1329,stroke:#1e3a8a,stroke-width:1px,color:#93c5fd
+    style EVIDENCE_COLLECTION fill:#0b1329,stroke:#059669,stroke-width:1px,color:#a7f3d0
+    style EVALUATION fill:#0b1329,stroke:#7c3aed,stroke-width:1px,color:#c4b5fd
+    style DELIVERY fill:#0b1329,stroke:#334155,stroke-width:1px,color:#cbd5e1
+{{< /mermaid >}}
 
 Dalam arsitektur ini:
 - **Rootless & Non-Root Execution:** Container Diagnostic Service berjalan sepenuhnya tanpa hak root (`USER 10001:10001`), tanpa privilege khusus, dan tanpa mounting socket container runtime host.

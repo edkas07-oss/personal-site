@@ -1,4 +1,9 @@
 [[main]]
+  name = "Projects"
+  pageRef = "projects"
+  weight = 5
+
+[[main]]
   name = "Articles"
   pageRef = "articles"
   weight = 10
@@ -15,6 +20,11 @@
   weight = 100
 
 [[footer]]
+  name = "Projects"
+  pageRef = "projects"
+  weight = 5
+
+[[footer]]
   name = "Articles"
   pageRef = "articles"
   weight = 10
@@ -23,3 +33,4 @@
   name = "Contact"
   pageRef = "contact"
   weight = 20
+
