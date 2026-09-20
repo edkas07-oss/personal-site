@@ -1,6 +1,5 @@
 +++
 title = "Engineering Projects & Platforms"
-description = "Dokumentasi platform rekayasa produksi, orkestrasi runtime container multi-OS, dan arsitektur diagnosa insiden otonom berskala enterprise."
-draft = false
+description = "Koleksi platform rekayasa, arsitektur sistem terdistribusi, dan otomasi infrastruktur berskala enterprise yang dirancang dengan fokus pada keandalan tinggi dan efisiensi operasional."
 cascade = { showDate = false, showAuthor = false }
 +++
