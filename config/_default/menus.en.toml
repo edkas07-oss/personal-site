@@ -4,6 +4,11 @@
   weight = 10
 
 [[main]]
+  name = "Contact"
+  pageRef = "contact"
+  weight = 20
+
+[[main]]
   identifier = "github"
   pre = "github"
   url = "https://github.com/edkas07-oss"
@@ -13,3 +18,8 @@
   name = "Articles"
   pageRef = "articles"
   weight = 10
+
+[[footer]]
+  name = "Contact"
+  pageRef = "contact"
+  weight = 20

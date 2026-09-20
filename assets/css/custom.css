@@ -613,3 +613,316 @@ section.prose.flex        { max-width: none !important; }
 #site-footer > div.flex.items-center.justify-between {
   display: none !important;
 }
+
+/* ================================================================
+   CONTACT PAGE STYLING
+   ================================================================ */
+.ew-contact-container {
+  max-width: 1100px;
+  margin: 1.5rem auto 3rem auto;
+}
+
+.ew-contact-header {
+  margin-bottom: 2rem;
+}
+
+.ew-contact-title {
+  font-size: 2.25rem;
+  font-weight: 900;
+  letter-spacing: -0.02em;
+  color: rgb(17 24 39);
+  margin: 0 0 0.5rem 0;
+}
+.dark .ew-contact-title { color: rgb(248 250 252); }
+
+.ew-contact-desc {
+  font-size: 1.05rem;
+  line-height: 1.65;
+  color: rgb(75 85 99);
+  max-width: 42rem;
+  margin: 0;
+}
+.dark .ew-contact-desc { color: rgb(156 163 175); }
+
+.ew-contact-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 2rem;
+}
+@media (min-width: 860px) {
+  .ew-contact-grid {
+    grid-template-columns: 1fr 1.65fr;
+    gap: 2.5rem;
+  }
+}
+
+/* ── Left Sidebar Info Card ── */
+.ew-contact-sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.ew-contact-info-card {
+  background: #fff;
+  border: 1px solid rgb(229 231 235);
+  border-radius: 1rem;
+  padding: 1.75rem;
+}
+.dark .ew-contact-info-card {
+  background: rgb(30 41 59);
+  border-color: rgb(51 65 85);
+}
+
+.ew-contact-info-title {
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: rgb(17 24 39);
+  margin: 0 0 1.25rem 0;
+}
+.dark .ew-contact-info-title { color: rgb(248 250 252); }
+
+.ew-contact-info-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1.15rem;
+}
+
+.ew-contact-info-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.85rem;
+}
+
+.ew-contact-info-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: 0.5rem;
+  background: rgb(239 246 255);
+  color: rgb(37 99 235);
+  flex-shrink: 0;
+}
+.dark .ew-contact-info-icon {
+  background: rgb(30 58 138 / 0.4);
+  color: rgb(147 197 253);
+}
+
+.ew-contact-info-label {
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: rgb(107 114 128);
+  margin: 0 0 0.2rem 0;
+}
+.dark .ew-contact-info-label { color: rgb(148 163 184); }
+
+.ew-contact-info-val {
+  font-size: 0.92rem;
+  font-weight: 600;
+  color: rgb(31 41 55);
+  margin: 0;
+  word-break: break-all;
+}
+.dark .ew-contact-info-val { color: rgb(226 232 240); }
+
+.ew-contact-info-val a {
+  color: rgb(37 99 235);
+  text-decoration: none;
+}
+.dark .ew-contact-info-val a { color: rgb(96 165 250); }
+.ew-contact-info-val a:hover { text-decoration: underline; }
+
+/* Security Notice Box */
+.ew-security-notice {
+  background: rgb(240 253 244);
+  border: 1px solid rgb(187 247 208);
+  border-radius: 0.85rem;
+  padding: 1.25rem;
+  display: flex;
+  gap: 0.75rem;
+  align-items: flex-start;
+}
+.dark .ew-security-notice {
+  background: rgb(6 78 59 / 0.2);
+  border-color: rgb(5 150 105 / 0.4);
+}
+
+.ew-security-notice__icon {
+  color: rgb(22 163 74);
+  flex-shrink: 0;
+  margin-top: 0.1rem;
+}
+.dark .ew-security-notice__icon { color: rgb(74 222 128); }
+
+.ew-security-notice__text {
+  font-size: 0.82rem;
+  line-height: 1.55;
+  color: rgb(22 101 52);
+  margin: 0;
+}
+.dark .ew-security-notice__text { color: rgb(167 243 208); }
+
+/* ── Right Contact Form Card ── */
+.ew-contact-form-card {
+  background: #fff;
+  border: 1px solid rgb(229 231 235);
+  border-radius: 1rem;
+  padding: 2rem;
+}
+.dark .ew-contact-form-card {
+  background: rgb(30 41 59);
+  border-color: rgb(51 65 85);
+}
+
+.ew-form-row {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1rem;
+}
+@media (min-width: 600px) {
+  .ew-form-row {
+    grid-template-columns: 1fr 1fr;
+    gap: 1.25rem;
+  }
+}
+
+.ew-form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  margin-bottom: 1.25rem;
+}
+
+.ew-form-label {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: rgb(55 65 81);
+}
+.dark .ew-form-label { color: rgb(203 213 225); }
+
+.ew-form-label span.required {
+  color: rgb(239 68 68);
+}
+
+.ew-form-input,
+.ew-form-select,
+.ew-form-textarea {
+  width: 100%;
+  padding: 0.7rem 0.95rem;
+  border-radius: 0.6rem;
+  font-size: 0.95rem;
+  border: 1.5px solid rgb(209 213 219);
+  background: #fff;
+  color: rgb(17 24 39);
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  font-family: inherit;
+}
+.dark .ew-form-input,
+.dark .ew-form-select,
+.dark .ew-form-textarea {
+  background: rgb(15 23 42);
+  border-color: rgb(51 65 85);
+  color: rgb(248 250 252);
+}
+
+.ew-form-input:focus,
+.ew-form-select:focus,
+.ew-form-textarea:focus {
+  outline: none;
+  border-color: rgb(37 99 235);
+  box-shadow: 0 0 0 3px rgb(37 99 235 / 0.2);
+}
+.dark .ew-form-input:focus,
+.dark .ew-form-select:focus,
+.dark .ew-form-textarea:focus {
+  border-color: rgb(96 165 250);
+  box-shadow: 0 0 0 3px rgb(59 130 246 / 0.3);
+}
+
+.ew-form-textarea {
+  resize: vertical;
+  min-height: 140px;
+}
+
+/* Submit button */
+.ew-form-submit-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  width: 100%;
+  padding: 0.85rem 1.75rem;
+  border-radius: 0.6rem;
+  font-size: 1rem;
+  font-weight: 700;
+  background: rgb(37 99 235);
+  color: #fff;
+  border: none;
+  cursor: pointer;
+  box-shadow: 0 4px 14px rgb(37 99 235 / 0.35);
+  transition: background 0.15s ease, transform 0.15s ease, box-shadow 0.15s ease;
+}
+.ew-form-submit-btn:hover:not(:disabled) {
+  background: rgb(29 78 216);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgb(37 99 235 / 0.45);
+}
+.ew-form-submit-btn:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* Status Alert Messages */
+.ew-form-alert {
+  padding: 1rem 1.25rem;
+  border-radius: 0.6rem;
+  margin-bottom: 1.25rem;
+  font-size: 0.92rem;
+  line-height: 1.5;
+  display: none;
+}
+.ew-form-alert--success {
+  background: rgb(240 253 244);
+  border: 1px solid rgb(187 247 208);
+  color: rgb(22 101 52);
+}
+.dark .ew-form-alert--success {
+  background: rgb(6 78 59 / 0.3);
+  border-color: rgb(5 150 105 / 0.5);
+  color: rgb(167 243 208);
+}
+
+.ew-form-alert--error {
+  background: rgb(254 242 242);
+  border: 1px solid rgb(254 202 202);
+  color: rgb(153 27 27);
+}
+.dark .ew-form-alert--error {
+  background: rgb(127 29 29 / 0.3);
+  border-color: rgb(220 38 38 / 0.5);
+  color: rgb(254 202 202);
+}
+
+.ew-form-alert--warning {
+  background: rgb(254 252 232);
+  border: 1px solid rgb(254 240 138);
+  color: rgb(133 77 14);
+}
+.dark .ew-form-alert--warning {
+  background: rgb(113 63 18 / 0.3);
+  border-color: rgb(202 138 4 / 0.5);
+  color: rgb(254 240 138);
+}
+
+/* Honeypot hidden */
+.ew-botcheck {
+  display: none !important;
+  visibility: hidden !important;
+  position: absolute !important;
+  left: -9999px !important;
+}
