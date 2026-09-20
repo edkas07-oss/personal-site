@@ -137,9 +137,113 @@
 })();
 </script>
 
+{{/* ── 1.5. FEATURED PLATFORMS & MODULES (SCROLL REVEAL ANIMATION) ──── */}}
+<section class="ew-featured-section">
+  <div class="ew-featured-section__header ew-reveal">
+    <div class="flex items-center justify-between gap-4 flex-wrap">
+      <div>
+        <p class="ew-hero__eyebrow mb-1">Produk &amp; Modul Karya Mandiri</p>
+        <h2 class="ew-articles__title">Platform &amp; Komponen Unggulan</h2>
+      </div>
+      <a href="{{ "/projects/" | relLangURL }}" class="ew-articles__more">
+        Semua Proyek &amp; Platform →
+      </a>
+    </div>
+    <p class="text-sm sm:text-base text-neutral-600 dark:text-neutral-400 mt-2 max-w-none w-full">
+      Koleksi platform dan modul sistem yang saya bangun berdasarkan kebutuhan nyata di skala enterprise.
+    </p>
+  </div>
+
+  <div class="ew-featured-banner ew-reveal ew-reveal-delay-1">
+    <div class="ew-featured-banner__content">
+      <div class="flex flex-wrap items-center gap-2 mb-3">
+        <span class="ew-tag ew-tag--cat">Flagship Platform</span>
+        <span class="ew-fs-badge ew-fs--blue">SRE &amp; Observability</span>
+        <span class="ew-fs-badge ew-fs--purple">Multi-OS</span>
+        <span class="ew-fs-badge ew-fs--green">Zero Auto-Remediation</span>
+      </div>
+
+      <h3 class="text-xl sm:text-2xl font-bold text-white mb-2 tracking-tight">
+        <a href="{{ "/projects/tomcat-monitoring/" | relLangURL }}" class="hover:text-blue-400 transition-colors">
+          Tomcat Monitoring &amp; Autonomous Diagnostic Platform
+        </a>
+      </h3>
+
+      <p class="text-slate-300 text-xs sm:text-sm leading-relaxed mb-6 max-w-none w-full">
+        Platform observabilitas dan penentu keputusan insiden otonom untuk runtime Apache Tomcat di lingkungan Linux (Podman rootless) dan Windows Server (Docker). Menerapkan kebijakan <strong>Zero Destructive Auto-Remediation</strong> (TM-ADR-0014) dan korelasi bukti forensik multi-sumber.
+      </p>
+
+      {{/* 3 Modules Grid */}}
+      <div class="ew-featured-modules-grid">
+        
+        <a href="{{ "/projects/tomcat-monitoring/tmctl/" | relLangURL }}" class="ew-feat-module-card ew-reveal-pop ew-reveal-delay-2 group">
+          <div class="flex items-center justify-between mb-2">
+            <span class="text-xl">🛠️</span>
+            <span class="text-[11px] font-bold text-blue-400 uppercase tracking-wider font-mono">Go CLI</span>
+          </div>
+          <h4 class="text-sm font-bold text-white group-hover:text-blue-300 transition-colors mb-1">
+            tmctl
+          </h4>
+          <p class="text-xs text-slate-300 leading-relaxed line-clamp-2">
+            Operator CLI via direct socket API (Podman Unix Socket &amp; Windows Named Pipe) dengan safe rollback.
+          </p>
+          <span class="mt-2 inline-flex items-center gap-1 text-xs font-semibold text-blue-400 group-hover:underline">
+            Detail Modul →
+          </span>
+        </a>
+
+        <a href="{{ "/projects/tomcat-monitoring/tm-agent/" | relLangURL }}" class="ew-feat-module-card ew-reveal-pop ew-reveal-delay-3 group">
+          <div class="flex items-center justify-between mb-2">
+            <span class="text-xl">📦</span>
+            <span class="text-[11px] font-bold text-emerald-400 uppercase tracking-wider font-mono">Go Daemon</span>
+          </div>
+          <h4 class="text-sm font-bold text-white group-hover:text-emerald-300 transition-colors mb-1">
+            tm-agent
+          </h4>
+          <p class="text-xs text-slate-300 leading-relaxed line-clamp-2">
+            Streaming event lifecycle container real-time, deteksi OOM instan (&lt;10ms), dan spool atomik.
+          </p>
+          <span class="mt-2 inline-flex items-center gap-1 text-xs font-semibold text-emerald-400 group-hover:underline">
+            Detail Modul →
+          </span>
+        </a>
+
+        <a href="{{ "/projects/tomcat-monitoring/diagnostic-service/" | relLangURL }}" class="ew-feat-module-card ew-reveal-pop ew-reveal-delay-4 group">
+          <div class="flex items-center justify-between mb-2">
+            <span class="text-xl">🚀</span>
+            <span class="text-[11px] font-bold text-purple-400 uppercase tracking-wider font-mono">Node.js 24</span>
+          </div>
+          <h4 class="text-sm font-bold text-white group-hover:text-purple-300 transition-colors mb-1">
+            Diagnostic Service
+          </h4>
+          <p class="text-xs text-slate-300 leading-relaxed line-clamp-2">
+            Otoritas diagnosa otonom dengan taksonomi 8 failure domain dan pelaporan insiden 7-seksi via SMTP.
+          </p>
+          <span class="mt-2 inline-flex items-center gap-1 text-xs font-semibold text-purple-400 group-hover:underline">
+            Detail Modul →
+          </span>
+        </a>
+
+      </div>
+
+      {{/* Action Link */}}
+      <div class="mt-6 pt-4 border-t border-blue-900/60 flex flex-wrap items-center justify-between gap-4">
+        <a href="{{ "/projects/tomcat-monitoring/" | relLangURL }}" class="ew-btn ew-btn--primary text-xs sm:text-sm py-2 px-4">
+          📖 Buka Blueprint Arsitektur Platform →
+        </a>
+        <div class="flex items-center gap-2 text-xs text-slate-400">
+          <span>Orkestrasi:</span>
+          <span class="text-slate-300 font-mono">Podman</span> ·
+          <span class="text-slate-300 font-mono">Docker</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
 {{/* ── 2. RECENT ARTICLES ───────────────────────────────────────────── */}}
 <section class="ew-articles">
-  <div class="ew-articles__header">
+  <div class="ew-articles__header ew-reveal">
     <h2 class="ew-articles__title">Artikel Teknis Terbaru</h2>
     <a href="{{ "/articles/" | relLangURL }}" class="ew-articles__more">Lihat Semua →</a>
   </div>
@@ -189,3 +293,49 @@
     {{ end }}
   </div>
 </section>
+
+{{/* ── 3. SCROLL REVEAL INTERSECTION OBSERVER ───────────────────────── */}}
+<script>
+(function () {
+  var section = document.querySelector('.ew-featured-section');
+  if (!section) return;
+
+  var items = section.querySelectorAll('.ew-reveal, .ew-reveal-pop');
+
+  if (!('IntersectionObserver' in window)) {
+    items.forEach(function (el) { el.classList.add('is-visible'); });
+    return;
+  }
+
+  var observer = new IntersectionObserver(function (entries) {
+    entries.forEach(function (entry) {
+      if (entry.isIntersecting) {
+        items.forEach(function (el) {
+          el.classList.add('is-visible');
+        });
+        observer.unobserve(section);
+      }
+    });
+  }, {
+    threshold: 0.12,
+    rootMargin: '0px 0px -80px 0px'
+  });
+
+  observer.observe(section);
+
+  /* Also observe recent articles header */
+  var artHeader = document.querySelector('.ew-articles__header');
+  if (artHeader) {
+    var artObserver = new IntersectionObserver(function (entries) {
+      entries.forEach(function (entry) {
+        if (entry.isIntersecting) {
+          artHeader.classList.add('is-visible');
+          artObserver.unobserve(artHeader);
+        }
+      });
+    }, { threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
+    artObserver.observe(artHeader);
+  }
+})();
+</script>
+
