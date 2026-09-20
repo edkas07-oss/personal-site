@@ -418,7 +418,7 @@ section.prose.flex        { max-width: none !important; }
   -webkit-line-clamp: 3;
   -webkit-box-orient: vertical;
   overflow: hidden;
-  align-self: start;
+  min-height: calc(0.875rem * 1.65 * 3);
 }
 .dark .ew-card__summary { color: rgb(156 163 175); }
 
@@ -432,11 +432,13 @@ section.prose.flex        { max-width: none !important; }
 .ew-card__footer {
   display: flex;
   flex-wrap: wrap;
-  align-items: center;
+  align-items: flex-start;
+  align-content: flex-start;
   gap: 0.4rem;
   margin-top: 1rem;
   padding-top: 0.75rem;
   border-top: 1px solid rgb(243 244 246);
+  min-height: 4.25rem;
 }
 .dark .ew-card__footer { border-top-color: rgb(55 65 81); }
 
