@@ -27,11 +27,11 @@
 
       {{/* Dynamic random article highlight — rendered by JS on each page load */}}
       <div class="ew-spotlight" id="ew-spotlight" style="display:none;" aria-live="polite">
-        <span class="ew-spotlight__label">📌 Artikel untukmu hari ini</span>
+        <div class="ew-spotlight__header">
+          <span class="ew-spotlight__label">📖 Rekomendasi Artikel</span>
+          <button class="ew-spotlight__shuffle" id="ew-spotlight-shuffle" title="Pilih artikel lain" aria-label="Shuffle artikel">↻</button>
+        </div>
         <a class="ew-spotlight__link" id="ew-spotlight-link" href="#"></a>
-        <button class="ew-spotlight__shuffle" id="ew-spotlight-shuffle" title="Pilih artikel lain" aria-label="Shuffle artikel">
-          ↻
-        </button>
       </div>
 
       <div class="ew-hero__cta">
