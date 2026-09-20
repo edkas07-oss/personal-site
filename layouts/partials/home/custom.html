@@ -1,5 +1,20 @@
 {{/* Custom homepage: full-width hero + article grid */}}
 
+{{/* ── Build-time: embed all articles as JSON for JS runtime ────────── */}}
+{{ $articles := where .Site.RegularPages "Section" "articles" }}
+<script>
+  window.__EW_ARTICLES__ = [
+    {{ range $articles -}}
+    {
+      title: {{ .Title | jsonify }},
+      url:   {{ .RelPermalink | jsonify }},
+      cat:   {{ with .Params.categories }}{{ index . 0 | jsonify }}{{ else }}""{{ end }},
+      date:  {{ .Date.Format "2 Jan 2006" | jsonify }}
+    },
+    {{ end }}
+  ];
+</script>
+
 {{/* ── 1. HERO BANNER ──────────────────────────────────────────────── */}}
 <section class="ew-hero">
   <div class="ew-hero__inner">
@@ -14,6 +29,15 @@
         <em>Autonomous Incident Diagnostics</em> &amp; <em>Zero Auto-Remediation</em>
         hingga <em>JMX Exporter TLS Security</em> dan <em>Deep JVM Observability</em>.
       </p>
+
+      {{/* Dynamic random article highlight — rendered by JS on each page load */}}
+      <div class="ew-spotlight" id="ew-spotlight" style="display:none;" aria-live="polite">
+        <span class="ew-spotlight__label">📌 Artikel untukmu hari ini</span>
+        <a class="ew-spotlight__link" id="ew-spotlight-link" href="#"></a>
+        <button class="ew-spotlight__shuffle" id="ew-spotlight-shuffle" title="Pilih artikel lain" aria-label="Shuffle artikel">
+          ↻
+        </button>
+      </div>
 
       <div class="ew-hero__cta">
         <a href="{{ "/articles/" | relLangURL }}" class="ew-btn ew-btn--primary">
@@ -45,6 +69,69 @@
   </div>
 </section>
 
+{{/* ── JS: random pick per page load + fade-in + shuffle button ─────── */}}
+<script>
+(function () {
+  var articles = (window.__EW_ARTICLES__ || []).filter(function (a) {
+    return a.title && a.url && a.url.indexOf('/articles/') !== -1;
+  });
+  if (!articles.length) return;
+
+  var wrapper  = document.getElementById('ew-spotlight');
+  var link     = document.getElementById('ew-spotlight-link');
+  var shuffleBtn = document.getElementById('ew-spotlight-shuffle');
+  if (!wrapper || !link) return;
+
+  var lastIdx = -1;
+
+  function pickRandom() {
+    if (articles.length === 1) return 0;
+    var idx;
+    do { idx = Math.floor(Math.random() * articles.length); } while (idx === lastIdx);
+    lastIdx = idx;
+    return idx;
+  }
+
+  function fadeIn(el, cb) {
+    el.style.opacity = '0';
+    el.style.display = 'flex';
+    el.style.transition = 'opacity 0.55s ease';
+    requestAnimationFrame(function () {
+      requestAnimationFrame(function () {
+        el.style.opacity = '1';
+        if (cb) cb();
+      });
+    });
+  }
+
+  function fadeOut(el, cb) {
+    el.style.transition = 'opacity 0.25s ease';
+    el.style.opacity = '0';
+    setTimeout(cb, 280);
+  }
+
+  function render(idx) {
+    var a = articles[idx];
+    link.href        = a.url;
+    link.textContent = a.title;
+  }
+
+  /* Initial load */
+  render(pickRandom());
+  fadeIn(wrapper);
+
+  /* Shuffle button */
+  if (shuffleBtn) {
+    shuffleBtn.addEventListener('click', function () {
+      fadeOut(wrapper, function () {
+        render(pickRandom());
+        fadeIn(wrapper);
+      });
+    });
+  }
+})();
+</script>
+
 {{/* ── 2. RECENT ARTICLES ───────────────────────────────────────────── */}}
 <section class="ew-articles">
   <div class="ew-articles__header">
@@ -52,7 +139,6 @@
     <a href="{{ "/articles/" | relLangURL }}" class="ew-articles__more">Lihat Semua →</a>
   </div>
 
-  {{ $articles := where .Site.RegularPages "Section" "articles" }}
   <div class="ew-grid">
     {{ range first 6 $articles }}
     <article class="ew-card">
