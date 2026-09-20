@@ -146,6 +146,7 @@
 
   <div class="ew-grid">
     {{ range first 6 $articles }}
+    {{ $shortTitle := index (split .Title ":") 0 | strings.TrimRight " " }}
     <article class="ew-card">
       <div class="ew-card__body">
         {{/* Category badges */}}
@@ -157,28 +158,32 @@
           {{ end }}
         </div>
 
-        {{/* Date & reading time — own row, left-aligned */}}
+        {{/* Date & reading time */}}
         <div class="ew-card__meta">{{ .Date.Format "2 Jan 2006" }} · {{ .ReadingTime }} min</div>
 
-        {{/* Title */}}
+        {{/* Title: potong di titik dua */}}
         <h3 class="ew-card__title">
-          <a href="{{ .RelPermalink }}" class="ew-card__link">{{ .Title }}</a>
+          <a href="{{ .RelPermalink }}" class="ew-card__link">{{ $shortTitle }}</a>
         </h3>
 
         {{/* Summary */}}
         {{ with .Params.summary }}
         <p class="ew-card__summary">{{ . }}</p>
         {{ end }}
+
+        {{/* Baca: div sendiri, kanan, di atas garis */}}
+        <div class="ew-card__action">
+          <a href="{{ .RelPermalink }}" class="ew-card__read">Baca →</a>
+        </div>
       </div>
 
-      {{/* Tags */}}
+      {{/* Tags footer — hanya tags, dengan garis atas */}}
       <div class="ew-card__footer">
         {{ with .Params.tags }}
           {{ range first 3 . }}
           <span class="ew-tag">#{{ . }}</span>
           {{ end }}
         {{ end }}
-        <a href="{{ .RelPermalink }}" class="ew-card__read">Baca →</a>
       </div>
     </article>
     {{ end }}

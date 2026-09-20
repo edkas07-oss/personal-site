@@ -343,19 +343,18 @@ section.prose.flex        { max-width: none !important; }
   border-color: rgb(96 165 250 / 0.5);
 }
 
-/* Body: grid dengan 3 baris fixed agar title sejajar antar card */
+/* Body: 5-baris grid agar semua elemen sejajar antar card */
 .ew-card__body {
   flex: 1;
   display: grid;
-  grid-template-rows: auto auto 1fr auto;
+  grid-template-rows: auto auto auto 1fr auto;
   gap: 0;
 }
 .ew-card__cats {
   display: flex;
   flex-wrap: wrap;
   gap: 0.35rem;
-  margin-bottom: 0.5rem;
-  min-height: 1.6rem; /* pastikan baris badges tingginya konsisten */
+  margin-bottom: 0.4rem;
 }
 
 /* Tags & category badges */
@@ -393,13 +392,12 @@ section.prose.flex        { max-width: none !important; }
   line-height: 1.4;
   margin: 0 0 0.6rem 0;
   color: rgb(17 24 39);
-  /* Clamp ke 3 baris agar tinggi title konsisten antar card */
+  /* Clamp ke 2 baris — tinggi title fixed dan konsisten antar card */
   display: -webkit-box;
-  -webkit-line-clamp: 3;
+  -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
-  /* Pastikan grid row ini punya tinggi minimum 3 baris */
-  min-height: calc(1.05rem * 1.4 * 3);
+  min-height: calc(1.05rem * 1.4 * 2);
 }
 .dark .ew-card__title { color: rgb(248 250 252); }
 
@@ -414,13 +412,21 @@ section.prose.flex        { max-width: none !important; }
   font-size: 0.875rem;
   line-height: 1.65;
   color: rgb(75 85 99);
-  margin: 0;
+  margin: 0 0 0.5rem 0;
   display: -webkit-box;
   -webkit-line-clamp: 3;
   -webkit-box-orient: vertical;
   overflow: hidden;
+  align-self: start;
 }
 .dark .ew-card__summary { color: rgb(156 163 175); }
+
+/* Baca → : div sendiri, kanan, di atas garis footer */
+.ew-card__action {
+  display: flex;
+  justify-content: flex-end;
+  padding-top: 0.5rem;
+}
 
 .ew-card__footer {
   display: flex;
