@@ -85,7 +85,7 @@ Memiliki pertanyaan seputar artikel, ingin mendiskusikan arsitektur SRE/DevOps, 
 <form id="ew-contact-form" method="POST" action="https://api.web3forms.com/submit" novalidate>
 
 <!-- Web3Forms Access Key: edkas07@gmail.com -->
-<input type="hidden" name="access_key" id="ew-access-key" value="YOUR_ACCESS_KEY_HERE">
+<input type="hidden" name="access_key" id="ew-access-key" value="6351824b-d63d-43e1-9556-cc3d18bbed0b">
 
 <!-- Form Settings -->
 <input type="hidden" name="subject" id="ew-form-subject" value="[eddywiyatno.my.id] Pesan Baru dari Form Kontak">
