@@ -35,8 +35,11 @@
       </div>
 
       <div class="ew-hero__cta">
-        <a href="{{ "/articles/" | relLangURL }}" class="ew-btn ew-btn--primary">
+        <a href="{{ "/articles/" | relLangURL }}" id="ew-cta-read" class="ew-btn ew-btn--primary">
           Baca Artikel →
+        </a>
+        <a href="{{ "/articles/" | relLangURL }}" class="ew-btn ew-btn--ghost">
+          Semua Artikel
         </a>
         <a href="https://github.com/edkas07-oss" target="_blank" rel="noopener" class="ew-btn ew-btn--ghost">
           GitHub
@@ -105,10 +108,17 @@
     setTimeout(cb, 280);
   }
 
+  var ctaBtn = document.getElementById('ew-cta-read');
+
   function render(idx) {
     var a = articles[idx];
     link.href        = a.url;
     link.textContent = a.title;
+    /* Sync tombol CTA utama ke artikel spotlight */
+    if (ctaBtn) {
+      ctaBtn.href        = a.url;
+      ctaBtn.textContent = 'Baca Artikel →';
+    }
   }
 
   /* Initial load */
