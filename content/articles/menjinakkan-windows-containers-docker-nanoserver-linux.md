@@ -13,7 +13,7 @@ showSummary = true
 
 ## 📌 Ringkasan Eksekutif (TL;DR)
 
-Di banyak organisasi enterprise, infrastruktur TI tidak pernah seragam (*homogeneous*). Aplikasi inti perbankan, sistem ERP, dan middleware Apache Tomcat berumur belasan tahun sering kali berjalan di atas ekosistem **Windows Server**, sementara inovasi *observability stack* modern (Prometheus, Alertmanager, Node.js diagnostic engine, dan Go daemons) hampir seluruhnya dirancang dengan asumsi lingkungan **Linux/POSIX**.
+Di banyak organisasi enterprise, infrastruktur TI tidak pernah seragam (*homogeneous*). Aplikasi mission-critical, sistem ERP, dan middleware Apache Tomcat berumur belasan tahun sering kali berjalan di atas ekosistem **Windows Server**, sementara inovasi *observability stack* modern (Prometheus, Alertmanager, Node.js diagnostic engine, dan Go daemons) hampir seluruhnya dirancang dengan asumsi lingkungan **Linux/POSIX**.
 
 Pendekatan umum yang sering diambil tim infrastruktur biasanya terbagi menjadi dua kompromi yang sama-sama buruk:
 1. **Memaksakan emulasi Linux (WSL2 / Docker Desktop) di Windows Server produksi**, yang membawa ketidakstabilan kernel virtual, konsumsi memori tinggi, dan tidak didukung secara resmi untuk beban kerja *production*.
