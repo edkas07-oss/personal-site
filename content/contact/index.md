@@ -14,7 +14,7 @@ showPagination = false
 <div class="ew-contact-container">
 <div class="ew-contact-header">
 <p class="ew-contact-desc">
-Memiliki pertanyaan seputar artikel, ingin mendiskusikan arsitektur SRE/DevOps, atau tertarik dengan kolaborasi teknis? Silakan kirimkan pesan melalui form di bawah ini.
+Memiliki pertanyaan seputar jurnal rekayasa, ingin mendiskusikan arsitektur SRE/DevOps, atau tertarik dengan kolaborasi teknis? Silakan kirimkan pesan melalui form di bawah ini.
 </p>
 </div>
 
@@ -112,7 +112,7 @@ Memiliki pertanyaan seputar artikel, ingin mendiskusikan arsitektur SRE/DevOps, 
 <option value="" disabled selected>Pilih topik yang relevan...</option>
 <option value="Konsultasi SRE &amp; Observability">Konsultasi SRE &amp; Observability (JVM / Tomcat / Prometheus)</option>
 <option value="Platform &amp; Infrastructure Engineering">Platform &amp; Infrastructure Engineering (Container / IaC / CI/CD)</option>
-<option value="Diskusi Artikel Teknis">Diskusi / Feedback Artikel Teknis</option>
+<option value="Diskusi Jurnal Rekayasa">Diskusi / Feedback Jurnal Rekayasa</option>
 <option value="Peluang Kerja atau Proyek">Peluang Kerja Sama / Kolaborasi Proyek</option>
 <option value="Lainnya">Lainnya</option>
 </select>

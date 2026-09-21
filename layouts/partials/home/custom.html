@@ -28,18 +28,18 @@
       {{/* Dynamic random article highlight — rendered by JS on each page load */}}
       <div class="ew-spotlight" id="ew-spotlight" style="display:none;" aria-live="polite">
         <div class="ew-spotlight__header">
-          <span class="ew-spotlight__label">📖 Rekomendasi Artikel</span>
-          <button class="ew-spotlight__shuffle" id="ew-spotlight-shuffle" title="Pilih artikel lain" aria-label="Shuffle artikel">↻</button>
+          <span class="ew-spotlight__label">📖 Rekomendasi Jurnal</span>
+          <button class="ew-spotlight__shuffle" id="ew-spotlight-shuffle" title="Pilih jurnal lain" aria-label="Shuffle jurnal">↻</button>
         </div>
         <a class="ew-spotlight__link" id="ew-spotlight-link" href="#"></a>
       </div>
 
       <div class="ew-hero__cta">
         <a href="{{ "/articles/" | relLangURL }}" id="ew-cta-read" class="ew-btn ew-btn--primary">
-          Baca Artikel →
+          Baca Jurnal →
         </a>
         <a href="{{ "/articles/" | relLangURL }}" class="ew-btn ew-btn--ghost">
-          Semua Artikel
+          Semua Jurnal
         </a>
         <a href="https://github.com/edkas07-oss" target="_blank" rel="noopener" class="ew-btn ew-btn--ghost">
           GitHub
@@ -114,10 +114,10 @@
     var a = articles[idx];
     link.href        = a.url;
     link.textContent = a.title;
-    /* Sync tombol CTA utama ke artikel spotlight */
+    /* Sync tombol CTA utama ke jurnal spotlight */
     if (ctaBtn) {
       ctaBtn.href        = a.url;
-      ctaBtn.textContent = 'Baca Artikel →';
+      ctaBtn.textContent = 'Baca Jurnal →';
     }
   }
 
@@ -244,7 +244,7 @@
 {{/* ── 2. RECENT ARTICLES ───────────────────────────────────────────── */}}
 <section class="ew-articles">
   <div class="ew-articles__header ew-reveal">
-    <h2 class="ew-articles__title">Artikel Teknis Terbaru</h2>
+    <h2 class="ew-articles__title">Jurnal Rekayasa Terbaru</h2>
     <a href="{{ "/articles/" | relLangURL }}" class="ew-articles__more">Lihat Semua →</a>
   </div>
 

@@ -4,7 +4,7 @@
   weight = 5
 
 [[main]]
-  name = "Articles"
+  name = "Journals"
   pageRef = "articles"
   weight = 10
 
@@ -25,7 +25,7 @@
   weight = 5
 
 [[footer]]
-  name = "Articles"
+  name = "Journals"
   pageRef = "articles"
   weight = 10
 

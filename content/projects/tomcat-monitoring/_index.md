@@ -135,9 +135,9 @@ Platform ini ditopang oleh 3 pilar perangkat lunak mandiri yang saling berkolabo
 
 ---
 
-## 📚 Studi Kasus & Artikel Terkait
+## 📚 Studi Kasus & Jurnal Rekayasa Terkait
 
-Untuk pemahaman mendalam mengenai tantangan operasional dan implementasi teknis di balik platform ini, simak artikel engineering berikut:
+Untuk pemahaman mendalam mengenai tantangan operasional dan implementasi teknis di balik platform ini, simak publikasi jurnal rekayasa berikut:
 
 * [Mengapa Auto-Restart di Production Berbahaya: Menerapkan Kebijakan Zero Destructive Auto-Remediation]({{< ref "articles/mengapa-auto-restart-di-production-berbahaya" >}})
 * [Deep-Dive Observability Apache Tomcat: Mengamankan JMX Exporter dengan TLS & Keystore]({{< ref "articles/deep-dive-observability-apache-tomcat-jmx-exporter-tls" >}})
