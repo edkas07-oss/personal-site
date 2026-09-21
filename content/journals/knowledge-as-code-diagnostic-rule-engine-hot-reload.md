@@ -9,6 +9,7 @@ tags = ["sre", "architecture", "nodejs", "sqlite", "incident-management", "rules
 series = ["Enterprise Observability & Systems Engineering"]
 toc = true
 showSummary = true
+aliases = ["/articles/knowledge-as-code-diagnostic-rule-engine-hot-reload/"]
 +++
 
 ## 📌 Ringkasan Eksekutif (TL;DR)

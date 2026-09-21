@@ -139,6 +139,6 @@ Platform ini ditopang oleh 3 pilar perangkat lunak mandiri yang saling berkolabo
 
 Untuk pemahaman mendalam mengenai tantangan operasional dan implementasi teknis di balik platform ini, simak publikasi jurnal rekayasa berikut:
 
-* [Mengapa Auto-Restart di Production Berbahaya: Menerapkan Kebijakan Zero Destructive Auto-Remediation]({{< ref "articles/mengapa-auto-restart-di-production-berbahaya" >}})
-* [Deep-Dive Observability Apache Tomcat: Mengamankan JMX Exporter dengan TLS & Keystore]({{< ref "articles/deep-dive-observability-apache-tomcat-jmx-exporter-tls" >}})
-* [Mendeteksi Concurrency Saturation dan GC Thrashing pada Workload Enterprise]({{< ref "articles/mendeteksi-concurrency-saturation-dan-gc-thrashing" >}})
+* [Mengapa Auto-Restart di Production Berbahaya: Menerapkan Kebijakan Zero Destructive Auto-Remediation]({{< ref "journals/mengapa-auto-restart-di-production-berbahaya" >}})
+* [Deep-Dive Observability Apache Tomcat: Mengamankan JMX Exporter dengan TLS & Keystore]({{< ref "journals/deep-dive-observability-apache-tomcat-jmx-exporter-tls" >}})
+* [Mendeteksi Concurrency Saturation dan GC Thrashing pada Workload Enterprise]({{< ref "journals/mendeteksi-concurrency-saturation-dan-gc-thrashing" >}})

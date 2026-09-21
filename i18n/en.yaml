@@ -1,0 +1,8 @@
+article:
+  part_of_series: "Bagian dari serial jurnal rekayasa ini."
+  part: "Bagian"
+  this_article: "Jurnal Ini"
+  related_articles: "Jurnal Terkait"
+
+list:
+  no_articles: "Belum ada jurnal yang terdaftar di sini."

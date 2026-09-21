@@ -9,6 +9,7 @@ tags = ["golang", "devops", "docker", "podman", "sre", "observability", "systems
 series = ["Enterprise Observability & Systems Engineering"]
 toc = true
 showSummary = true
+aliases = ["/articles/forensik-kontainer-real-time-golang-socket-engine-spool/"]
 +++
 
 ## 📌 Ringkasan Eksekutif (TL;DR)

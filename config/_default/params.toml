@@ -6,7 +6,7 @@ enableSearch = true
 enableCodeCopy = true
 enableStructuredBreadcrumbs = true
 
-mainSections = ["articles"]
+mainSections = ["journals"]
 disableImageOptimization = true
 
 highlightCurrentMenuArea = true
@@ -28,7 +28,7 @@ smartTOCHideUnfocusedChildren = true
   showRecent = true
   showRecentItems = 6
   showMoreLink = true
-  showMoreLinkDest = "articles"
+  showMoreLinkDest = "journals"
   cardView = true
   cardViewScreenWidth = false
 

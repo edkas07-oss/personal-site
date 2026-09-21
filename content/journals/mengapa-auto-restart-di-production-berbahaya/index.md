@@ -9,6 +9,7 @@ tags = ["tomcat", "incident-response", "zero-remediation", "prometheus", "alertm
 series = ["SRE & Incident Diagnostics Architecture"]
 toc = true
 showSummary = true
+aliases = ["/articles/mengapa-auto-restart-di-production-berbahaya/"]
 +++
 
 ## 📌 Ringkasan Eksekutif (TL;DR)

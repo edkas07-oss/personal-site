@@ -9,6 +9,7 @@ tags = ["jvm", "tomcat", "garbage-collection", "concurrency", "promql", "prometh
 series = ["JVM & Tomcat Performance Engineering"]
 toc = true
 showSummary = true
+aliases = ["/articles/mendeteksi-concurrency-saturation-dan-gc-thrashing/"]
 +++
 
 ## 📌 Ringkasan Eksekutif (TL;DR)

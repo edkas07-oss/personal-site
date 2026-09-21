@@ -9,6 +9,7 @@ tags = ["windows-containers", "docker", "nanoserver", "devops", "sre", "security
 series = ["Enterprise Observability & Multi-OS Architecture"]
 toc = true
 showSummary = true
+aliases = ["/articles/menjinakkan-windows-containers-docker-nanoserver-linux/"]
 +++
 
 ## 📌 Ringkasan Eksekutif (TL;DR)

@@ -9,6 +9,7 @@ tags = ["tomcat", "observability", "prometheus", "jmx", "security", "sre"]
 series = ["JVM & Tomcat Performance Engineering"]
 toc = true
 showSummary = true
+aliases = ["/articles/deep-dive-observability-apache-tomcat-jmx-exporter-tls/"]
 +++
 
 ## 📌 Ringkasan Eksekutif (TL;DR)
