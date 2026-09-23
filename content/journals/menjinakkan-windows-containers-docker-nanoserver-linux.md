@@ -141,7 +141,55 @@ flowchart LR
 
 Dalam arsitektur *high-performance monitoring*, **Process Isolation adalah keharusan mutlak**. Membakar ratusan megabyte RAM hanya untuk *utility VM* per komponen pemantauan akan membebani server aplikasi target.
 
-### 3. Jebakan Non-Admin `ContainerUser` & *Permission Denied*
+### 3. Mitos vs Realitas: Menjalankan Kontainer di Atas VM (Dunia Nyata Enterprise)
+
+Salah satu pertanyaan mendasar yang sering muncul dari tim infrastruktur saat merancang sistem di lapangan adalah:  
+*"Di dunia nyata, hampir semua server produksi berbentuk Virtual Machine (seperti AWS EC2, Azure VM, VMware ESXi, atau Proxmox). Apakah menjalankan kontainer dan bind-mount di atas VM Linux atau Windows akan menimbulkan masalah performa atau permission?"*
+
+Jawabannya: **Sama sekali tidak bermasalah, asalkan arsitekturnya lurus (jalur tunggal) dan tidak memaksakan *nested virtualization*.**
+
+#### Realitas Jalur Produksi Tunggal (Standar Industri Enterprise)
+Menjalankan kontainer di atas VM adalah standar industri global dan berjalan 100% mulus:
+1. **Jalur Linux Murni (Standar Industri):**
+   ```text
+   VM Linux (Ubuntu/RHEL di EC2) ➔ Podman / Docker Engine ➔ Linux Container
+   ```
+   *Bind-mount* folder host `/opt/data` ke kontainer dieksekusi **100% secara native** di atas kernel Linux VM tersebut. Tidak ada translasi filesystem, tidak ada friksi permission POSIX, dan performa I/O berjalan tanpa latensi tambahan.
+2. **Jalur Windows Murni (Process Isolation):**
+   ```text
+   VM Windows Server (EC2) ➔ Docker CE Windows ➔ Windows Container
+   ```
+   *Bind-mount* folder host `D:\tomcats` ke kontainer dieksekusi **100% secara native** di atas kernel Windows NT menggunakan filter driver NTFS (`wcifs.sys`). Tidak ada layer virtualisasi filesystem tambahan, menghasilkan **100% Native NTFS Speed**.
+
+#### Kapan Masalah I/O & Permission Tersebut Muncul? (*The Nested VM Trap*)
+Masalah performa I/O lambat dan bentrok izin file **HANYA TERJADI jika Anda memaksakan menjalankan Podman di dalam VM Windows Server**:
+
+{{< mermaid >}}
+flowchart TD
+    subgraph HostVM["Windows Server Host (AWS EC2 VM)"]
+        WIN_DISK["Partisi NTFS Host: D:\tomcats"]
+        
+        subgraph NestedVM["Podman Machine (WSL2 / Linux VM di Dalam Windows)"]
+            VIRT_FS["Lapisan Konversi: VirtioFS / 9P (/mnt/d/tomcats)"]
+            CONTAINER["Kontainer Linux (Tomcat / UID 1001)"]
+        end
+    end
+
+    WIN_DISK <-->|"Cross-OS Boundary (Disk I/O Bottleneck)"| VIRT_FS
+    VIRT_FS <-->|"Bentrok Hak Akses POSIX vs NTFS ACL"| CONTAINER
+{{< /mermaid >}}
+
+Ketika Podman dipaksakan berjalan di Windows Server:
+1. **Terjadi Nested Virtualization (VM di dalam VM):** Podman diciptakan khusus untuk Linux dan tidak memiliki runtime native Windows Container. Menjalankan Podman di Windows mewajibkan WSL2/Hyper-V, yang artinya Windows Server harus menyalakan sebuah Linux VM kecil lagi di dalam dirinya sendiri.
+2. **Cross-Boundary I/O Latency:** Setiap operasi *read/write* bind-mount dari harddisk Windows (`D:\tomcats`) ke Linux container di dalam WSL2 harus melompati batas filesystem (NTFS $\leftrightarrow$ ext4) melalui protokol emulasi jaringan virtual (**VirtioFS / 9P**). Hal ini memicu penalti performa (bisa 3x–10x lebih lambat), menyebabkan *disk I/O bottleneck* parah pada penulisan log berkala atau ekstraksi file `.war`.
+3. **Bentrok Hak Akses (POSIX vs NTFS):** Kontainer Linux menuntut izin POSIX numerik (`chmod 0750`, `chown 1001:1001`). Saat direktori NTFS di-mount via 9P/VirtioFS, atribut keamanan sering kali dipetakan secara kaku (`777` atau `root`), memicu kegagalan startup Java atau *Access Denied*.
+
+> [!TIP]
+> **Pelajaran Rekayasa Lapangan:** Di lingkungan enterprise nyata, **tidak ada perusahaan yang menjalankan Podman + WSL2 di Windows Server produksi** untuk beban kerja penting. Jika workload Anda adalah kontainer Linux, gunakan VM Linux murni. Jika workload Anda berjalan di Windows Server, gunakan Docker CE native dengan *Process Isolation*.
+
+---
+
+### 4. Jebakan Non-Admin `ContainerUser` & *Permission Denied*
 
 NanoServer hadir dengan dua akun pengguna bawaan:
 - **`ContainerAdministrator`** (SID: `S-1-5-93-2-1`): Pengguna dengan hak administratif penuh.
@@ -167,7 +215,7 @@ level=fatal msg="[db] open C:\data\mailpit.db: Access is denied."
 
 Inilah akar masalah yang diselesaikan secara definitif oleh keputusan arsitektur [`TM-ADR-0031`](https://edkas07-oss.github.io/devops-handbook/adr/tomcat-monitoring/adr-records/TM-ADR-0031/).
 
-### 4. Misteri `netapi32.dll` pada Binary Go & Ekosistem Node.js
+### 5. Misteri `netapi32.dll` pada Binary Go & Ekosistem Node.js
 
 NanoServer dirancang sangat ramping (ukuran unduh terkompresi hanya ~100-250 MB). Untuk mencapai ukuran sekecil itu, ribuan pustaka DLL Win32 bawaan sistem operasi yang dianggap tidak esensial dibuang oleh Microsoft.
 
@@ -335,10 +383,12 @@ Tier ini dialokasikan khusus untuk penyimpanan data stateful yang membutuhkan th
 - **Alertmanager State Engine (`alertmanager_data`)**
 - **Mailpit Testing Store (`mailpit_data`)**
 
-**Mengapa Named Volumes, bukan Host Directory Bind-Mount?**
-Pada Windows Server, melakukan bind mount direktori host biasa (`C:\MyData`) ke dalam container Windows sering kali memicu hambatan performa akibat lapisan translasi virtualisasi filesystem, serta rentan terhadap *file locking collision* antara proses host (seperti Windows Defender / antivirus scan) dan engine database. 
+**Mengapa Named Volumes untuk Database Ber-I/O Tinggi? (Dan Klarifikasi Mitos Bind-Mount)**
+Di masa lalu, muncul anggapan keliru bahwa bind-mount direktori host di Windows selalu lambat. Faktanya, penalti performa bind-mount hanya terjadi jika melewati batas virtualisasi lintas-OS (seperti Docker Desktop / WSL2 yang menggunakan translasi `VirtioFS`/`9P`). Pada Windows Server native dengan *Process Isolation*, bind-mount berjalan langsung di atas kernel NT (`wcifs.sys`) dengan kecepatan 100% native NTFS.
 
-Dengan mempercayakan database ke *Container Engine Named Volumes* (`C:\ProgramData\docker\volumes\...` di Windows atau storage subsystem Podman/Docker di Linux), engine kontainer mengontrol penuh alokasi blok penyimpanan secara native, menjamin performa maksimal dan integritas atomik ACID SQLite.
+Namun, untuk beban kerja database spesifik (seperti Prometheus TSDB chunks dan SQLite WAL) yang melakukan ribuan transaksi flush kecil dan penguncian file eksklusif (*exclusive file locking*), penggunaan **Container Engine Named Volumes** (`C:\ProgramData\docker\volumes\...`) tetap direkomendasikan untuk menghindari bentrok penguncian (*file locking collision*) dari proses host lain (seperti background scanner antivirus Windows Defender yang kerap mengunci file saat memindai folder host biasa).
+
+Dengan mempercayakan database ke *Container Engine Named Volumes*, engine kontainer mengontrol penuh alokasi blok penyimpanan secara native, menjamin performa maksimal dan integritas atomik ACID SQLite.
 
 ### 2. Tier 2: Host Workspace Directory (`tm_home`)
 Tier ini adalah ruang kerja terstandarisasi di sisi host yang mengadopsi konvensi ekosistem Java/Tomcat (`CATALINA_HOME`, `JAVA_HOME`). Direktori default berada di:
