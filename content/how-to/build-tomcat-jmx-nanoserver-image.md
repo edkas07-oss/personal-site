@@ -2,7 +2,7 @@
 title = "Panduan Praktis: Build Image Container Apache Tomcat + Prometheus JMX Exporter + JDK di Windows NanoServer"
 date = "2026-09-25T16:50:00+07:00"
 draft = false
-summary = "Panduan langkah-demi-langkah membangun container image Apache Tomcat 9.0 native Windows NanoServer yang dilengkapi instrumentasi Prometheus JMX Exporter dan multi-versi Eclipse Temurin JDK/JRE (11, 17, 21). Mengupas pembuatan Dockerfile modular, mekanisme setenv.bat untuk JRE_HOME dan Java Agent, hingga dua metode distribusi image ke private OCI container registry dan arsip tar offline untuk lingkungan air-gapped."
+summary = "Panduan langkah-demi-langkah membangun container image Apache Tomcat 9.0 native Windows NanoServer yang dilengkapi instrumentasi Prometheus JMX Exporter dan multi-versi Eclipse Temurin JDK/JRE (11, 17, 21). Mengupas pembuatan Dockerfile modular, arsitektur setenv.bat dengan Hierarchy Fallback (Zero-Rebuild) untuk JRE_HOME dan Java Agent, hingga dua metode distribusi image ke private OCI container registry dan arsip tar offline untuk lingkungan air-gapped."
 author = "Eddy Wiyatno"
 categories = ["How-To", "Container", "Middleware", "Observability"]
 tags = ["tomcat", "windows-containers", "nanoserver", "jmx-exporter", "prometheus", "docker", "powershell", "devops", "sysadmin"]
@@ -27,6 +27,7 @@ Bagi System Engineer dan System Administrator (SysAdmin) yang mengelola beban ke
 2. **Observabilitas JVM Native Tanpa Port RMI Terbuka:** Mengaktifkan Remote JMX standar melalui protokol Java RMI membuka risiko keamanan eksploitasi deserialization (*Remote Code Execution*) serta kerumitan *port traversal* di firewall. Menanamkan **Prometheus JMX Exporter Java Agent** langsung ke dalam image memungkinkan metrik internal JVM (Heap Memory, Metaspace, GC pause, dan Tomcat Thread Pools) diekspos melalui endpoint HTTP/HTTPS standar (port 9404) secara aman dan efisien.
 3. **Fleksibilitas Multi-Versi Java dengan Satu Dockerfile:** Kebutuhan aplikasi legacy maupun modern dapat dipenuhi cukup dengan satu template Dockerfile modular yang memanfaatkan argumen build (`--build-arg JAVA_TAG=...`), sehingga Anda tidak perlu memelihara banyak Dockerfile terpisah untuk Java 11, 17, dan 21.
 4. **Kemandirian di Lingkungan Tertutup (Air-Gapped Ready):** Image yang sudah dibuild dapat didistribusikan ke *private container registry* internal (seperti Gitea, Harbor, Nexus, Artifactory) atau diekspor ke file arsip `.tar` untuk diimpor langsung di server target tanpa memerlukan koneksi ke Docker Hub atau internet publik.
+5. **Arsitektur Observabilitas Zero-Rebuild:** Konfigurasi JMX bawaan menyertakan aturan dasar siap pakai serta mendukung mekanisme penimpaan (*override*) otomatis melalui direktori `conf/`, sehingga penambahan metrik atau kustomisasi aturan baru dapat dilakukan sewaktu-waktu tanpa perlu membangun ulang (*rebuild*) citra container.
 
 ---
 
@@ -39,7 +40,7 @@ flowchart TD
     subgraph Build_Host ["Host Windows Server (Docker Engine)"]
         TomcatZip["Biner Apache Tomcat 9.0"]
         NanoBase["Base Image: Eclipse Temurin NanoServer<br/>(Java 11 / 17 / 21)"]
-        JmxAgent["Prometheus JMX Exporter<br/>Java Agent JAR"]
+        JmxAgent["Prometheus JMX Exporter<br/>Java Agent JAR + config.yaml"]
         Builder["Docker Engine (windowsfilter)"]
         BuiltImages["Local Container Images:<br/>- tomcat:9.0-jdk11<br/>- tomcat:9.0-jdk17<br/>- tomcat:9.0-jdk21"]
     end
@@ -108,15 +109,42 @@ $jmxUrl = "https://repo1.maven.org/maven2/io/prometheus/jmx/jmx_prometheus_javaa
 Write-Host "Mengunduh Prometheus JMX Exporter v$jmxVersion..." -ForegroundColor Cyan
 Invoke-WebRequest -Uri $jmxUrl -OutFile "C:\build\jmx-exporter\jmx_prometheus_javaagent.jar"
 
-# 5. Konfigurasi setenv.bat (Bridging JRE_HOME & Instrumentasi JMX Opsional)
+# 5. Konfigurasi Standar Prometheus JMX Exporter (Bawaan Citra)
+# Aturan ini menangkap metrik Catalina dasar dan wildcard '.*' untuk auto-discovery MBean baru
+$jmxConfig = @'
+lowercaseOutputLabelNames: true
+lowercaseOutputName: true
+rules:
+  - pattern: 'Catalina<type=GlobalRequestProcessor, name=\"([^\"]+)\"><>(\w+):'
+    name: tomcat_request_processor_$2
+    labels:
+      name: "$1"
+  - pattern: 'Catalina<type=ThreadPool, name=\"([^\"]+)\"><>(\w+):'
+    name: tomcat_threadpool_$2
+    labels:
+      name: "$1"
+  - pattern: 'Catalina<type=Manager, host=([^,]+), context=([^,]+)><>(activeSessions|maxActive|sessionCounter):'
+    name: tomcat_session_$3
+    labels:
+      host: "$1"
+      context: "$2"
+  - pattern: '.*'
+'@
+Set-Content -Path "C:\build\jmx-exporter\config.yaml" -Value $jmxConfig -Encoding ASCII
+
+# 6. Konfigurasi setenv.bat (Defensive JRE_HOME & Hierarchy Fallback JMX)
 $setenvContent = @'
 @echo off
-rem Alihkan JAVA_HOME ke JRE_HOME agar catalina.bat tidak memvalidasi javac.exe
-set "JRE_HOME=%JAVA_HOME%"
+rem 1. Alihkan JAVA_HOME ke JRE_HOME secara defensif agar catalina.bat tidak memvalidasi javac.exe
+if not "%JAVA_HOME%" == "" set "JRE_HOME=%JAVA_HOME%"
 set "JAVA_HOME="
 
-rem Aktifkan Prometheus JMX Java Agent secara otomatis jika file konfigurasi tersedia
-if exist "C:\jmx-exporter\config.yaml" (
+rem 2. Logika Hierarchy Fallback JMX Exporter:
+rem Prioritaskan custom config dari host bind-mount (%CATALINA_HOME%\conf\jmx-config.yaml) jika ada,
+rem atau fallback ke default config bawaan citra (C:\jmx-exporter\config.yaml).
+if exist "%CATALINA_HOME%\conf\jmx-config.yaml" (
+    set "CATALINA_OPTS=%CATALINA_OPTS% -javaagent:C:\jmx-exporter\jmx_prometheus_javaagent.jar=9404:%CATALINA_HOME%\conf\jmx-config.yaml"
+) else if exist "C:\jmx-exporter\config.yaml" (
     set "CATALINA_OPTS=%CATALINA_OPTS% -javaagent:C:\jmx-exporter\jmx_prometheus_javaagent.jar=9404:C:\jmx-exporter\config.yaml"
 )
 '@
@@ -125,9 +153,12 @@ Set-Content -Path "C:\build\tomcat\bin\setenv.bat" -Value $setenvContent -Encodi
 ```
 
 > [!NOTE]
-> **Mengapa Membutuhkan `setenv.bat`?**
-> 1. **Bridging `JRE_HOME`:** Image resmi Temurin JRE mengekspor variabel `JAVA_HOME`. Skrip startup `catalina.bat` secara default akan memvalidasi keberadaan compiler `javac.exe` jika `JAVA_HOME` didefinisikan (mengasumsikan JDK penuh terpasang). Mengalihkan nilainya ke `JRE_HOME` membuat Tomcat hanya memvalidasi `java.exe` runtime sehingga dapat berjalan normal di lingkungan JRE murni.
-> 2. **Instrumentasi JMX Dinamis:** Dengan menyematkan logika `if exist "C:\jmx-exporter\config.yaml"`, image ini tetap fleksibel: saat berjalan tanpa file konfigurasi JMX, Tomcat berfungsi seperti biasa. Saat Anda menyuntikkan konfigurasi via *host bind-mount*, Prometheus JMX Exporter otomatis aktif di port 9404 tanpa perlu mengubah image.
+> **Mengapa Membutuhkan `setenv.bat` dengan Hierarchy Fallback?**
+> 1. **Defensive Bridging `JRE_HOME`:** Image resmi Temurin JRE mengekspor variabel `JAVA_HOME`. Skrip startup `catalina.bat` secara default akan memvalidasi keberadaan compiler `javac.exe` jika `JAVA_HOME` didefinisikan (mengasumsikan JDK penuh terpasang). Mengalihkan nilainya ke `JRE_HOME` membuat Tomcat hanya memvalidasi `java.exe` runtime sehingga dapat berjalan normal di lingkungan JRE murni tanpa memicu error `NB: JAVA_HOME should point to a JDK not a JRE`.
+> 2. **Zero-Rebuild Observability Architecture:** Dengan menanamkan `config.yaml` default ke dalam image dan menyematkan logika pengecekan `conf\jmx-config.yaml`:
+>    - **Out-of-the-Box:** Container langsung menyajikan metrik Prometheus di port 9404 begitu di-start dengan parameter JMX.
+>    - **Bebas Masalah Mount Windows:** Keterbatasan Windows Containers yang tidak mendukung *file bind-mount* dan ancaman *directory shadowing* dapat dihindari sepenuhnya.
+>    - **Kustomisasi Tanpa Rebuild:** Jika aplikasi Anda membutuhkan aturan metrik kustom di masa depan, Anda cukup meletakkan file `jmx-config.yaml` di direktori host `conf/` (yang sudah ter-mount via `conf:ro`) tanpa perlu membangun ulang (*rebuild*) citra container!
 
 ---
 
@@ -294,26 +325,127 @@ Jika server produksi terisolasi secara fisik tanpa ada jaringan ke registry OCI,
 
 ### Langkah 5: Smoke Test & Verifikasi Runtime
 
-Untuk memastikan image yang telah dibuild berfungsi dengan baik, jalankan uji coba kontainer sederhana:
+Untuk memastikan image yang telah dibuild berfungsi dengan baik, jalankan uji coba kontainer dengan mempublikasikan port HTTP aplikasi (8080) dan port Prometheus JMX Exporter (9404):
 
 ```powershell
-# 1. Jalankan container uji coba di port 8080
+# 1. Jalankan container uji coba
 docker run -d --name tomcat-test -p 8080:8080 -p 9404:9404 tomcat:9.0-jdk17
 
 # 2. Tunggu beberapa detik dan cek status container
 docker ps
 
-# 3. Periksa log bootstrap Tomcat
+# 3. Periksa log bootstrap Tomcat (pastikan Java Agent JMX aktif)
 docker logs tomcat-test
 
-# 4. Uji respons HTTP
+# 4. Uji respons HTTP aplikasi web Tomcat (port 8080)
 Invoke-WebRequest -Uri "http://localhost:8080/" -UseBasicParsing | Select-Object StatusCode, StatusDescription
+
+# 5. Uji respons endpoint metrik Prometheus JMX Exporter (port 9404)
+$metricsResponse = Invoke-WebRequest -Uri "http://localhost:9404/metrics" -UseBasicParsing
+[PSCustomObject]@{
+    StatusCode        = $metricsResponse.StatusCode
+    StatusDescription = $metricsResponse.StatusDescription
+    SampleMetrics     = ($metricsResponse.Content -split "`n" | Where-Object { $_ -match "^(jvm_|tomcat_)" } | Select-Object -First 3) -join " | "
+}
 ```
 
-Jika output `StatusCode` bernilai `404` atau `200`, Tomcat telah berhasil menyala dan siap melayani permintaan. Setelah pengujian selesai, bersihkan container uji coba:
+Jika output `StatusCode` untuk port 8080 bernilai `200` atau `404`, dan port 9404 mengembalikan metrik Prometheus (HTTP 200), berarti Tomcat dan agen observabilitas JMX telah aktif sempurna!
+
+Setelah pengujian selesai, bersihkan container uji coba:
 
 ```powershell
 docker rm -f tomcat-test
+```
+
+---
+
+### Langkah 6: Praktik Kustomisasi & Menambah Metrik JMX Baru Tanpa Rebuild Citra (Zero-Rebuild Override)
+
+Salah satu keunggulan terbesar dari arsitektur *Hierarchy Fallback* pada skrip `setenv.bat` adalah Anda **tidak perlu me-rebuild image Docker** saat ingin menambahkan metrik baru, memonitor MBean aplikasi tertentu, atau mengubah konvensi penamaan telemetri.
+
+Berikut tutorial praktis langkah-demi-langkah cara mengubah konfigurasi JMX langsung dari host Windows:
+
+#### 1. Skenario Kebutuhan: Menambahkan Monitoring Database Pool & Servlet
+Katakanlah aplikasi enterprise Anda menambahkan *connection pool* **HikariCP** (`com.zaxxer.hikari`) dan Anda ingin mengekspos metrik koneksi aktif, idle, serta waktu pemrosesan servlet tertentu.
+
+#### 2. Buat Berkas `jmx-config.yaml` pada Direktori Host `conf\`
+Di host Windows, buat file `jmx-config.yaml` langsung di dalam folder bind-mount `conf/` instance Tomcat Anda (misal `C:\tomcats\tomcat-lab\conf\jmx-config.yaml`):
+
+```powershell
+$customJmx = @'
+lowercaseOutputLabelNames: true
+lowercaseOutputName: true
+rules:
+  # 1. Aturan Standar Tomcat (Request & ThreadPool)
+  - pattern: 'Catalina<type=GlobalRequestProcessor, name=\"([^\"]+)\"><>(\w+):'
+    name: tomcat_request_processor_$2
+    labels:
+      name: "$1"
+  - pattern: 'Catalina<type=ThreadPool, name=\"([^\"]+)\"><>(\w+):'
+    name: tomcat_threadpool_$2
+    labels:
+      name: "$1"
+
+  # 2. METRIK TAMBAHAN BARU: Database Connection Pool (HikariCP)
+  - pattern: 'com.zaxxer.hikari<type=Pool \((.+)\)><>(ActiveConnections|IdleConnections|TotalConnections|ThreadsAwaitingConnection):'
+    name: app_hikaricp_$2
+    labels:
+      pool: "$1"
+    type: GAUGE
+
+  # 3. METRIK TAMBAHAN BARU: Waktu Eksekusi Servlet & Error Count
+  - pattern: 'Catalina<j2eeType=Servlet, name=([^,]+), WebModule=([^,]+), J2EEApplication=none, J2EEServer=none><>(processingTime|requestCount|errorCount):'
+    name: tomcat_servlet_$3
+    labels:
+      servlet: "$1"
+      module: "$2"
+
+  # 4. Fallback Catch-All Wildcard (Otomatis Tangkap MBean Lainnya)
+  - pattern: '.*'
+'@
+
+# Tulis berkas ke folder conf host yang sudah di-mount ke container
+Set-Content -Path "C:\tomcats\tomcat-lab\conf\jmx-config.yaml" -Value $customJmx -Encoding ASCII
+```
+
+#### 3. Terapkan Konfigurasi Baru (Cukup Restart atau Rollout)
+Karena direktori host `conf/` terhubung ke kontainer melalui bind mount (`conf:ro`), kontainer cukup di-restart atau di-rollout tanpa perlu membuang image atau melakukan build ulang:
+
+- **Jika Menggunakan Operator `tcctl`:**
+  ```powershell
+  # Opsi A: Restart cepat
+  docker restart tomcat-lab
+
+  # Opsi B: Zero-Downtime Rollout (Rekomendasi Staging/Production)
+  tcctl deploy rollout --name tomcat-lab --port 8080 --staging-port 9080 --jmx --base-dir C:/tomcats
+  ```
+- **Jika Menggunakan Docker CLI Standar:**
+  ```powershell
+  docker run -d --name tomcat-lab `
+    -p 8080:8080 -p 9404:9404 `
+    -v "C:\tomcats\tomcat-lab\conf:C:\usr\local\tomcat\conf:ro" `
+    tomcat:9.0-jdk17
+  ```
+
+Saat Tomcat melakukan *bootstrap*, skrip `setenv.bat` otomatis mendeteksi:
+```cmd
+if exist "%CATALINA_HOME%\conf\jmx-config.yaml"
+```
+Karena file tersebut ditemukan di folder `conf`, Java Agent JMX langsung memuat konfigurasi kustom tersebut, **mengabaikan konfigurasi default image tanpa menyentuh satu pun layer Docker**.
+
+#### 4. Verifikasi Metrik Baru di Endpoint `/metrics`
+Uji apakah metrik baru HikariCP dan Servlet sudah berhasil diekspos oleh Prometheus JMX Exporter:
+
+```powershell
+# Filter output metrik baru dari endpoint port 9404
+(Invoke-WebRequest -Uri "http://localhost:9404/metrics" -UseBasicParsing).Content -split "`n" | Select-String -Pattern "app_hikaricp|tomcat_servlet"
+```
+
+Output yang diharapkan menampilkan deretan metrik time-series baru yang siap di-scrape oleh server Prometheus:
+```text
+app_hikaricp_ActiveConnections{pool="HikariPool-1",} 5.0
+app_hikaricp_IdleConnections{pool="HikariPool-1",} 15.0
+tomcat_servlet_processingTime{module="//localhost/",servlet="dispatcherServlet",} 142.0
 ```
 
 ---
@@ -331,9 +463,10 @@ Secara default, instalasi baru Docker CE di Windows Server tidak otomatis membua
 - Perintah PowerShell `Set-Content` akan melempar error `DirectoryNotFoundException` jika direktori induk belum ada.
 - **Solusi:** Selalu jalankan `New-Item -ItemType Directory -Force -Path "C:\ProgramData\docker\config"` sebelum mencoba menulis atau memodifikasi file `daemon.json`.
 
-### 3. Mengapa NanoServer Hanya Mendukung Java 11 ke Atas?
-- **NanoServer (`nanoserver:ltsc2022`):** Merupakan sistem operasi kontainer Windows paling ramping (~100–170 MB). NanoServer sengaja menghilangkan subsistem grafis Win32, konsol legasi GDI, dan font library. Java 11, 17, dan 21 telah didesain *headless-native* sehingga berjalan sempurna di atas NanoServer.
-- **Java 8 (Legacy Dependency):** Java 8 memerlukan pustaka DLL Win32 tertentu dan subsistem font sistem yang tidak ada di NanoServer. Jika aplikasi Anda mutlak membutuhkan Java 8, Anda **wajib** menggunakan base image **ServerCore (`servercore:ltsc2022`)** yang memiliki dependensi lengkap namun berukuran sekitar ~4,5 GB.
+### 3. Mengapa Menggunakan Base Image JRE Headless (Klarifikasi Label JDK vs JRE)
+- **NanoServer (`nanoserver:ltsc2022`) + JRE:** Merupakan sistem operasi kontainer Windows paling ramping (~100–170 MB). Base image menggunakan **Eclipse Temurin JRE** tanpa compiler `javac.exe` dan pustaka grafis Win32/GDI untuk menjaga ukuran image tetap ultra-ringan (< 450 MB).
+- **Kompilasi JSP Tetap Bekerja:** Apache Tomcat secara default menyertakan Eclipse Compiler for Java (`ecj-*.jar`) di dalam direktori `lib/`, sehingga aplikasi tetap dapat mengompilasi berkas JSP secara runtime di lingkungan JRE murni.
+- **Konvensi Penamaan Tag:** Tag image diberi label `tomcat:9.0-jdk11` / `jdk17` / `jdk21` semata-mata sebagai konvensi industri untuk mengindikasikan level platform bahasa Java yang didukung, bukan berarti di dalamnya terdapat paket JDK penuh (*development kit*).
 
 ### 4. Mengatasi Error "server gave HTTP response to HTTPS client"
 Jika saat menjalankan `docker push` atau `docker pull` muncul error:
@@ -342,12 +475,28 @@ Error response from daemon: Get "https://registry.internal.corp:5000/v2/": http:
 ```
 Penyebabnya adalah Docker client secara default selalu mencoba koneksi aman TLS/HTTPS. Daftarkan nama domain/IP registry tersebut ke dalam array `insecure-registries` pada `C:\ProgramData\docker\config\daemon.json`, kemudian restart daemon dengan perintah `Restart-Service docker`.
 
+### 5. Jebakan Directory Shadowing & Strategi Menambah Metrik JMX Baru Tanpa Rebuild Citra
+Dalam ekosistem Windows Containers, terdapat dua aturan penting terkait bind mount dan JMX:
+1. **Windows Containers Tidak Mendukung File Bind-Mount:** Anda tidak dapat me-mount file tunggal seperti `-v C:\host\config.yaml:C:\jmx-exporter\config.yaml`.
+2. **Bahaya Directory Shadowing:** Jangan sekali-kali mencoba me-mount direktori host ke `C:\jmx-exporter` (misal `-v C:\host\jmx:C:\jmx-exporter`), karena berkas `jmx_prometheus_javaagent.jar` di dalam image akan **tertimpa dan lenyap (*shadowed*)**, menyebabkan JVM gagal start dengan error `agent library failed to init: instrument`.
+
+**Solusi Zero-Rebuild saat Ingin Menambah Metrik Baru:**
+- **Kasus A (Auto-Discovery MBean Baru):** Image ini telah dilengkapi aturan wildcard `pattern: '.*'`. Jika aplikasi menambahkan *connection pool* baru (misal HikariCP, DBCP), metrik Spring Boot, atau custom Java MXBean, metrik tersebut **otomatis terdeteksi dan muncul di port 9404** tanpa perlu ubah konfigurasi apa pun.
+- **Kasus B (Kustomisasi Format / Filter Aturan Khusus):** Anda **tidak perlu me-rebuild image**. Berkat arsitektur *Hierarchy Fallback*, cukup letakkan berkas kustom Anda di dalam direktori host `conf\` (misal `C:\tomcats\<instance>\conf\jmx-config.yaml` yang di-mount secara aman via `conf:ro`). Skrip `setenv.bat` akan otomatis memprioritaskan berkas tersebut dibandingkan konfigurasi bawaan image (panduan langkah-demi-langkah tersedia pada **[Langkah 6: Praktik Kustomisasi & Menambah Metrik JMX Baru](#langkah-6-praktik-kustomisasi--menambah-metrik-jmx-baru-tanpa-rebuild-citra-zero-rebuild-override)**).
+
+### 6. Sinergi dengan Operator tcctl & Mekanisme setenv.bat di Host (TC-ADR-0010)
+Jika Anda menggunakan operator CLI enterprise [**`tcctl`**]({{< ref "how-to/deploy-tomcat-container-windows-server-tcctl" >}}):
+- **Otomasi JMX Port & Probing:** Cukup jalankan perintah `tcctl deploy run --jmx`, maka port 9404 otomatis dipublikasikan dan diverifikasi oleh health-probe bawaan `tcctl`.
+- **Mengapa Host `bin/` Di-mount ke `bin/custom:ro`?** `tcctl` me-mount folder `bin` host ke `C:\usr\local\tomcat\bin\custom:ro` (bukan ke `bin/`) agar biner inti Tomcat di dalam image (`catalina.bat`, `bootstrap.jar`, `setenv.bat`) tidak tertimpa (*directory shadowing*).
+- **Injeksi Dinamis `CATALINA_OPTS`:** `tcctl` membaca parameter memori JVM dari `setenv.bat` di host dan menyuntikkannya ke container via flag `-e CATALINA_OPTS="..."`. Skrip `setenv.bat` internal di dalam image NanoServer kemudian menggabungkan (*append*) opsi memori tersebut dengan argumen Java Agent JMX secara harmonis.
+
 ---
 
 ## 📚 Referensi Terkait
 
-- [Panduan Praktis: Instalasi Docker Engine Community Edition (CE) v27+ di Windows Server]({{< ref "how-to/install-docker-engine-windows-containers" >}})
+- [Panduan Praktis: Implementasi Pure Pull-Based GitOps dan Otomasi CI Promotion Apache Tomcat di Windows Server]({{< ref "how-to/implement-pure-pull-based-gitops-and-ci-promotion-tomcat" >}})
 - [Panduan Praktis: Deploy Kontainer Apache Tomcat di Windows Server Menggunakan tcctl]({{< ref "how-to/deploy-tomcat-container-windows-server-tcctl" >}})
+- [Panduan Praktis: Instalasi Docker Engine Community Edition (CE) v27+ di Windows Server]({{< ref "how-to/install-docker-engine-windows-containers" >}})
 - [Microsoft Windows Container Base Images Documentation](https://learn.microsoft.com/en-us/virtualization/windows-containers/manage-images/container-base-images)
 - [Eclipse Temurin Official Container Images (Docker Hub)](https://hub.docker.com/_/eclipse-temurin)
 - [Prometheus JMX Exporter Official Repository](https://github.com/prometheus/jmx_exporter)
