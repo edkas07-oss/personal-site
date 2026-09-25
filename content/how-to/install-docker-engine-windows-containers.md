@@ -49,7 +49,7 @@ flowchart TD
     I --> J["Tahap 4: Injeksi daemon.json (Deteksi D:/docker vs C:/)"]
     J --> K["Tahap 5: Registrasi Windows Service & Start-Service docker"]
     K --> L["Tahap 6: Readiness Polling Named Pipe (Loop 20 Detik)"]
-    L --> M["Tahap 7: Buat Docker NAT Network (devops-lab) & Base Dir"]
+    L --> M["Tahap 7: Verifikasi Default NAT Network & Base Dir"]
     M --> N["Selesai: Host Siap untuk Orkestrasi Beban Kerja tcctl"]
 {{< /mermaid >}}
 
@@ -272,28 +272,34 @@ Write-Host "    [OK] Docker berhasil didaftarkan ke System PATH." -ForegroundCol
 
 ---
 
-### Langkah 6: Pembuatan NAT Network & Persiapan Base Directory
+### Langkah 6: Verifikasi Default NAT Network & Persiapan Base Directory
 
-Kontainer enterprise (seperti Apache Tomcat yang diorkestrasi oleh [`tcctl`]({{< ref "packages/tcctl" >}})) membutuhkan jaringan NAT terisolasi dan direktori host bind-mount yang terstruktur:
+> [!NOTE]
+> **Standardisasi Jaringan Kontainer:**  
+> Arsitektur `tcctl` dan Docker di Windows Server mengandalkan jaringan bawaan default **`nat`** (Host Network Service). Penggunaan *custom network* lawas (seperti `devops-lab`) sudah di-*deprecate* karena dapat memicu konflik alokasi pool IPv4 dan kompleksitas routing HNS yang tidak perlu.
+
+Secara default, Docker di Windows Server otomatis membuat jaringan NAT bawaan bernama `nat`. Kita cukup memverifikasi ketersediaannya dan menyiapkan direktori host bind-mount (`$dataDrive\tomcats`):
 
 ```powershell
-$NetworkName = "devops-lab"
+$NetworkName = "nat"
 $BaseDir     = "$dataDrive\tomcats"
 
-# 1. Pastikan Docker NAT Network tersedia
+# 1. Pastikan default NAT Network tersedia
 $netInspect = & "$dockerCliPath" network ls --filter "name=^$NetworkName$" --format "{{.Name}}" 2>$null
 if (-not $netInspect) {
-    Write-Host "--> Membuat Docker NAT network '$NetworkName'..." -ForegroundColor Yellow
+    Write-Host "--> Jaringan default '$NetworkName' belum terdeteksi. Membuat network nat..." -ForegroundColor Yellow
     & "$dockerCliPath" network create -d nat $NetworkName | Out-Null
     Write-Host "    [OK] Network '$NetworkName' berhasil dibuat." -ForegroundColor Green
 } else {
-    Write-Host "    [OK] Network '$NetworkName' sudah ada." -ForegroundColor Green
+    Write-Host "    [OK] Network '$NetworkName' (Default HNS NAT) sudah aktif." -ForegroundColor Green
 }
 
-# 2. Buat Base Directory untuk bind-mount kontainer
+# 2. Buat Base Directory untuk bind-mount kontainer (D:\tomcats atau C:\tomcats)
 if (-not (Test-Path $BaseDir)) {
     New-Item -ItemType Directory -Force -Path $BaseDir | Out-Null
     Write-Host "    [OK] Tomcat Base Directory dibuat di $BaseDir." -ForegroundColor Green
+} else {
+    Write-Host "    [OK] Tomcat Base Directory sudah siap di $BaseDir." -ForegroundColor Green
 }
 ```
 
@@ -330,13 +336,13 @@ Berikut adalah blok skrip otomatisasi terpadu yang menggabungkan seluruh tahapan
     - Instalasi biner Docker CE v27+ (Offline C:\temp\docker.zip atau online fallback)
     - Konfigurasi data-root otomatis pada drive D: (jika tersedia)
     - Registrasi Windows Service & polling kesiapan named pipe
-    - Pembuatan network NAT 'devops-lab' & base directory bind-mount
+    - Verifikasi default NAT network ('nat') & base directory bind-mount
 #>
 
 param (
-    [string]$DockerZipPath   = "C:\temp\docker.zip",
+    [string]$DockerZipPath    = "C:\temp\docker.zip",
     [string]$DockerInstallDir = "C:\Program Files\Docker",
-    [string]$NetworkName      = "devops-lab",
+    [string]$NetworkName      = "nat",
     [string]$BaseDir          = "",
     [switch]$AutoReboot
 )
@@ -449,7 +455,7 @@ Write-Host " DOCKER ENGINE CE v27+ (WINDOWS CONTAINERS) BERHASIL TERPASANG!  " -
 Write-Host "=================================================================" -ForegroundColor Green
 Write-Host " - Engine Version  : $(& "$dockerCli" version --format '{{.Server.Version}}')"
 Write-Host " - Data Root       : $dockerDataRoot"
-Write-Host " - NAT Network     : $NetworkName"
+Write-Host " - NAT Network     : $NetworkName (Default HNS NAT)"
 Write-Host " - Host Base Dir   : $BaseDir"
 Write-Host "=================================================================" -ForegroundColor Green
 ```
