@@ -9,6 +9,7 @@ tags = ["tomcat", "sre", "observability", "golang", "nodejs", "podman", "docker"
 series = ["Tomcat Autonomous Diagnostic Platform"]
 toc = true
 showSummary = true
+modules_subtitle = "Tiga perangkat lunak mandiri yang menopang observabilitas dan diagnosa otonom Tomcat."
 +++
 
 {{< lead >}}

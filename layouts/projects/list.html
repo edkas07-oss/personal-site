@@ -22,7 +22,103 @@
     </div>
   </header>
 
-  {{/* ── Featured Platform Showcase Card ────────────────────────────── */}}
+  {{/* ── Featured Platform Showcase 1: tcctl (Tomcat Super Module) ──── */}}
+  <div class="ew-project-showcase">
+    <div class="ew-project-showcase__header">
+      <div class="flex flex-wrap items-center gap-2 mb-3">
+        <span class="ew-tag ew-tag--cat">Flagship Platform</span>
+        <span class="ew-fs-badge ew-fs--blue">Platform Engineering &amp; GitOps</span>
+        <span class="ew-fs-badge ew-fs--purple">Multi-OS (Windows &amp; Linux)</span>
+        <span class="ew-fs-badge ew-fs--green">CIS Benchmark &amp; Zero-Git</span>
+      </div>
+      <h2 class="text-2xl sm:text-3xl font-bold text-white tracking-tight mb-2">
+        <a href="{{ "/projects/tcctl/" | relLangURL }}" class="hover:text-blue-400 transition-colors">
+          Apache Tomcat Enterprise Super Module (tcctl)
+        </a>
+      </h2>
+      <p class="text-blue-200 text-sm sm:text-base font-semibold mb-4">
+        Unified Operator CLI, Automated CIS Hardening, Zero-Git Pull Reconciler &amp; Staging Rollout Engine
+      </p>
+      <p class="text-slate-300 text-sm sm:text-base leading-relaxed w-full max-w-none mb-6">
+        Platform operator terpadu (Super Module) berbasis Go untuk tata kelola siklus hidup, security hardening CIS Benchmark, audit kerentanan Trivy, GitOps otonom (<strong>Zero-Git</strong> via Gitea REST API), dynamic JVM tuning, dan zero-downtime temporary staging rollout Apache Tomcat di Windows Server dan Linux.
+      </p>
+    </div>
+
+    {{/* ── 3 Core Modules Micro-Grid ─────────────────────────────────── */}}
+    <div class="ew-module-grid">
+      
+      {{/* Module 1: Staging Rollout */}}
+      <a href="{{ "/projects/tcctl/staging-rollout/" | relLangURL }}" class="ew-module-card group">
+        <div class="flex items-center justify-between mb-2">
+          <span class="text-lg">🚀</span>
+          <span class="text-xs font-bold text-blue-400 uppercase tracking-wider">Go Staging Rollout</span>
+        </div>
+        <h3 class="text-base font-bold text-white group-hover:text-blue-300 transition-colors mb-1">
+          tcctl deploy
+        </h3>
+        <p class="text-xs text-slate-300 leading-relaxed">
+          Zero-downtime temporary staging rollout (:9080 &rarr; :8080), dynamic bin/setenv JVM memory tuning, dan safe rollback atomik.
+        </p>
+        <span class="mt-3 inline-block text-xs font-semibold text-blue-400 group-hover:underline">
+          Pelajari Modul →
+        </span>
+      </a>
+
+      {{/* Module 2: Hardening & VA */}}
+      <a href="{{ "/projects/tcctl/hardening-audit/" | relLangURL }}" class="ew-module-card group">
+        <div class="flex items-center justify-between mb-2">
+          <span class="text-lg">🛡️</span>
+          <span class="text-xs font-bold text-emerald-400 uppercase tracking-wider">CIS Benchmark &amp; VA</span>
+        </div>
+        <h3 class="text-base font-bold text-white group-hover:text-emerald-300 transition-colors mb-1">
+          tcctl hardening &amp; va
+        </h3>
+        <p class="text-xs text-slate-300 leading-relaxed">
+          Audit statis 9 aturan CIS Benchmark untuk XML Tomcat, penegakan non-root ContainerUser, dan scanner Trivy sebagai CI quality gate.
+        </p>
+        <span class="mt-3 inline-block text-xs font-semibold text-emerald-400 group-hover:underline">
+          Pelajari Modul →
+        </span>
+      </a>
+
+      {{/* Module 3: GitOps Reconciler */}}
+      <a href="{{ "/projects/tcctl/gitops-reconciler/" | relLangURL }}" class="ew-module-card group">
+        <div class="flex items-center justify-between mb-2">
+          <span class="text-lg">🔄</span>
+          <span class="text-xs font-bold text-purple-400 uppercase tracking-wider">Zero-Git Reconciler</span>
+        </div>
+        <h3 class="text-base font-bold text-white group-hover:text-purple-300 transition-colors mb-1">
+          tcctl gitops
+        </h3>
+        <p class="text-xs text-slate-300 leading-relaxed">
+          Rekonsiliator GitOps otonom berbasis REST API Gitea (Zero-Git dependency), deteksi drift atomik, dan eksekusi background daemon.
+        </p>
+        <span class="mt-3 inline-block text-xs font-semibold text-purple-400 group-hover:underline">
+          Pelajari Modul →
+        </span>
+      </a>
+
+    </div>
+
+    {{/* ── Action Buttons ────────────────────────────────────────────── */}}
+    <div class="mt-6 pt-5 border-t border-blue-900/60 flex flex-wrap items-center justify-between gap-4">
+      <div class="flex flex-wrap gap-3">
+        <a href="{{ "/projects/tcctl/" | relLangURL }}" class="ew-btn ew-btn--primary">
+          📖 Buka Blueprint Super Module →
+        </a>
+        <a href="{{ "/packages/tcctl/" | relLangURL }}" class="ew-btn ew-btn--ghost text-slate-300 border-slate-600 hover:border-blue-400">
+          📦 Unduh Biner di Packages →
+        </a>
+      </div>
+      <div class="flex items-center gap-2 text-xs text-slate-400">
+        <span>Arsitektur Didukung:</span>
+        <span class="text-slate-300 font-mono">Windows (Docker)</span> ·
+        <span class="text-slate-300 font-mono">Linux (Podman)</span>
+      </div>
+    </div>
+  </div>
+
+  {{/* ── Featured Platform Showcase 2: Tomcat Monitoring ─────────────── */}}
   <div class="ew-project-showcase">
     <div class="ew-project-showcase__header">
       <div class="flex flex-wrap items-center gap-2 mb-3">
@@ -111,12 +207,12 @@
         <span>Arsitektur Didukung:</span>
         <span class="text-slate-300 font-mono">Linux (Podman)</span> ·
         <span class="text-slate-300 font-mono">Windows (Docker)</span>
+      </div>
     </div>
-
   </div>
 
-  {{/* ── Future Projects Grid (auto-rendered when new projects are added) ── */}}
-  {{ $otherProjects := where .Pages "File.TranslationBaseName" "ne" "tomcat-monitoring" }}
+  {{/* ── Future Projects Grid (auto-rendered when other projects are added) ── */}}
+  {{ $otherProjects := where .Pages "RelPermalink" "not in" (slice "/projects/tomcat-monitoring/" "/projects/tcctl/") }}
   {{ if gt (len $otherProjects) 0 }}
   <div class="mt-12 not-prose">
     <div class="mb-6">
@@ -153,7 +249,7 @@
 {{ else }}
 
 {{/* ══════════════════════════════════════════════════════════════════════
-     2. PROJECT BLUEPRINT PAGE (e.g. /projects/tomcat-monitoring/)
+     2. PROJECT BLUEPRINT PAGE (e.g. /projects/tcctl/ or /projects/tomcat-monitoring/)
      ══════════════════════════════════════════════════════════════════════ */}}
 <article class="max-w-full">
 
@@ -208,7 +304,11 @@
             Modul Inti Platform
           </h2>
           <p class="text-sm text-neutral-500 dark:text-neutral-400 mt-1">
-            Tiga perangkat lunak mandiri yang menopang observabilitas dan diagnosa otonom Tomcat.
+            {{ with .Params.modules_subtitle }}
+              {{ . }}
+            {{ else }}
+              Modul perangkat lunak mandiri yang menopang kapabilitas dan operasional platform.
+            {{ end }}
           </p>
         </div>
 

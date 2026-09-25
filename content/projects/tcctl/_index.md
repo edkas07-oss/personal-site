@@ -9,6 +9,7 @@ tags = ["tcctl", "tomcat", "windows-server", "linux", "gitops", "docker", "podma
 series = ["Apache Tomcat Enterprise Platform"]
 toc = true
 showSummary = true
+modules_subtitle = "Tiga subsistem inti yang mengotomasi siklus hidup, kepatuhan keamanan, dan rekonsiliasi GitOps Tomcat enterprise."
 aliases = ["/projects/tomcat-super-module/"]
 +++
 
