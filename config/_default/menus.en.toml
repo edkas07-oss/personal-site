@@ -9,6 +9,11 @@
   weight = 10
 
 [[main]]
+  name = "How-To"
+  pageRef = "how-to"
+  weight = 15
+
+[[main]]
   name = "Contact"
   pageRef = "contact"
   weight = 20
@@ -28,6 +33,11 @@
   name = "Journals"
   pageRef = "journals"
   weight = 10
+
+[[footer]]
+  name = "How-To"
+  pageRef = "how-to"
+  weight = 15
 
 [[footer]]
   name = "Contact"
