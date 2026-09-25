@@ -14,9 +14,14 @@
   weight = 15
 
 [[main]]
+  name = "Packages"
+  pageRef = "packages"
+  weight = 18
+
+[[main]]
   name = "Contact"
   pageRef = "contact"
-  weight = 20
+  weight = 25
 
 [[main]]
   identifier = "github"
@@ -40,7 +45,12 @@
   weight = 15
 
 [[footer]]
+  name = "Packages"
+  pageRef = "packages"
+  weight = 18
+
+[[footer]]
   name = "Contact"
   pageRef = "contact"
-  weight = 20
+  weight = 25
 
