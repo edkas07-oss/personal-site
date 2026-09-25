@@ -58,7 +58,7 @@ Sebelum memulai, pastikan host target telah memenuhi prasyarat berikut:
 | **Container Engine** | [Docker Engine Community Edition v27.0+]({{< ref "how-to/install-docker-engine-windows-containers" >}}) (mode Windows Containers aktif) |
 | **Operator CLI** | Biner `tcctl` terpasang di `C:\Program Files\tcctl\` dan terdaftar pada `$env:Path` |
 | **Hak Akses Shell** | PowerShell 5.1 atau PowerShell 7+ dijalankan sebagai **Administrator** |
-| **Citra Kontainer** | Citra berbasis Windows NanoServer (misal `tomcat:9.0-jdk11` lokal atau dari private registry) |
+| **Container Image** | Image berbasis Windows NanoServer (misal `tomcat:9.0-jdk11` lokal atau dari private registry) |
 
 ---
 
@@ -74,7 +74,7 @@ docker version --format '{{.Server.Os}}'
 # 2. Pastikan tcctl dapat dieksekusi dari direktori mana pun
 tcctl version
 
-# 3. Periksa ketersediaan citra Tomcat NanoServer di repository lokal
+# 3. Periksa ketersediaan image Tomcat NanoServer di repository lokal
 docker images "tomcat*"
 ```
 
@@ -88,8 +88,8 @@ Jalankan sub-command deployment dengan menentukan nama instance serta mapping po
 tcctl deploy run --name tomcat-lab --port 8080 --https-port 8443
 ```
 
-### Menu Pemilihan Citra Otomatis
-`tcctl` secara cerdas akan memindai citra Tomcat/Java yang tersedia di host dan menampilkan menu pilihan interaktif:
+### Menu Pemilihan Image Otomatis
+`tcctl` secara cerdas akan memindai image Tomcat/Java yang tersedia di host dan menampilkan menu pilihan interaktif:
 
 ```text
 ℹ Discovered available Tomcat / Java images in local container repository:
@@ -325,7 +325,7 @@ $tcpClient.Close()
 
 ## 🚀 Langkah 6: Zero-Downtime Temporary Staging Rollout (TC-ADR-0006)
 
-Saat memperbarui versi Java atau citra Tomcat di lingkungan produksi, Anda tidak perlu menghentikan kontainer yang sedang melayani pengguna. Gunakan fitur rollout *canary-promotion* dari `tcctl`:
+Saat memperbarui versi Java atau image Tomcat di lingkungan produksi, Anda tidak perlu menghentikan kontainer yang sedang melayani pengguna. Gunakan fitur rollout *canary-promotion* dari `tcctl`:
 
 ```powershell
 tcctl deploy rollout --name tomcat-lab --image tomcat:9.0-jdk21 --port 8080 --staging-port 9080
@@ -346,10 +346,10 @@ Untuk membersihkan seluruh resource di lingkungan pengujian/lab hingga kembali k
 ```powershell
 # 1. Hentikan dan hapus kontainer
 docker rm -f tomcat-lab
-
+ 
 # 2. Hapus direktori persistensi host bind-mount
 Remove-Item -Recurse -Force "C:\tomcats\tomcat-lab"
-
+ 
 # 3. (Opsional) Redeploy instan dalam satu baris perintah
 tcctl deploy run --name tomcat-lab --port 8080 --https-port 8443 --image "tomcat:9.0-jdk11"
 ```
@@ -358,7 +358,7 @@ tcctl deploy run --name tomcat-lab --port 8080 --https-port 8443 --image "tomcat
 
 ## 🎯 Kesimpulan
 
-Dengan memanfaatkan kakas operator terpadu **`tcctl`**, orkestrasi kontainer Apache Tomcat pada Windows Server tidak lagi memerlukan skrip PowerShell yang panjang dan rentan kesalahan. Standar keamanan enterprise—mulai dari CIS Benchmark, proteksi immutability, enkripsi HTTPS, hingga isolasi perizinan non-root—ditegakkan secara otomatis sejak detik pertama deployment.
+Dengan memanfaatkan CLI tool **`tcctl`**, orkestrasi kontainer Apache Tomcat pada Windows Server tidak lagi memerlukan skrip PowerShell yang panjang dan rentan kesalahan. Standar keamanan enterprise—mulai dari CIS Benchmark, proteksi immutability, enkripsi HTTPS, hingga isolasi perizinan non-root—ditegakkan secara otomatis sejak detik pertama deployment.
 
 ### 📚 Referensi Terkait
 - [Detailed Installation & Build Guide (INSTALL.md)](https://github.com/edkas07-oss/tcctl/blob/main/INSTALL.md)
