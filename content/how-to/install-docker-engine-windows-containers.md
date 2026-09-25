@@ -2,37 +2,37 @@
 title = "Panduan Praktis: Instalasi Docker Engine Community Edition (CE) v27+ di Windows Server (Mode Windows Containers)"
 date = "2026-09-25T15:30:00+07:00"
 draft = false
-summary = "Panduan operasional terverifikasi berbasis standar Day-1 Bootstrapping untuk menginstal dan mengonfigurasi Docker Engine Community Edition (CE) v27+ native Windows Containers secara headless. Mengupas aktivasi filter driver kernel, penanganan offline archive di lingkungan terisolasi, pemisahan storage data-root D:, named pipe polling, hingga provisi NAT network."
+summary = "Panduan operasional terverifikasi untuk menginstal dan mengonfigurasi Docker Engine Community Edition (CE) v27+ native Windows Containers secara headless sebagai Windows Service. Mengulas aktivasi filter driver kernel windowsfilter, penanganan offline archive di lingkungan lab terisolasi, pemisahan storage data-root D:, named pipe readiness polling, hingga smoke test citra NanoServer."
 author = "Eddy Wiyatno"
 categories = ["How-To", "Container", "Infrastructure"]
-tags = ["docker", "docker-ce", "windows-containers", "windows-server", "powershell", "devops", "sre", "tcctl", "hyper-v"]
+tags = ["docker", "docker-ce", "windows-containers", "windows-server", "powershell", "devops", "sre", "hyper-v", "sysadmin"]
 series = ["Windows Server Container Platform"]
 toc = true
 showSummary = true
 +++
 
 {{< lead >}}
-**Standar Operasional Day-1 Bootstrapping untuk Container Engine Native di Windows Server Enterprise**
+**Penyediaan Headless Docker Engine CE v27+ Skala Enterprise untuk Beban Kerja Windows Containers Native**
 
-Menjalankan Docker di lingkungan Windows Server produksi memiliki karakteristik yang sangat berbeda dibandingkan workstation. Panduan ini disusun berdasarkan implementasi nyata skrip operasional **Day-1 Host Bootstrapper** (`day1_bootstrap.ps1`), memverifikasi instalasi **Docker Engine Community Edition (CE) v27+** tanpa antarmuka grafis (*headless daemon*), siap dioperasikan pada server terisolasi (*air-gapped/lab*), dan terintegrasi langsung dengan orkestrator enterprise.
+Pada infrastruktur Windows Server produksi, menjalankan Docker Desktop bukanlah pilihan yang tepat karena beban antarmuka grafis (GUI), ketergantungan sesi interaktif, dan lisensi. Pendekatan standar industri adalah memasang **Docker Engine Community Edition (CE) v27+ mandiri (*headless daemon*)** yang didaftarkan langsung sebagai *Windows Service* native untuk mengorkestrasi beban kerja **Windows Containers**.
 {{< /lead >}}
 
 ---
 
-## 📌 Mengapa Mengikuti Pola Day-1 Bootstrapper?
+## 📌 Mengapa Docker Engine CE Mandiri (Bukan Docker Desktop)?
 
-Banyak panduan umum di internet mengasumsikan instalasi Docker pada Windows selalu memiliki akses internet langsung dan menggunakan direktori default drive `C:`. Dalam implementasi enterprise nyata di perbankan atau data center, terdapat sejumlah tantangan kritis:
+Bagi insinyur sistem dan administrator infrastruktur Windows, terdapat perbedaan fundamental antara kebutuhan workstation dan server produksi:
 
-1. **Jaringan Terisolasi (Offline / Restricted Network):** Server produksi sering kali tidak memiliki akses langsung ke `download.docker.com`. Skrip instalasi harus mendukung paradigma *offline-first* dengan mendeteksi arsip lokal di `C:\temp\docker.zip` sebelum mencoba *download fallback*.
-2. **Kewajiban Reboot untuk Driver Kernel (`windowsfilter.sys`):** Mengaktifkan fitur Windows `Containers` mewajibkan *reboot* sistem agar filter driver kernel terpasang. Menjalankan Docker daemon sebelum *reboot* dipastikan berujung pada kegagalan runtime.
-3. **Pemisahan Partisi Disk Data (`data-root`):** Menyimpan image dan container layer di drive sistem `C:\ProgramData\docker` berisiko menyebabkan *disk exhaustion* yang melumpuhkan OS. Standar Day-1 mendeteksi drive sekunder `D:\` secara otomatis dan mengalokasikan `data-root` ke `D:\docker`.
-4. **Named Pipe Latency & Readiness Polling:** Setelah layanan *Windows Service* `docker` dinyalakan, named pipe `\\.\pipe\docker_engine` membutuhkan waktu beberapa detik untuk inisialisasi socket IPC. Diperlukan mekanisme *readiness polling loop* untuk memastikan daemon benar-benar siap menerima perintah.
+1. **Operasional Headless & Unattended:** Server produksi berjalan tanpa login pengguna interaktif. Docker Engine harus beroperasi murni sebagai latar belakang (*Windows Service*) yang otomatis aktif saat host *booting*.
+2. **Zero GUI Overhead & Efisiensi Resource:** Docker Desktop membawa dependensi Electron, WSL2 backend, dan dashboard visual yang memboroskan memori server. Biner statis Docker CE hanya membutuhkan memori saat beban kerja kontainer berjalan.
+3. **Native Named Pipe API:** Komunikasi CLI terhubung langsung ke Windows Named Pipe lokal (`\\.\pipe\docker_engine`) dengan performa socket IPC deterministik dan kontrol akses bawaan Windows ACL.
+4. **Catatan Deprecasi `DockerMsftProvider`:** Modul lama PowerShell `DockerMsftProvider` yang sebelumnya disediakan Microsoft untuk Windows Server kini telah pensiun (*deprecated*). Instalasi biner statis resmi dari upstream Docker merupakan metode kanonikal dan paling stabil untuk mendapatkan versi modern (v27+).
 
 ---
 
-## 🏛️ Alur Kerja Day-1 Bootstrapping
+## 🏛️ Esensi Alur Kerja Instalasi Produksi
 
-Diagram berikut merefleksikan alur eksekusi deterministik yang telah teruji pada lingkungan Windows Server 2019, 2022, dan 2025:
+Berdasarkan praktik operasional server produksi di lingkungan terisolasi (*restricted network/air-gap*), alur kerja instalasi Docker Engine Windows Containers terbagi menjadi tahapan deterministik berikut:
 
 {{< mermaid >}}
 flowchart TD
@@ -42,20 +42,20 @@ flowchart TD
     D -->|Setelah Reboot| A
     C -->|Sudah Aktif| E["Tahap 2: Resolusi Biner Docker CE v27+"]
     E --> F{"Arsip Lokal C:/temp/docker.zip Tersedia?"}
-    F -->|Ya| G["Gunakan Arsip Offline"]
+    F -->|Ya| G["Gunakan Arsip Offline (Air-Gap)"]
     F -->|Tidak| H["Fallback: Unduh dari download.docker.com"]
     G --> I["Tahap 3: Ekstraksi ke C:/Program Files/Docker & Daftarkan PATH"]
     H --> I
     I --> J["Tahap 4: Injeksi daemon.json (Deteksi D:/docker vs C:/)"]
     J --> K["Tahap 5: Registrasi Windows Service & Start-Service docker"]
     K --> L["Tahap 6: Readiness Polling Named Pipe (Loop 20 Detik)"]
-    L --> M["Tahap 7: Verifikasi Default NAT Network & Base Dir"]
-    M --> N["Selesai: Host Siap untuk Orkestrasi Beban Kerja tcctl"]
+    L --> M["Tahap 7: Verifikasi Kesiapan Default NAT Network"]
+    M --> N["Tahap 8: Smoke Test Kontainer Windows Native (NanoServer)"]
 {{< /mermaid >}}
 
 ---
 
-## 🛠️ Prasyarat Lingkungan
+## 🛠️ Prasyarat Sistem Operasi & Hardware
 
 | Parameter | Spesifikasi / Ketentuan |
 | :--- | :--- |
@@ -69,13 +69,13 @@ flowchart TD
 
 ## 🚀 Prosedur Langkah Demi Langkah
 
-Berikut adalah urutan teknis terverifikasi yang diambil langsung dari arsitektur Day-1.
+Seluruh perintah di bawah ini dijalankan di dalam konsol **PowerShell sebagai Administrator**.
 
 ---
 
 ### Langkah 1: Aktivasi Fitur Windows `Containers` & Evaluasi Reboot
 
-Kernel Windows membutuhkan modul isolasi kontainer dan driver filter sistem berkas (`windowsfilter`).
+Kernel Windows membutuhkan subsistem isolasi kontainer dan driver filter sistem berkas (`windowsfilter`).
 
 Jalankan blok skrip berikut:
 
@@ -83,7 +83,7 @@ Jalankan blok skrip berikut:
 # 1. Validasi hak akses Administrator
 $isAdmin = ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
 if (-not $isAdmin) {
-    Write-Error "ERROR: Skrip ini wajib dijalankan di konsol PowerShell sebagai Administrator!"
+    Write-Error "ERROR: Sesi PowerShell wajib dijalankan sebagai Administrator!"
     exit 1
 }
 
@@ -112,15 +112,14 @@ if ($containerFeature -and -not $containerFeature.Installed) {
 
 ### Langkah 2: Penyediaan Biner Docker CE v27+ (Offline-First)
 
-Arsip biner resmi yang digunakan adalah biner statis Windows 64-bit dari Docker upstream (contoh: `docker-27.5.1.zip`). 
+Arsip biner resmi yang digunakan adalah biner statis Windows 64-bit dari repositori resmi Docker upstream (contoh: `docker-27.5.1.zip`).
 
-Skrip menerapkan logika cerdas:
-1. Memeriksa keberadaan berkas di `C:\temp\docker.zip` atau `C:\temp\docker-27.5.1.zip`.
-2. Jika server berada di lab tertutup tanpa internet, operator dapat melakukan *push* berkas dari mesin Linux kerja via SCP:
-   ```bash
-   scp -o IdentitiesOnly=yes docker-27.5.1.zip Administrator@<host_windows>:C:\temp\docker.zip
-   ```
-3. Jika berkas tidak ditemukan di `C:\temp`, barulah skrip mencoba mengunduh langsung dari upstream resmi:
+Di lingkungan enterprise yang terisolasi (*air-gapped* atau lab perbankan tanpa akses internet langsung), operator dapat meletakkan berkas arsip di `C:\temp\docker.zip` (misal via SCP dari mesin workstation):
+```bash
+scp -o IdentitiesOnly=yes docker-27.5.1.zip Administrator@<host_windows>:C:\temp\docker.zip
+```
+
+Skrip instalasi secara cerdas memeriksa arsip lokal terlebih dahulu sebelum mencoba mengunduh ke internet:
 
 ```powershell
 $DockerInstallDir = "C:\Program Files\Docker"
@@ -180,7 +179,9 @@ if (-not (Test-Path $dockerdPath) -or -not (Test-Path $dockerCliPath)) {
 
 ### Langkah 3: Konfigurasi `daemon.json` & Pemisahan Disk Data (`D:\docker`)
 
-Di lingkungan enterprise, pemisahan partisi data sangat dianjurkan. Skrip memeriksa apakah drive `D:\` tersedia. Jika ada, Docker diarahkan menggunakan `D:\docker` sebagai `data-root`.
+Pada server produksi, pemisahan partisi data sangat krusial. Menyimpan citra kontainer dan layer *scratch space* di drive sistem `C:\ProgramData\docker` berisiko menyebabkan *disk exhaustion* yang dapat melumpuhkan sistem operasi Windows.
+
+Skrip memeriksa apakah drive `D:\` tersedia. Jika ada, Docker otomatis diarahkan menggunakan `D:\docker` sebagai `data-root`:
 
 ```powershell
 $dataDrive       = if (Test-Path "D:\") { "D:" } else { "C:" }
@@ -193,7 +194,7 @@ if (-not (Test-Path $dockerConfigDir)) {
 
 $daemonJsonPath = Join-Path $dockerConfigDir "daemon.json"
 
-# Buat folder data-root jika di drive D:
+# Buat folder data-root jika menggunakan drive sekunder D:
 if ($dataDrive -eq "D:" -and -not (Test-Path $dockerDataRoot)) {
     New-Item -ItemType Directory -Force -Path $dockerDataRoot | Out-Null
 }
@@ -213,11 +214,16 @@ $daemonConfig | ConvertTo-Json -Depth 5 | Set-Content -Path $daemonJsonPath -Enc
 Write-Host "    [OK] daemon.json dikonfigurasi dengan data-root: $dockerDataRoot" -ForegroundColor Green
 ```
 
+#### Rincian Parameter Kritis:
+* **`log-driver` & `log-opts`:** Membatasi ukuran satu berkas log maksimal `50 MB` dan mempertahankan maksimal `5` rotasi berkas per kontainer.
+* **`storage-opts: ["size=120GB"]`:** Menentukan batas kuota layer disk virtual (*scratch space*) untuk setiap kontainer Windows (default Windows Containers biasanya 20 GB).
+* **`hosts: ["npipe:////./pipe/docker_engine"]`:** Mengamankan daemon agar hanya melayani permintaan lokal via Windows Named Pipe dengan kontrol ACL Administrator bawaan OS.
+
 ---
 
 ### Langkah 4: Registrasi Windows Service & Named Pipe Polling Loop
 
-Kini daftarkan daemon sebagai *Windows Service* resmi, atur agar berjalan otomatis saat boot, lalu lakukan *polling* hingga socket Named Pipe siap:
+Kini daftarkan `dockerd.exe` sebagai *Windows Service* resmi, atur agar berjalan otomatis saat boot, lalu lakukan *polling* hingga socket Named Pipe siap:
 
 ```powershell
 # 1. Daftarkan service ke Windows Service Control Manager
@@ -252,9 +258,9 @@ if ($ready) {
 
 ---
 
-### Langkah 5: Registrasi System PATH & Dukungan Sesi Remote (SSH)
+### Langkah 5: Registrasi System PATH & Dukungan Sesi Remote (SSH/WinRM)
 
-Agar biner `docker.exe` dapat diakses dari PowerShell baru atau sesi non-interaktif SSH/WinRM:
+Agar biner `docker.exe` dapat diakses dari konsol PowerShell baru ataupun sesi non-interaktif SSH/WinRM:
 
 ```powershell
 # 1. Daftarkan ke Machine Scope PATH
@@ -272,89 +278,99 @@ Write-Host "    [OK] Docker berhasil didaftarkan ke System PATH." -ForegroundCol
 
 ---
 
-### Langkah 6: Verifikasi Default NAT Network & Persiapan Base Directory
+### Langkah 6: Verifikasi Kesiapan Default NAT Network (Host Network Service)
 
-> [!NOTE]
-> **Standardisasi Jaringan Kontainer:**  
-> Arsitektur `tcctl` dan Docker di Windows Server mengandalkan jaringan bawaan default **`nat`** (Host Network Service). Penggunaan *custom network* lawas (seperti `devops-lab`) sudah di-*deprecate* karena dapat memicu konflik alokasi pool IPv4 dan kompleksitas routing HNS yang tidak perlu.
-
-Secara default, Docker di Windows Server otomatis membuat jaringan NAT bawaan bernama `nat`. Kita cukup memverifikasi ketersediaannya dan menyiapkan direktori host bind-mount (`$dataDrive\tomcats`):
+Pada Windows Server, Docker secara otomatis menyediakan jaringan NAT default bernama **`nat`** yang dikelola oleh *Host Network Service* (HNS). Seluruh kontainer Windows standar akan terhubung ke jaringan ini secara otomatis:
 
 ```powershell
-$NetworkName = "nat"
-$BaseDir     = "$dataDrive\tomcats"
-
-# 1. Pastikan default NAT Network tersedia
-$netInspect = & "$dockerCliPath" network ls --filter "name=^$NetworkName$" --format "{{.Name}}" 2>$null
+# Pastikan default NAT Network tersedia
+$netInspect = & "$dockerCliPath" network ls --filter "name=^nat$" --format "{{.Name}}" 2>$null
 if (-not $netInspect) {
-    Write-Host "--> Jaringan default '$NetworkName' belum terdeteksi. Membuat network nat..." -ForegroundColor Yellow
-    & "$dockerCliPath" network create -d nat $NetworkName | Out-Null
-    Write-Host "    [OK] Network '$NetworkName' berhasil dibuat." -ForegroundColor Green
+    Write-Host "--> Jaringan default 'nat' belum terdeteksi. Membuat network nat..." -ForegroundColor Yellow
+    & "$dockerCliPath" network create -d nat nat | Out-Null
+    Write-Host "    [OK] Network 'nat' berhasil dibuat." -ForegroundColor Green
 } else {
-    Write-Host "    [OK] Network '$NetworkName' (Default HNS NAT) sudah aktif." -ForegroundColor Green
-}
-
-# 2. Buat Base Directory untuk bind-mount kontainer (D:\tomcats atau C:\tomcats)
-if (-not (Test-Path $BaseDir)) {
-    New-Item -ItemType Directory -Force -Path $BaseDir | Out-Null
-    Write-Host "    [OK] Tomcat Base Directory dibuat di $BaseDir." -ForegroundColor Green
-} else {
-    Write-Host "    [OK] Tomcat Base Directory sudah siap di $BaseDir." -ForegroundColor Green
+    Write-Host "    [OK] Network 'nat' (Default HNS NAT) sudah aktif." -ForegroundColor Green
 }
 ```
 
 ---
 
-### Langkah 7: Verifikasi Runtime & Smoke Test Citra NanoServer
+### Langkah 7: Verifikasi Runtime & Smoke Test Citra Windows Native
 
 Lakukan pengujian akhir untuk memastikan seluruh subsistem bekerja:
 
+#### 1. Uji Versi & Engine Platform
 ```powershell
-# 1. Uji Versi Docker
 docker version
+```
+*Output yang diharapkan:*
+```text
+Client:
+ Version:           27.5.1
+ API version:       1.47
+ Go version:        go1.23.1
+ OS/Arch:           windows/amd64
 
-# 2. Uji Status Engine & Driver
+Server: Docker Engine - Community
+ Engine:
+  Version:          27.5.1
+  API version:      1.47 (minimum version 1.24)
+  Go version:       go1.23.1
+  OS/Arch:          windows/amd64
+```
+
+#### 2. Uji Status Informasi Engine & Storage Driver
+```powershell
 docker info --format 'OS: {{.OperatingSystem}} | Driver: {{.Driver}} | Root: {{.DockerRootDir}}'
+```
+*Output harus menyatakan:* `Driver: windowsfilter` dengan root storage yang sesuai (`D:\docker` atau `C:\ProgramData\docker`).
 
-# 3. Eksekusi Smoke Test Container Native (Windows Server 2022)
+#### 3. Eksekusi Smoke Test Citra NanoServer Native
+Tarik dan jalankan citra resmi Microsoft NanoServer yang sesuai dengan versi Windows Server Anda:
+
+```powershell
+# Contoh smoke test untuk Windows Server 2022 (LTSC):
 docker run --rm mcr.microsoft.com/windows/nanoserver:ltsc2022 cmd.exe /c "echo Verifikasi Sukses: Docker Engine CE v27+ Beroperasi Sempurna di Windows Containers!"
 ```
 
+Jika teks konfirmasi tercetak ke terminal, lingkungan Windows Containers Anda telah berfungsi secara sempurna dan siap menerima beban kerja kontainer!
+
 ---
 
-## 📜 Skrip Otomasi Penuh (`day1_bootstrap.ps1`)
+## 📜 All-in-One Automation Script (`install-docker-ce.ps1`)
 
-Berikut adalah blok skrip otomatisasi terpadu yang menggabungkan seluruh tahapan di atas ke dalam satu berkas siap pakai. Simpan sebagai `day1_bootstrap.ps1`:
+Berikut adalah skrip otomatisasi mandiri murni (*standalone installer*) yang merangkum seluruh tahapan instalasi Docker Engine CE di atas ke dalam satu berkas PowerShell siap pakai:
 
 ```powershell
 <#
 .SYNOPSIS
-    Day-1 Windows Host Bootstrapper for Docker Engine CE v27+ (Windows Containers).
+    Standalone Automated Installer for Docker Engine CE v27+ on Windows Server.
 .DESCRIPTION
-    Skrip operasional produksi untuk mengotomatiskan:
+    Mengotomatiskan penyediaan Docker Engine Community Edition mode Windows Containers:
     - Validasi hak administrator & fitur Windows Containers
     - Instalasi biner Docker CE v27+ (Offline C:\temp\docker.zip atau online fallback)
     - Konfigurasi data-root otomatis pada drive D: (jika tersedia)
     - Registrasi Windows Service & polling kesiapan named pipe
-    - Verifikasi default NAT network ('nat') & base directory bind-mount
+    - Verifikasi default NAT network ('nat')
 #>
 
 param (
     [string]$DockerZipPath    = "C:\temp\docker.zip",
     [string]$DockerInstallDir = "C:\Program Files\Docker",
-    [string]$NetworkName      = "nat",
-    [string]$BaseDir          = "",
+    [string]$DataRoot         = "",
     [switch]$AutoReboot
 )
 
 $ErrorActionPreference = "Stop"
 
-# Deteksi Drive Data
-$dataDrive = if (Test-Path "D:\") { "D:" } else { "C:" }
-if (-not $BaseDir) { $BaseDir = "$dataDrive\tomcats" }
-$dockerDataRoot = if ($dataDrive -eq "D:") { "D:\docker" } else { "C:\ProgramData\docker" }
+# Deteksi Drive Data otomatis jika tidak dispesifikasikan
+if (-not $DataRoot) {
+    $dataDrive = if (Test-Path "D:\") { "D:" } else { "C:" }
+    $DataRoot  = if ($dataDrive -eq "D:") { "D:\docker" } else { "C:\ProgramData\docker" }
+}
 
-Write-Host "=== Memulai Day-1 Bootstrapping: Docker Engine CE v27+ ===" -ForegroundColor Cyan
+Write-Host "=== Memulai Instalasi Docker Engine CE v27+ (Windows Containers) ===" -ForegroundColor Cyan
 
 # 1. Validasi Hak Administrator
 $isAdmin = ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
@@ -406,11 +422,11 @@ if (-not (Test-Path $dockerdPath) -or -not (Test-Path $dockerCli)) {
 Write-Host "--> [3/5] Mengonfigurasi daemon.json..." -ForegroundColor Yellow
 $cfgDir = "C:\ProgramData\docker\config"
 New-Item -ItemType Directory -Force -Path $cfgDir | Out-Null
-if ($dataDrive -eq "D:" -and -not (Test-Path $dockerDataRoot)) {
-    New-Item -ItemType Directory -Force -Path $dockerDataRoot | Out-Null
+if (-not (Test-Path $DataRoot)) {
+    New-Item -ItemType Directory -Force -Path $DataRoot | Out-Null
 }
 @{
-    "data-root"    = $dockerDataRoot
+    "data-root"    = $DataRoot
     "hosts"        = @("npipe:////./pipe/docker_engine")
     "storage-opts" = @("size=120GB")
     "log-driver"   = "json-file"
@@ -442,30 +458,46 @@ if ($mPath -notlike "*$DockerInstallDir*") {
 }
 Copy-Item "$DockerInstallDir\*.exe" "C:\Windows\System32\" -Force -ErrorAction SilentlyContinue
 
-# 6. Docker Network & Base Directory
-Write-Host "--> [5/5] Menyiapkan Jaringan NAT & Direktori Host..." -ForegroundColor Yellow
-if (-not (& "$dockerCli" network ls --filter "name=^$NetworkName$" --format "{{.Name}}" 2>$null)) {
-    & "$dockerCli" network create -d nat $NetworkName | Out-Null
+# 6. Verifikasi Default NAT Network
+Write-Host "--> [5/5] Memverifikasi Jaringan Default NAT..." -ForegroundColor Yellow
+if (-not (& "$dockerCli" network ls --filter "name=^nat$" --format "{{.Name}}" 2>$null)) {
+    & "$dockerCli" network create -d nat nat | Out-Null
 }
-New-Item -ItemType Directory -Force -Path $BaseDir | Out-Null
 
 Write-Host ""
 Write-Host "=================================================================" -ForegroundColor Green
 Write-Host " DOCKER ENGINE CE v27+ (WINDOWS CONTAINERS) BERHASIL TERPASANG!  " -ForegroundColor Green
 Write-Host "=================================================================" -ForegroundColor Green
 Write-Host " - Engine Version  : $(& "$dockerCli" version --format '{{.Server.Version}}')"
-Write-Host " - Data Root       : $dockerDataRoot"
-Write-Host " - NAT Network     : $NetworkName (Default HNS NAT)"
-Write-Host " - Host Base Dir   : $BaseDir"
+Write-Host " - Data Root       : $DataRoot"
+Write-Host " - Network Default : nat (HNS)"
 Write-Host "=================================================================" -ForegroundColor Green
 ```
 
 ---
 
-## 📚 Langkah Selanjutnya (Menuju Day-2 Operations)
+## 🛠️ Tips Operasional & Troubleshooting Umum
 
-Host Windows Server Anda kini telah 100% siap untuk menjalankan beban kerja kontainer enterprise. Lanjutkan ke tahap operasional orkestrasi:
+### 1. Version Mismatch: Kompatibilitas Versi Kernel Host & Kontainer
+Windows Containers menerapkan arsitektur *Shared-Kernel*. Citra kontainer harus memiliki build yang selaras dengan host:
 
-* [Panduan Praktis: Deploy Kontainer Apache Tomcat Hardened di Windows Server Menggunakan tcctl]({{< ref "how-to/deploy-tomcat-container-windows-server-tcctl" >}})
-* [Unduh Biner Resmi tcctl di Menu Packages]({{< ref "packages/tcctl" >}})
-* [Arsitektur Blueprint: Tomcat Monitoring & Autonomous Diagnostic Platform]({{< ref "projects/tomcat-monitoring" >}})
+| Versi Windows Server Host | Build Host | Citra NanoServer/ServerCore yang Didukung (Process Isolation) |
+| :--- | :--- | :--- |
+| **Windows Server 2022** | `20348` | `ltsc2022` (Process Isolation bawaan) |
+| **Windows Server 2019** | `17763` | `1809` / `ltsc2019` (Process Isolation bawaan) |
+| **Windows Server 2025** | `26100` | `ltsc2025` (Process Isolation bawaan) |
+
+> [!WARNING]
+> Menjalankan citra kontainer yang berbeda build dengan OS host (misal: citra `ltsc2019` di atas host Server 2022) mewajibkan penambahan flag `--isolation=hyperv`. Jika dijalankan dengan isolasi proses biasa, kontainer akan gagal dimulai dengan pesan error: *The operating system of the container image is not compatible with the host operating system*.
+
+### 2. Memulihkan Default NAT Network yang Hilang
+Jika perintah `docker run` menghasilkan error seperti:
+```text
+Error response from daemon: could not find an available, non-overlapping IPv4 address pool
+```
+Artinya Host Network Service (HNS) gagal mengalokasikan subnet NAT default. Anda dapat membersihkan dan membuatnya kembali:
+
+```powershell
+# Buat ulang network nat default secara eksplisit:
+docker network create -d nat --subnet 172.28.0.0/16 --gateway 172.28.0.1 nat
+```
