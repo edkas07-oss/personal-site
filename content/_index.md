@@ -15,15 +15,21 @@ Jurnal rekayasa, studi kasus sistem berskala enterprise, dan dokumentasi arsitek
 ### 🚀 Platform Rekayasa Unggulan
 
 > [!NOTE]
-> **[Tomcat Monitoring & Autonomous Diagnostic Platform]({{< ref "projects/tomcat-monitoring" >}})**
+> **[Apache Tomcat Enterprise Super Module (tcctl)]({{< relref "projects/tcctl" >}})**
+> Operator CLI mandiri (*Super Module*) berbasis Go untuk standarisasi tata kelola 7 pilar: pre-flight audit CIS Benchmark 9 aturan, quality gate Trivy vulnerability scanner, rollout zero-downtime berbasis temporary staging container, proteksi host bind-mount (`conf:ro`), dynamic JVM tuning (`bin/setenv`), dan pure pull-based GitOps otonom di Windows Server dan Linux.
+> 
+> [👉 **Telusuri Blueprint Arsitektur Super Module tcctl →**]({{< relref "projects/tcctl" >}})
+
+> [!NOTE]
+> **[Tomcat Monitoring & Autonomous Diagnostic Platform]({{< relref "projects/tomcat-monitoring" >}})**
 > Platform observabilitas end-to-end dan penentu keputusan insiden otonom untuk runtime Apache Tomcat di lingkungan multi-OS (Linux Podman rootless & Windows Server Docker). 
 > 
 > Didukung oleh tiga modul terpadu:
-> * **[`tmctl`]({{< ref "projects/tomcat-monitoring/tmctl" >}})** — Cross-Platform Operator CLI berbasis Go untuk orkestrasi via Container Engine Socket API.
-> * **[`tm-agent`]({{< ref "projects/tomcat-monitoring/tm-agent" >}})** — High-Throughput Event Collector Daemon berbasis Go dengan *atomic spool evidence*.
-> * **[`diagnostic service`]({{< ref "projects/tomcat-monitoring/diagnostic-service" >}})** — Mesin triage insiden deterministik berbasis Node.js 24 LTS dengan laporan 7-seksi kanonikal.
+> * **[`tmctl`]({{< relref "projects/tomcat-monitoring/tmctl" >}})** — Cross-Platform Operator CLI berbasis Go untuk orkestrasi via Container Engine Socket API.
+> * **[`tm-agent`]({{< relref "projects/tomcat-monitoring/tm-agent" >}})** — High-Throughput Event Collector Daemon berbasis Go dengan *atomic spool evidence*.
+> * **[`diagnostic service`]({{< relref "projects/tomcat-monitoring/diagnostic-service" >}})** — Mesin triage insiden deterministik berbasis Node.js 24 LTS dengan laporan 7-seksi kanonikal.
 > 
-> [👉 **Telusuri Blueprint Arsitektur Platform →**]({{< ref "projects/tomcat-monitoring" >}})
+> [👉 **Telusuri Blueprint Arsitektur Platform →**]({{< relref "projects/tomcat-monitoring" >}})
 
 ---
 
