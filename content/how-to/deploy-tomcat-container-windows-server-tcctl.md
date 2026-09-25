@@ -55,7 +55,7 @@ Sebelum memulai, pastikan host target telah memenuhi prasyarat berikut:
 | Komponen | Spesifikasi / Kebutuhan |
 | :--- | :--- |
 | **Sistem Operasi** | Windows Server 2022 Datacenter (LTSC) atau Windows Server 2019 (Build 17763+) |
-| **Container Engine** | Docker Engine Community Edition v27.0+ (mode Windows Containers aktif) |
+| **Container Engine** | [Docker Engine Community Edition v27.0+]({{< ref "how-to/install-docker-engine-windows-containers" >}}) (mode Windows Containers aktif) |
 | **Operator CLI** | Biner `tcctl` terpasang di `C:\Program Files\tcctl\` dan terdaftar pada `$env:Path` |
 | **Hak Akses Shell** | PowerShell 5.1 atau PowerShell 7+ dijalankan sebagai **Administrator** |
 | **Citra Kontainer** | Citra berbasis Windows NanoServer (misal `tomcat:9.0-jdk11` lokal atau dari private registry) |
