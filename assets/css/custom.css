@@ -1216,4 +1216,320 @@ section.prose.flex        { max-width: none !important; }
   border-color: rgb(96 165 250 / 0.5);
 }
 
+/* ================================================================
+   PACKAGES & TOOLS CARDS (ew-pkg-*)
+   ================================================================ */
+.ew-packages-container {
+  width: 100%;
+}
+
+.ew-pkg-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 2rem;
+  margin-top: 1.5rem;
+  margin-bottom: 3rem;
+}
+
+@media (min-width: 1024px) {
+  .ew-pkg-grid {
+    grid-template-columns: repeat(auto-fit, minmax(480px, 1fr));
+  }
+}
+
+.ew-pkg-card {
+  display: flex;
+  flex-direction: column;
+  background: #ffffff;
+  border: 1px solid rgb(226 232 240);
+  border-radius: 1.25rem;
+  padding: 2rem;
+  box-shadow: 0 4px 20px -2px rgb(0 0 0 / 0.05);
+  transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.dark .ew-pkg-card {
+  background: linear-gradient(135deg, rgb(15 23 42 / 0.95) 0%, rgb(23 37 84 / 0.35) 100%);
+  border-color: rgb(59 130 246 / 0.25);
+  box-shadow: 0 10px 30px -10px rgb(0 0 0 / 0.5);
+}
+
+.ew-pkg-card:hover {
+  transform: translateY(-3px);
+  border-color: rgb(59 130 246 / 0.6);
+  box-shadow: 0 16px 36px -8px rgb(37 99 235 / 0.2);
+}
+
+.ew-pkg-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-bottom: 0.5rem;
+}
+
+.ew-pkg-icon {
+  font-size: 1.5rem;
+  line-height: 1;
+}
+
+.ew-pkg-title {
+  font-size: 1.65rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: rgb(15 23 42);
+  margin: 0 !important;
+  line-height: 1.2;
+}
+
+.dark .ew-pkg-title {
+  color: #ffffff !important;
+}
+
+.ew-pkg-tagline {
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: rgb(37 99 235);
+  margin-top: 0.35rem;
+  margin-bottom: 0.75rem;
+  line-height: 1.4;
+}
+
+.dark .ew-pkg-tagline {
+  color: rgb(147 197 253);
+}
+
+.ew-pkg-desc {
+  font-size: 0.95rem;
+  line-height: 1.65;
+  color: rgb(71 85 105);
+  margin-bottom: 1rem;
+}
+
+.dark .ew-pkg-desc {
+  color: rgb(203 213 225);
+}
+
+.ew-pkg-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.ew-pkg-badge {
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 0.25rem 0.65rem;
+  border-radius: 9999px;
+  background: rgb(241 245 249);
+  color: rgb(51 65 85);
+  border: 1px solid rgb(226 232 240);
+}
+
+.dark .ew-pkg-badge {
+  background: rgb(30 41 59 / 0.6);
+  color: rgb(203 213 225);
+  border-color: rgb(71 85 105 / 0.5);
+}
+
+.ew-pkg-badge--status {
+  background: rgb(236 253 245);
+  color: rgb(5 150 105);
+  border-color: rgb(167 243 208);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.dark .ew-pkg-badge--status {
+  background: rgb(6 78 59 / 0.4);
+  color: rgb(52 211 153);
+  border-color: rgb(5 150 105 / 0.4);
+}
+
+.ew-pkg-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background-color: currentColor;
+  display: inline-block;
+}
+
+.ew-pkg-section-title {
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: rgb(100 116 139);
+  margin-bottom: 0.5rem;
+}
+
+.dark .ew-pkg-section-title {
+  color: rgb(148 163 184);
+}
+
+.ew-pkg-downloads {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0.75rem;
+  margin-bottom: 1.25rem;
+}
+
+@media (min-width: 640px) {
+  .ew-pkg-downloads {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.ew-pkg-dl-btn {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.85rem 1rem;
+  border-radius: 0.75rem;
+  background: rgb(248 250 252);
+  border: 1px solid rgb(226 232 240);
+  text-decoration: none !important;
+  transition: all 0.2s ease;
+}
+
+.dark .ew-pkg-dl-btn {
+  background: rgb(30 41 59 / 0.5);
+  border-color: rgb(51 65 85);
+}
+
+.ew-pkg-dl-btn:hover {
+  background: rgb(37 99 235);
+  border-color: rgb(29 78 216);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 14px rgb(37 99 235 / 0.3);
+}
+
+.ew-pkg-dl-btn:hover * {
+  color: #ffffff !important;
+}
+
+.ew-pkg-install {
+  background: rgb(15 23 42);
+  border: 1px solid rgb(30 41 59);
+  border-radius: 0.75rem;
+  padding: 1rem 1.15rem;
+  margin-bottom: 1.5rem;
+}
+
+.ew-pkg-install-header {
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: rgb(148 163 184);
+  margin-bottom: 0.65rem;
+}
+
+.ew-pkg-cmd-block {
+  margin-bottom: 0.65rem;
+}
+
+.ew-pkg-cmd-block:last-child {
+  margin-bottom: 0;
+}
+
+.ew-pkg-cmd-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  background: rgb(2 6 23 / 0.7);
+  border: 1px solid rgb(30 41 59 / 0.8);
+  border-radius: 0.5rem;
+  padding: 0.5rem 0.75rem;
+}
+
+.ew-pkg-cmd-row code {
+  overflow-x: auto;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace !important;
+  font-size: 0.78rem !important;
+  color: rgb(226 232 240) !important;
+  background: transparent !important;
+  padding: 0 !important;
+  white-space: nowrap;
+}
+
+.ew-pkg-copy-btn {
+  background: transparent;
+  border: none;
+  color: rgb(148 163 184);
+  font-size: 0.85rem;
+  cursor: pointer;
+  padding: 0.2rem 0.4rem;
+  border-radius: 0.35rem;
+  margin-left: auto;
+  flex-shrink: 0;
+  transition: color 0.15s, background-color 0.15s;
+}
+
+.ew-pkg-copy-btn:hover {
+  color: #ffffff;
+  background: rgb(255 255 255 / 0.15);
+}
+
+.ew-pkg-footer {
+  margin-top: auto;
+  padding-top: 1rem;
+  border-top: 1px solid rgb(226 232 240);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.dark .ew-pkg-footer {
+  border-top-color: rgb(51 65 85 / 0.7);
+}
+
+.ew-pkg-link {
+  font-size: 0.88rem;
+  font-weight: 600;
+  text-decoration: none !important;
+  transition: color 0.15s ease;
+}
+
+.ew-pkg-link--primary {
+  color: rgb(37 99 235);
+}
+
+.ew-pkg-link--primary:hover {
+  color: rgb(29 78 216);
+  text-decoration: underline !important;
+}
+
+.dark .ew-pkg-link--primary {
+  color: rgb(96 165 250);
+}
+
+.dark .ew-pkg-link--primary:hover {
+  color: rgb(147 197 253);
+}
+
+.ew-pkg-link--secondary {
+  color: rgb(100 116 139);
+}
+
+.ew-pkg-link--secondary:hover {
+  color: rgb(51 65 85);
+  text-decoration: underline !important;
+}
+
+.dark .ew-pkg-link--secondary {
+  color: rgb(148 163 184);
+}
+
+.dark .ew-pkg-link--secondary:hover {
+  color: rgb(226 232 240);
+}
+
+
 

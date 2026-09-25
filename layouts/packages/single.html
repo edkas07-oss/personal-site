@@ -1,0 +1,10 @@
+{{ define "main" }}
+<script>window.location.replace("{{ "/packages/" | relLangURL }}#{{ .File.TranslationBaseName }}");</script>
+<noscript>
+  <meta http-equiv="refresh" content="0; url={{ "/packages/" | relLangURL }}#{{ .File.TranslationBaseName }}">
+</noscript>
+<div class="py-12 text-center">
+  <p class="text-neutral-500">Mengalihkan ke katalog paket...</p>
+  <a href="{{ "/packages/" | relLangURL }}#{{ .File.TranslationBaseName }}" class="text-blue-500 underline mt-2 inline-block">Klik di sini jika tidak beralih otomatis</a>
+</div>
+{{ end }}

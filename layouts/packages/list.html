@@ -1,0 +1,128 @@
+{{ define "main" }}
+<div class="ew-packages-container max-w-full">
+
+  {{/* ── Header ──────────────────────────────────────────────────────── */}}
+  <header class="mb-8 mt-4">
+    {{ if .Params.showBreadcrumbs | default (site.Params.list.showBreadcrumbs | default true) }}
+      {{ partial "breadcrumbs.html" . }}
+    {{ end }}
+    <div class="mt-4">
+      <p class="ew-hero__eyebrow">Standalone Binaries &amp; Operator Tools</p>
+      <h1 class="text-4xl font-extrabold tracking-tight text-neutral-900 dark:text-white sm:text-5xl">
+        {{ .Title }}
+      </h1>
+      <p class="mt-3 w-full max-w-none text-lg text-neutral-600 dark:text-neutral-300">
+        {{ .Description }}
+      </p>
+    </div>
+  </header>
+
+  {{/* ── Content from _index.md (if any) ────────────────────────────── */}}
+  {{ if .Content }}
+  <div class="prose dark:prose-invert max-w-none mb-8 text-neutral-600 dark:text-neutral-300">
+    {{ .Content }}
+  </div>
+  {{ end }}
+
+  {{/* ── Packages Cards Grid ────────────────────────────────────────── */}}
+  <div class="ew-pkg-grid">
+    {{ range .RegularPages.ByWeight }}
+    {{ $p := . }}
+    <article class="ew-pkg-card" id="{{ $p.File.TranslationBaseName }}">
+      
+      {{/* Header: Icon, Name, Version, License */}}
+      <div class="ew-pkg-header">
+        <div class="flex flex-wrap items-center gap-2.5">
+          <span class="ew-pkg-icon">📦</span>
+          <h2 class="ew-pkg-title">{{ $p.Title }}</h2>
+          {{ with $p.Params.version }}
+          <span class="ew-pkg-badge ew-pkg-badge--status">
+            <span class="ew-pkg-dot"></span> {{ . }}{{ with $p.Params.status }} · {{ . }}{{ end }}
+          </span>
+          {{ end }}
+        </div>
+        {{ with $p.Params.license }}
+        <span class="ew-pkg-badge">{{ . }}</span>
+        {{ end }}
+      </div>
+
+      {{/* Tagline */}}
+      {{ with .Params.tagline }}
+      <p class="ew-pkg-tagline">{{ . }}</p>
+      {{ end }}
+
+      {{/* Description */}}
+      <p class="ew-pkg-desc">
+        {{ .Params.summary | default .Summary }}
+      </p>
+
+      {{/* Capability Badges */}}
+      {{ with .Params.tags }}
+      <div class="ew-pkg-badges">
+        {{ range . }}
+        <span class="ew-pkg-badge">{{ . }}</span>
+        {{ end }}
+      </div>
+      {{ end }}
+
+      {{/* Direct Downloads Section */}}
+      {{ with .Params.downloads }}
+      <div class="ew-pkg-section-title">Unduh Biner Resmi:</div>
+      <div class="ew-pkg-downloads">
+        {{ range . }}
+        <a href="{{ .url }}" class="ew-pkg-dl-btn group" target="_blank" rel="noopener noreferrer">
+          <div class="flex items-center gap-3">
+            <span class="text-2xl">{{ .icon }}</span>
+            <div class="text-left">
+              <div class="text-xs font-bold text-neutral-900 dark:text-white group-hover:text-white">{{ .os }}</div>
+              <div class="text-[11px] text-neutral-500 dark:text-neutral-400 group-hover:text-blue-100 font-mono">{{ .file }} ({{ .size }})</div>
+            </div>
+          </div>
+          <span class="text-sm font-bold text-blue-600 dark:text-blue-400 group-hover:text-white transition-transform group-hover:translate-y-0.5">⬇️</span>
+        </a>
+        {{ end }}
+      </div>
+      {{ end }}
+
+      {{/* Quick Install Box */}}
+      {{ with .Params.downloads }}
+      <div class="ew-pkg-install">
+        <div class="ew-pkg-install-header">
+          <span>⚡ One-Liner Quick Install</span>
+        </div>
+        {{ range . }}
+        <div class="ew-pkg-cmd-block">
+          <div class="text-[11px] font-semibold text-slate-400 mb-1 flex items-center gap-1.5">
+            <span>{{ .icon }}</span> <span>{{ .os }}:</span>
+          </div>
+          <div class="ew-pkg-cmd-row">
+            <code>{{ .cmd }}</code>
+            <button type="button" class="ew-pkg-copy-btn" onclick="navigator.clipboard.writeText('{{ .cmd }}'); this.innerText='✓'; const b=this; setTimeout(function(){ b.innerText='📋'; }, 1500);" title="Salin perintah">📋</button>
+          </div>
+        </div>
+        {{ end }}
+      </div>
+      {{ end }}
+
+      {{/* Footer Action Links */}}
+      <div class="ew-pkg-footer">
+        {{ with $p.Params.guide_url }}
+        <a href="{{ . | relLangURL }}" class="ew-pkg-link ew-pkg-link--primary">
+          📖 {{ $p.Params.guide_label | default "Panduan How-To Deployment" }} →
+        </a>
+        {{ end }}
+        {{ with $p.Params.repo_url }}
+        <a href="{{ . }}" class="ew-pkg-link ew-pkg-link--secondary" target="_blank" rel="noopener noreferrer">
+          🐙 GitHub Releases &amp; Code ↗
+        </a>
+        {{ end }}
+      </div>
+
+    </article>
+    {{ else }}
+      <p class="text-neutral-500 italic py-8 border-t">Belum ada paket yang terdaftar di sini.</p>
+    {{ end }}
+  </div>
+
+</div>
+{{ end }}
