@@ -14,7 +14,7 @@ showSummary = true
 {{< lead >}}
 **Mewujudkan Arsitektur Continuous Delivery Modern Tanpa Port Inbound SSH/WinRM dengan Pemulihan Mandiri (Self-Healing) Berkelanjutan**
 
-Pada infrastruktur enterprise tradisional, server CI (seperti Jenkins) atau Ansible Controller umumnya melakukan *push deployment* dengan membuka akses langsung ke server produksi melalui SSH atau WinRM. Pola ini memperluas bidang serangan jaringan (*attack surface*) dan berisiko tinggi terhadap kebocoran kredensial admin. Panduan ini mengupas tuntas cara menerapkan arsitektur **Pure Pull-Based GitOps** menggunakan operator CLI [`tcctl`]({{< ref "packages/tcctl" >}}), repositori deklaratif Gitea, dan pipeline Gitea Actions untuk mengelola kontainer Apache Tomcat pada Windows Server 2022 secara aman, konsisten, dan tanpa downtime.
+Pada infrastruktur enterprise tradisional, server CI (seperti Jenkins) atau Ansible Controller umumnya melakukan *push deployment* dengan membuka akses langsung ke server produksi melalui SSH atau WinRM. Pola ini memperluas bidang serangan jaringan (*attack surface*) dan berisiko tinggi terhadap kebocoran kredensial admin. Panduan ini mengupas tuntas cara menerapkan arsitektur **Pure Pull-Based GitOps** menggunakan operator CLI [`tcctl`]({{< relref "packages/tcctl" >}}), repositori deklaratif Gitea, dan pipeline Gitea Actions untuk mengelola kontainer Apache Tomcat pada Windows Server 2022 secara aman, konsisten, dan tanpa downtime.
 {{< /lead >}}
 
 ---
@@ -91,17 +91,17 @@ Pastikan komponen-komponen berikut sudah tersedia sebelum memulai konfigurasi:
 
 | Komponen | Spesifikasi / Kebutuhan |
 | :--- | :--- |
-| **Target Host** | Windows Server 2022 Datacenter atau Windows Server 2019 dengan [Docker Engine CE v27+]({{< ref "how-to/install-docker-engine-windows-containers" >}}) mode Windows Containers |
-| **Operator CLI** | Biner [`tcctl.exe`]({{< ref "packages/tcctl" >}}) terpasang di `C:\Program Files\tcctl\` dan terdaftar pada sistem `PATH` Windows Server |
+| **Target Host** | Windows Server 2022 Datacenter atau Windows Server 2019 dengan [Docker Engine CE v27+]({{< relref "how-to/install-docker-engine-windows-containers" >}}) mode Windows Containers |
+| **Operator CLI** | Biner [`tcctl.exe`]({{< relref "packages/tcctl" >}}) terpasang di `C:\Program Files\tcctl\` dan terdaftar pada sistem `PATH` Windows Server |
 | **Git Server** | Gitea Server v1.21+ dengan fitur Actions (`[actions] ENABLED = true`) dan built-in OCI Container Registry |
 | **CI Runner Host** | Linux Workstation/Server dengan biner `podman`, `tcctl`, `trivy`, `node`, dan `act_runner` v4.0+ |
 | **Akses Jaringan** | Target host Windows Server dapat melakukan *outbound connection* (HTTP/HTTPS) ke host Gitea port 3000 |
 
 > [!TIP]
 > **Belum Menyiapkan Prasyarat di Atas? Ikuti Panduan Pendukung Berikut:**
-> - Unduh biner siap pakai melalui **[Katalog Paket tcctl]({{< ref "packages/tcctl" >}})**.
-> - Siapkan runtime kontainer Windows dengan **[Panduan Instalasi Docker Engine di Windows Server]({{< ref "how-to/install-docker-engine-windows-containers" >}})**.
-> - Pelajari pembuatan base image melalui **[Panduan Build Image Tomcat NanoServer]({{< ref "how-to/build-tomcat-jmx-nanoserver-image" >}})**.
+> - Unduh biner siap pakai melalui **[Katalog Paket tcctl]({{< relref "packages/tcctl" >}})**.
+> - Siapkan runtime kontainer Windows dengan **[Panduan Instalasi Docker Engine di Windows Server]({{< relref "how-to/install-docker-engine-windows-containers" >}})**.
+> - Pelajari pembuatan base image melalui **[Panduan Build Image Tomcat NanoServer]({{< relref "how-to/build-tomcat-jmx-nanoserver-image" >}})**.
 
 ---
 
@@ -481,9 +481,9 @@ Perintah ini menghasilkan dua output sekaligus:
 
 ## 📚 Referensi Terkait
 
-- [Katalog Paket & Download Biner Operator tcctl (Windows & Linux)]({{< ref "packages/tcctl" >}})
-- [Panduan Praktis: Deploy Kontainer Apache Tomcat Hardened di Windows Server Menggunakan tcctl]({{< ref "how-to/deploy-tomcat-container-windows-server-tcctl" >}})
-- [Panduan Praktis: Build Image Container Apache Tomcat + Prometheus JMX Exporter di Windows NanoServer]({{< ref "how-to/build-tomcat-jmx-nanoserver-image" >}})
-- [Panduan Praktis: Instalasi Docker Engine Community Edition (CE) v27+ di Windows Server]({{< ref "how-to/install-docker-engine-windows-containers" >}})
-- [Tomcat Monitoring & Autonomous Diagnostic Platform]({{< ref "projects/tomcat-monitoring" >}})
+- [Katalog Paket & Download Biner Operator tcctl (Windows & Linux)]({{< relref "packages/tcctl" >}})
+- [Panduan Praktis: Deploy Kontainer Apache Tomcat Hardened di Windows Server Menggunakan tcctl]({{< relref "how-to/deploy-tomcat-container-windows-server-tcctl" >}})
+- [Panduan Praktis: Build Image Container Apache Tomcat + Prometheus JMX Exporter di Windows NanoServer]({{< relref "how-to/build-tomcat-jmx-nanoserver-image" >}})
+- [Panduan Praktis: Instalasi Docker Engine Community Edition (CE) v27+ di Windows Server]({{< relref "how-to/install-docker-engine-windows-containers" >}})
+- [Tomcat Monitoring & Autonomous Diagnostic Platform]({{< relref "projects/tomcat-monitoring" >}})
 - [Spesifikasi Standar CNCF OpenGitOps (OpenGitOps.dev)](https://opengitops.dev/)

@@ -67,7 +67,7 @@ Sebelum memulai tahapan build, pastikan host telah memenuhi spesifikasi berikut:
 | Parameter | Spesifikasi / Kebutuhan |
 | :--- | :--- |
 | **Sistem Operasi Host** | Windows Server 2022 Datacenter (OS Build 20348) atau Windows Server 2019 (OS Build 17763) |
-| **Container Engine** | [Docker Engine Community Edition (CE) v27.0+]({{< ref "how-to/install-docker-engine-windows-containers" >}}) dalam mode **Windows Containers** |
+| **Container Engine** | [Docker Engine Community Edition (CE) v27.0+]({{< relref "how-to/install-docker-engine-windows-containers" >}}) dalam mode **Windows Containers** |
 | **Hak Akses Shell** | PowerShell 5.1 atau PowerShell 7+ dijalankan sebagai **Administrator** |
 | **Konektivitas / Biner** | Akses internet untuk mengunduh biner upstream, ATAU file biner yang telah disiapkan sebelumnya pada folder lokal |
 | **Private Registry (Opsional)** | Private OCI Container Registry (misal: Gitea Container Registry, Harbor, Docker Trusted Registry) jika menggunakan metode push jaringan |
@@ -485,7 +485,7 @@ Dalam ekosistem Windows Containers, terdapat dua aturan penting terkait bind mou
 - **Kasus B (Kustomisasi Format / Filter Aturan Khusus):** Anda **tidak perlu me-rebuild image**. Berkat arsitektur *Hierarchy Fallback*, cukup letakkan berkas kustom Anda di dalam direktori host `conf\` (misal `C:\tomcats\<instance>\conf\jmx-config.yaml` yang di-mount secara aman via `conf:ro`). Skrip `setenv.bat` akan otomatis memprioritaskan berkas tersebut dibandingkan konfigurasi bawaan image (panduan langkah-demi-langkah tersedia pada **[Langkah 6: Praktik Kustomisasi & Menambah Metrik JMX Baru](#langkah-6-praktik-kustomisasi--menambah-metrik-jmx-baru-tanpa-rebuild-citra-zero-rebuild-override)**).
 
 ### 6. Sinergi dengan Operator tcctl & Mekanisme setenv.bat di Host (TC-ADR-0010)
-Jika Anda menggunakan operator CLI enterprise [**`tcctl`**]({{< ref "how-to/deploy-tomcat-container-windows-server-tcctl" >}}):
+Jika Anda menggunakan operator CLI enterprise [**`tcctl`**]({{< relref "how-to/deploy-tomcat-container-windows-server-tcctl" >}}):
 - **Otomasi JMX Port & Probing:** Cukup jalankan perintah `tcctl deploy run --jmx`, maka port 9404 otomatis dipublikasikan dan diverifikasi oleh health-probe bawaan `tcctl`.
 - **Mengapa Host `bin/` Di-mount ke `bin/custom:ro`?** `tcctl` me-mount folder `bin` host ke `C:\usr\local\tomcat\bin\custom:ro` (bukan ke `bin/`) agar biner inti Tomcat di dalam image (`catalina.bat`, `bootstrap.jar`, `setenv.bat`) tidak tertimpa (*directory shadowing*).
 - **Injeksi Dinamis `CATALINA_OPTS`:** `tcctl` membaca parameter memori JVM dari `setenv.bat` di host dan menyuntikkannya ke container via flag `-e CATALINA_OPTS="..."`. Skrip `setenv.bat` internal di dalam image NanoServer kemudian menggabungkan (*append*) opsi memori tersebut dengan argumen Java Agent JMX secara harmonis.
@@ -494,9 +494,9 @@ Jika Anda menggunakan operator CLI enterprise [**`tcctl`**]({{< ref "how-to/depl
 
 ## 📚 Referensi Terkait
 
-- [Panduan Praktis: Implementasi Pure Pull-Based GitOps dan Otomasi CI Promotion Apache Tomcat di Windows Server]({{< ref "how-to/implement-pure-pull-based-gitops-and-ci-promotion-tomcat" >}})
-- [Panduan Praktis: Deploy Kontainer Apache Tomcat di Windows Server Menggunakan tcctl]({{< ref "how-to/deploy-tomcat-container-windows-server-tcctl" >}})
-- [Panduan Praktis: Instalasi Docker Engine Community Edition (CE) v27+ di Windows Server]({{< ref "how-to/install-docker-engine-windows-containers" >}})
+- [Panduan Praktis: Implementasi Pure Pull-Based GitOps dan Otomasi CI Promotion Apache Tomcat di Windows Server]({{< relref "how-to/implement-pure-pull-based-gitops-and-ci-promotion-tomcat" >}})
+- [Panduan Praktis: Deploy Kontainer Apache Tomcat di Windows Server Menggunakan tcctl]({{< relref "how-to/deploy-tomcat-container-windows-server-tcctl" >}})
+- [Panduan Praktis: Instalasi Docker Engine Community Edition (CE) v27+ di Windows Server]({{< relref "how-to/install-docker-engine-windows-containers" >}})
 - [Microsoft Windows Container Base Images Documentation](https://learn.microsoft.com/en-us/virtualization/windows-containers/manage-images/container-base-images)
 - [Eclipse Temurin Official Container Images (Docker Hub)](https://hub.docker.com/_/eclipse-temurin)
 - [Prometheus JMX Exporter Official Repository](https://github.com/prometheus/jmx_exporter)

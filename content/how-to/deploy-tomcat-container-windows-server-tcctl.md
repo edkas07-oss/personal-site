@@ -56,16 +56,16 @@ Sebelum memulai, pastikan host target telah memenuhi prasyarat berikut:
 | Komponen | Spesifikasi / Kebutuhan |
 | :--- | :--- |
 | **Sistem Operasi** | Windows Server 2022 Datacenter (LTSC) atau Windows Server 2019 (Build 17763+) |
-| **Container Engine** | [Docker Engine Community Edition v27.0+]({{< ref "how-to/install-docker-engine-windows-containers" >}}) *(mode Windows Containers aktif)* |
-| **Operator CLI** | Biner [`tcctl`]({{< ref "packages/tcctl" >}}) terpasang di `C:\Program Files\tcctl\` dan terdaftar pada `$env:Path` *(dapat langsung diunduh melalui [Halaman Paket tcctl]({{< ref "packages/tcctl" >}}))* |
+| **Container Engine** | [Docker Engine Community Edition v27.0+]({{< relref "how-to/install-docker-engine-windows-containers" >}}) *(mode Windows Containers aktif)* |
+| **Operator CLI** | Biner [`tcctl`]({{< relref "packages/tcctl" >}}) terpasang di `C:\Program Files\tcctl\` dan terdaftar pada `$env:Path` *(dapat langsung diunduh melalui [Halaman Paket tcctl]({{< relref "packages/tcctl" >}}))* |
 | **Hak Akses Shell** | PowerShell 5.1 atau PowerShell 7+ dijalankan sebagai **Administrator** |
-| **Container Image** | Image berbasis Windows NanoServer (misal `tomcat:9.0-jdk11` lokal atau dari private registry — ikuti [Panduan Build Image Tomcat NanoServer]({{< ref "how-to/build-tomcat-jmx-nanoserver-image" >}})) |
+| **Container Image** | Image berbasis Windows NanoServer (misal `tomcat:9.0-jdk11` lokal atau dari private registry — ikuti [Panduan Build Image Tomcat NanoServer]({{< relref "how-to/build-tomcat-jmx-nanoserver-image" >}})) |
 
 > [!TIP]
 > **Belum Menyiapkan Prasyarat di Atas? Ikuti Referensi Cepat Berikut:**
-> - **Unduh Biner `tcctl` Siap Pakai:** Anda tidak perlu melakukan kompilasi kode sumber secara manual. Biner statis Go `tcctl.exe` dapat langsung diunduh melalui **[Halaman Paket tcctl]({{< ref "packages/tcctl" >}})**, kemudian simpan di direktori `C:\Program Files\tcctl\` dan tambahkan ke `PATH`.
-> - **Panduan Pasang Docker CE:** Jika Docker belum terpasang di Windows Server Anda, ikuti panduan lengkap pada **[Panduan Praktis: Instalasi Docker Engine Community Edition (CE) v27+ di Windows Server]({{< ref "how-to/install-docker-engine-windows-containers" >}})**.
-> - **Panduan Build Citra Container:** Jika Anda belum memiliki image Tomcat Windows NanoServer di host atau registry, ikuti **[Panduan Praktis: Build Image Container Apache Tomcat + Prometheus JMX Exporter di Windows NanoServer]({{< ref "how-to/build-tomcat-jmx-nanoserver-image" >}})**.
+> - **Unduh Biner `tcctl` Siap Pakai:** Anda tidak perlu melakukan kompilasi kode sumber secara manual. Biner statis Go `tcctl.exe` dapat langsung diunduh melalui **[Halaman Paket tcctl]({{< relref "packages/tcctl" >}})**, kemudian simpan di direktori `C:\Program Files\tcctl\` dan tambahkan ke `PATH`.
+> - **Panduan Pasang Docker CE:** Jika Docker belum terpasang di Windows Server Anda, ikuti panduan lengkap pada **[Panduan Praktis: Instalasi Docker Engine Community Edition (CE) v27+ di Windows Server]({{< relref "how-to/install-docker-engine-windows-containers" >}})**.
+> - **Panduan Build Citra Container:** Jika Anda belum memiliki image Tomcat Windows NanoServer di host atau registry, ikuti **[Panduan Praktis: Build Image Container Apache Tomcat + Prometheus JMX Exporter di Windows NanoServer]({{< relref "how-to/build-tomcat-jmx-nanoserver-image" >}})**.
 
 ---
 
@@ -414,10 +414,10 @@ tcctl deploy run --name tomcat-lab --port 8080 --https-port 8443 --image "tomcat
 Dengan memanfaatkan CLI tool **`tcctl`**, orkestrasi kontainer Apache Tomcat pada Windows Server tidak lagi memerlukan skrip PowerShell yang panjang dan rentan kesalahan. Standar keamanan enterprise—mulai dari CIS Benchmark, proteksi immutability, enkripsi HTTPS, hingga isolasi perizinan non-root—ditegakkan secara otomatis sejak detik pertama deployment.
 
 ### 📚 Referensi Terkait
-- [Panduan Praktis: Implementasi Pure Pull-Based GitOps dan Otomasi CI Promotion Apache Tomcat di Windows Server]({{< ref "how-to/implement-pure-pull-based-gitops-and-ci-promotion-tomcat" >}})
-- [Katalog Paket & Download Biner Operator tcctl (Windows & Linux)]({{< ref "packages/tcctl" >}})
-- [Panduan Praktis: Instalasi Docker Engine Community Edition (CE) v27+ di Windows Server]({{< ref "how-to/install-docker-engine-windows-containers" >}})
-- [Panduan Praktis: Build Image Container Apache Tomcat + Prometheus JMX Exporter di Windows NanoServer]({{< ref "how-to/build-tomcat-jmx-nanoserver-image" >}})
+- [Panduan Praktis: Implementasi Pure Pull-Based GitOps dan Otomasi CI Promotion Apache Tomcat di Windows Server]({{< relref "how-to/implement-pure-pull-based-gitops-and-ci-promotion-tomcat" >}})
+- [Katalog Paket & Download Biner Operator tcctl (Windows & Linux)]({{< relref "packages/tcctl" >}})
+- [Panduan Praktis: Instalasi Docker Engine Community Edition (CE) v27+ di Windows Server]({{< relref "how-to/install-docker-engine-windows-containers" >}})
+- [Panduan Praktis: Build Image Container Apache Tomcat + Prometheus JMX Exporter di Windows NanoServer]({{< relref "how-to/build-tomcat-jmx-nanoserver-image" >}})
 - [Detailed Installation & Build Guide (INSTALL.md)](https://github.com/edkas07-oss/tcctl/blob/main/INSTALL.md)
-- [Tomcat Monitoring & Autonomous Diagnostic Platform]({{< ref "projects/tomcat-monitoring" >}})
-- [Jurnal: Menjinakkan Windows Containers Tanpa Mengubah Basis Kode]({{< ref "journals/menjinakkan-windows-containers-docker-nanoserver-linux" >}})
+- [Tomcat Monitoring & Autonomous Diagnostic Platform]({{< relref "projects/tomcat-monitoring" >}})
+- [Jurnal: Menjinakkan Windows Containers Tanpa Mengubah Basis Kode]({{< relref "journals/menjinakkan-windows-containers-docker-nanoserver-linux" >}})
