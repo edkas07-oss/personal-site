@@ -65,11 +65,11 @@ flowchart TD
     classDef success fill:#064e3b,stroke:#10b981,stroke-width:1.5px,color:#ffffff;
     classDef rollback fill:#881337,stroke:#f43f5e,stroke-width:1.5px,color:#ffffff;
 
-    START["1. Operator / GitOps Trigger: tcctl deploy"]:::step --> STAGING["2. Spin-Up Container Baru pada Port Staging (:9080)<br/>tc-<service>-staging"]:::step
+    START["1. Operator / GitOps Trigger: tcctl deploy"]:::step --> STAGING["2. Spin-Up Container Baru pada Port Staging (:9080)<br/>tc-[service]-staging"]:::step
     
-    STAGING --> PROBE{"3. Synthetic Health Probe Barrier<br/>GET http://localhost:9080/<health-path>"}:::gate
+    STAGING --> PROBE{"3. Synthetic Health Probe Barrier<br/>GET http://localhost:9080/[health-path]"}:::gate
     
-    PROBE -- "HTTP 200 OK (Warm-up Selesai)" --> PROMOTION["4. Eksekusi Promosi Atomik:<br/>• Hentikan kontainer lama (:8080)<br/>• Swap port staging ke kanonikal (:8080)<br/>• Rename container ke tc-<service>"]:::success
+    PROBE -- "HTTP 200 OK (Warm-up Selesai)" --> PROMOTION["4. Eksekusi Promosi Atomik:<br/>• Hentikan kontainer lama (:8080)<br/>• Swap port staging ke kanonikal (:8080)<br/>• Rename container ke tc-[service]"]:::success
     
     PROBE -- "Timeout / Non-200 (Gagal)" --> ABORT["5. Trigger Automated Rollback:<br/>• Hentikan kontainer staging (:9080)<br/>• Bersihkan alokasi port sementara<br/>• Pertahankan kontainer aktif lama (:8080)<br/>• Kirim laporan kegagalan"]:::rollback
 

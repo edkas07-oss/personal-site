@@ -57,10 +57,10 @@ flowchart TD
     subgraph PILLARS ["7 Pilar Modul Tata Kelola Enterprise"]
         M1["🛡️ hardening<br/>(CIS Benchmark 9 Rules Audit)"]:::module
         M2["🔎 va<br/>(Trivy Vulnerability Scanner)"]:::module
-        M3["📊 monitoring<br/>(Synthetic Health & JMX :9404)"]:::module
-        M4["🚀 deploy<br/>(Staging Rollout & bin/setenv)"]:::module
+        M3["📊 monitoring<br/>(Synthetic Health + JMX :9404)"]:::module
+        M4["🚀 deploy<br/>(Staging Rollout + bin/setenv)"]:::module
         M5["🔄 gitops<br/>(Zero-Git REST API Reconciler)"]:::module
-        M6["🔒 ssl<br/>(PKCS#12 & OpenSSL PEM Engine)"]:::module
+        M6["🔒 ssl<br/>(PKCS#12 + OpenSSL PEM Engine)"]:::module
         M7["⚡ serve<br/>(Embedded REST API Daemon :8089)"]:::module
     end
 
@@ -70,11 +70,18 @@ flowchart TD
     end
 
     subgraph STORAGE ["Host Bind-Mount Hierarchy (TC-ADR-0009 / TN-006)"]
-        DIR["C:/tomcats/ atau D:/tomcats/<instance>/<br/>• bin/ (setenv.bat / setenv.sh JVM Tuning)<br/>• conf/ (server.xml, web.xml, SSL Certs :ro)<br/>• webapps/ (Application Artifacts)<br/>• logs/ (Catalina & Access Logs)"]:::storage
+        DIR["C:/tomcats/ atau D:/tomcats/[instance]/<br/>• bin/ (setenv.bat / setenv.sh JVM Tuning)<br/>• conf/ (server.xml, web.xml, SSL Certs :ro)<br/>• webapps/ (Application Artifacts)<br/>• logs/ (Catalina + Access Logs)"]:::storage
     end
 
-    TCCTL --> M1 & M2 & M3 & M4 & M5 & M6 & M7
-    M4 & M5 --> RUNTIME
+    TCCTL --> M1
+    TCCTL --> M2
+    TCCTL --> M3
+    TCCTL --> M4
+    TCCTL --> M5
+    TCCTL --> M6
+    TCCTL --> M7
+    M4 --> RUNTIME
+    M5 --> RUNTIME
     RUNTIME --> STORAGE
 {{< /mermaid >}}
 
