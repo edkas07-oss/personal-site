@@ -5,12 +5,12 @@ version = "v1.0.0"
 status = "Latest Stable"
 license = "Apache 2.0"
 weight = 2
-summary = "Single static CLI operator untuk orkestrasi siklus hidup kontainer monitoring Tomcat (JMX Exporter, Prometheus, Alertmanager, Diagnostic Service), manajemen aturan diagnostik runtime, dan kepatuhan platform di Linux & Windows Server."
+summary = "Single static CLI operator untuk orkestrasi kontainer monitoring Tomcat (JMX Exporter, Prometheus, Alertmanager, Diagnostic), manajemen aturan diagnostik runtime, dan kepatuhan platform di Linux & Windows Server."
 tags = ["Go 1.23+ Static", "Zero Runtime Dependencies", "Windows Server (Docker)", "Linux (Podman)"]
 project_url = "/projects/tomcat-monitoring/tmctl/"
 project_label = "Bedah Arsitektur tmctl"
 guide_url = "/how-to/build-tomcat-jmx-nanoserver-image/"
-guide_label = "Panduan Build Image Tomcat JMX"
+guide_label = "Panduan Build Image JMX"
 repo_url = "https://github.com/edkas07-oss/tmctl"
 
 [[downloads]]

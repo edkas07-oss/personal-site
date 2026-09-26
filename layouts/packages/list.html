@@ -71,14 +71,14 @@
       <div class="ew-pkg-downloads">
         {{ range . }}
         <a href="{{ .url }}" class="ew-pkg-dl-btn group" target="_blank" rel="noopener noreferrer">
-          <div class="flex items-center gap-3">
-            <span class="text-2xl">{{ .icon }}</span>
-            <div class="text-left">
-              <div class="text-xs font-bold text-neutral-900 dark:text-white group-hover:text-white">{{ .os }}</div>
-              <div class="text-[11px] text-neutral-500 dark:text-neutral-400 group-hover:text-blue-100 font-mono">{{ .file }} ({{ .size }})</div>
+          <div class="flex items-center gap-3 min-w-0">
+            <span class="text-2xl shrink-0">{{ .icon }}</span>
+            <div class="text-left min-w-0">
+              <div class="text-xs font-bold text-neutral-900 dark:text-white group-hover:text-white truncate">{{ .os }}</div>
+              <div class="ew-pkg-dl-meta">{{ .file }} ({{ .size }})</div>
             </div>
           </div>
-          <span class="text-sm font-bold text-blue-600 dark:text-blue-400 group-hover:text-white transition-transform group-hover:translate-y-0.5">⬇️</span>
+          <span class="text-sm font-bold text-blue-600 dark:text-blue-400 group-hover:text-white transition-transform group-hover:translate-y-0.5 shrink-0">⬇️</span>
         </a>
         {{ end }}
       </div>
@@ -106,20 +106,24 @@
 
       {{/* Footer Action Links */}}
       <div class="ew-pkg-footer">
-        {{ with $p.Params.project_url }}
-        <a href="{{ . | relLangURL }}" class="ew-pkg-link ew-pkg-link--primary">
-          🏛️ {{ $p.Params.project_label | default "Platform Blueprint" }} →
-        </a>
-        {{ end }}
-        {{ with $p.Params.guide_url }}
-        <a href="{{ . | relLangURL }}" class="ew-pkg-link ew-pkg-link--primary">
-          📖 {{ $p.Params.guide_label | default "Panduan How-To Deployment" }} →
-        </a>
-        {{ end }}
+        <div class="ew-pkg-footer-actions">
+          {{ with $p.Params.project_url }}
+          <a href="{{ . | relLangURL }}" class="ew-pkg-link ew-pkg-link--primary">
+            🏛️ {{ $p.Params.project_label | default "Platform Blueprint" }} →
+          </a>
+          {{ end }}
+          {{ with $p.Params.guide_url }}
+          <a href="{{ . | relLangURL }}" class="ew-pkg-link ew-pkg-link--primary">
+            📖 {{ $p.Params.guide_label | default "Panduan How-To Deployment" }} →
+          </a>
+          {{ end }}
+        </div>
         {{ with $p.Params.repo_url }}
-        <a href="{{ . }}" class="ew-pkg-link ew-pkg-link--secondary" target="_blank" rel="noopener noreferrer">
-          🐙 GitHub Releases &amp; Code ↗
-        </a>
+        <div class="ew-pkg-footer-repo">
+          <a href="{{ . }}" class="ew-pkg-link ew-pkg-link--secondary" target="_blank" rel="noopener noreferrer">
+            🐙 GitHub Releases &amp; Code ↗
+          </a>
+        </div>
         {{ end }}
       </div>
 

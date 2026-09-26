@@ -1318,6 +1318,20 @@ section.prose.flex        { max-width: none !important; }
   margin-bottom: 1.5rem;
 }
 
+@media (min-width: 1024px) {
+  .ew-pkg-tagline {
+    min-height: 1.6rem;
+  }
+  .ew-pkg-desc {
+    min-height: 4.85rem;
+  }
+  .ew-pkg-badges {
+    min-height: 4.25rem;
+    align-content: flex-start;
+  }
+}
+
+
 .ew-pkg-badge {
   font-size: 0.75rem;
   font-weight: 600;
@@ -1387,12 +1401,13 @@ section.prose.flex        { max-width: none !important; }
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0.85rem 1rem;
+  padding: 0.75rem 0.85rem;
   border-radius: 0.75rem;
   background: rgb(248 250 252);
   border: 1px solid rgb(226 232 240);
   text-decoration: none !important;
   transition: all 0.2s ease;
+  min-height: 4.25rem;
 }
 
 .dark .ew-pkg-dl-btn {
@@ -1410,6 +1425,19 @@ section.prose.flex        { max-width: none !important; }
 .ew-pkg-dl-btn:hover * {
   color: #ffffff !important;
 }
+
+.ew-pkg-dl-meta {
+  font-size: 0.72rem;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace !important;
+  color: rgb(100 116 139);
+  white-space: nowrap !important;
+  line-height: 1.2;
+}
+
+.dark .ew-pkg-dl-meta {
+  color: rgb(148 163 184);
+}
+
 
 .ew-pkg-install {
   background: rgb(15 23 42);
@@ -1480,14 +1508,25 @@ section.prose.flex        { max-width: none !important; }
   padding-top: 1rem;
   border-top: 1px solid rgb(226 232 240);
   display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+}
+
+.dark .ew-pkg-footer {
+  border-top-color: rgb(51 65 85 / 0.7);
+}
+
+.ew-pkg-footer-actions {
+  display: flex;
   flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
   gap: 0.75rem;
 }
 
-.dark .ew-pkg-footer {
-  border-top-color: rgb(51 65 85 / 0.7);
+.ew-pkg-footer-repo {
+  display: flex;
+  align-items: center;
 }
 
 .ew-pkg-link {
