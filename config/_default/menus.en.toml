@@ -1,5 +1,5 @@
 [[main]]
-  name = "Projects"
+  name = "Products"
   pageRef = "projects"
   weight = 5
 
@@ -14,7 +14,7 @@
   weight = 15
 
 [[main]]
-  name = "Packages"
+  name = "Download"
   pageRef = "packages"
   weight = 18
 
@@ -30,7 +30,7 @@
   weight = 100
 
 [[footer]]
-  name = "Projects"
+  name = "Products"
   pageRef = "projects"
   weight = 5
 
@@ -45,7 +45,7 @@
   weight = 15
 
 [[footer]]
-  name = "Packages"
+  name = "Download"
   pageRef = "packages"
   weight = 18
 
@@ -53,4 +53,5 @@
   name = "Contact"
   pageRef = "contact"
   weight = 25
+
 
