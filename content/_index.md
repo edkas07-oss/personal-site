@@ -1,49 +1,46 @@
 +++
-title = "Home"
+title = "Enterprise Java & Apache Tomcat Modernization Platform"
 date = "2026-09-19T15:00:00+07:00"
 draft = false
 +++
 
 {{< lead >}}
-**Platform Engineering · SRE · DevOps Architecture**
+**Enterprise Java Modernization · Autonomous SRE Diagnostics · Cloud-Native Fleet Governance**
 
-Jurnal rekayasa, studi kasus sistem berskala enterprise, dan dokumentasi arsitektur teknis — dari *Autonomous Incident Diagnostics* hingga *Hybrid-Cloud Fleet Automation*.
+Solusi arsitektur dan platform mandiri untuk mentransformasi beban kerja Apache Tomcat warisan ke armada container multi-OS (Linux & Windows Server) berkinerja tinggi, kepatuhan CIS Benchmark, zero-downtime rollout, dan triage insiden otonom berkecepatan < 3 detik.
 {{< /lead >}}
 
 ---
 
-### 🚀 Platform Rekayasa Unggulan
+### 🛡️ Solusi & Layanan Komersial Enterprise
+
+> [!TIP]
+> **1. Pre-Hardened Image & Operator Subscription**
+> Akses OCI Registry privat untuk citra container Windows Server (NanoServer 1809/2022/2025) & Linux yang rutin di-patch bulanan (zero CVE high/critical), biner operator statis `tcctl` & `tmctl`, serta jaminan SLA dukungan teknis korporat.
+> 
+> [👉 **Ajukan Permintaan Lisensi & Langganan Citra →**]({{< relref "contact" >}})
 
 > [!NOTE]
-> **[Apache Tomcat Enterprise Super Module (tcctl)]({{< relref "projects/tcctl" >}})**
-> Operator CLI mandiri (*Super Module*) berbasis Go untuk standarisasi tata kelola 7 pilar: pre-flight audit CIS Benchmark 9 aturan, quality gate Trivy vulnerability scanner, rollout zero-downtime berbasis temporary staging container, proteksi host bind-mount (`conf:ro`), dynamic JVM tuning (`bin/setenv`), dan pure pull-based GitOps otonom di Windows Server dan Linux.
+> **2. Turnkey VM-to-Container Modernization & Migration Accelerator**
+> Layanan konsultasi arsitektur dan eksekusi migrasi kilat (2–4 minggu) dari Tomcat Virtual Machine ke container (Podman/Docker/Kubernetes/OpenShift) dengan jaminan zero downtime, temporary staging rollout, multi-SAN PKI TLS, dan dynamic JVM memory tuning.
 > 
-> [👉 **Telusuri Blueprint Arsitektur Super Module tcctl →**]({{< relref "projects/tcctl" >}})
+> [👉 **Jadwalkan Sesi Konsultasi Arsitektur →**]({{< relref "contact" >}})
 
-> [!NOTE]
-> **[Tomcat Monitoring & Autonomous Diagnostic Platform]({{< relref "projects/tomcat-monitoring" >}})**
-> Platform observabilitas end-to-end dan penentu keputusan insiden otonom untuk runtime Apache Tomcat di lingkungan multi-OS (Linux Podman rootless & Windows Server Docker). 
+> [!IMPORTANT]
+> **3. Autonomous SRE Diagnostics & Custom Rulepack Engineering**
+> Implementasi mesin triage insiden deterministik (< 3 detik) dengan formulasi AI rulepack spesifik domain kegagalan perbankan (Deadlock, OOM Metaspace, Socket leak) serta integrasi Dual-Channel Alerting (L1 Fast Alert + L2 7-Section Forensic SRE Report).
 > 
-> Didukung oleh tiga modul terpadu:
-> * **[`tmctl`]({{< relref "projects/tomcat-monitoring/tmctl" >}})** — Cross-Platform Operator CLI berbasis Go untuk orkestrasi via Container Engine Socket API.
-> * **[`tm-agent`]({{< relref "projects/tomcat-monitoring/tm-agent" >}})** — High-Throughput Event Collector Daemon berbasis Go dengan *atomic spool evidence*.
-> * **[`diagnostic service`]({{< relref "projects/tomcat-monitoring/diagnostic-service" >}})** — Mesin triage insiden deterministik berbasis Node.js 24 LTS dengan laporan 7-seksi kanonikal.
-> 
-> [👉 **Telusuri Blueprint Arsitektur Platform →**]({{< relref "projects/tomcat-monitoring" >}})
+> [👉 **Diskusikan Kebutuhan Autonomous Diagnostic Platform →**]({{< relref "contact" >}})
 
 ---
 
-### Fokus Rekayasa
+### 🚀 Platform & Operator Karya Mandiri
 
-**🛡️ Autonomous Incident Diagnostics & SRE Governance**
-Menerapkan kebijakan *Zero Destructive Auto-Remediation*, korelasi bukti forensik deterministik multi-sumber, serta format laporan kanonikal 7-seksi untuk tim on-call.
+* **[`tcctl` — Apache Tomcat Enterprise Super Module]({{< relref "projects/tcctl" >}})**: Operator CLI mandiri berbasis Go untuk standarisasi 7 pilar tata kelola Tomcat, audit CIS Benchmark, Trivy scanner, temporary staging rollout (:9080 &rarr; :8080), dan pure pull-based GitOps otonom.
+* **[`tmctl` — Tomcat Monitoring & Autonomous Diagnostic Fleet Operator]({{< relref "projects/tomcat-monitoring" >}})**: Operator observabilitas via Direct Engine Socket API (Linux Podman Unix Socket & Windows Named Pipe), bundle mandiri air-gapped, dan engine diagnostik otonom berstandar SRE.
 
-**📊 JVM & Deep Workload Observability**
-Analisis *GC Thrashing*, latensi Stop-The-World, kejenuhan *thread pool*, dan instrumentasi metrik JMX Prometheus di lingkungan produksi nyata.
+---
 
-**🚀 Multi-OS Fleet Orchestration**
-Portabilitas multi-engine — Podman rootless di Linux dan Docker di Windows Server — terpadu melalui CLI `tmctl` dan Ansible playbook.
+### 📦 Evaluasi & Uji Coba Gratis
 
-**⚙️ Pipeline as Code & Immutable Delivery**
-Ephemeral build environment berbasis container (DooD), artefak CI *immutable*, dan orkestrasi rilis terpisah antara Jenkins dan Ansible.
-
+Unduh biner mandiri yang sudah terkompilasi (zero runtime dependency) untuk platform Linux dan Windows Server langsung di halaman [**Download Packages**]({{< relref "packages" >}}).
