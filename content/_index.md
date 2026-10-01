@@ -1,35 +1,35 @@
 +++
-title = "Strategic Platform Evolution & Enterprise Modernization Services"
+title = "Layanan Solusi & Konsultasi Modernisasi Java Enterprise"
 date = "2026-09-19T15:00:00+07:00"
 draft = false
 +++
 
 {{< lead >}}
-**Enterprise Java Modernization · Autonomous SRE Diagnostics · Cloud-Native Systems Architecture**
+**Platform Engineering · SRE · DevOps Architecture**
 
-Eddy Wiyatno Systems Engineering sedang bertransformasi dari *personal engineering research lab* menjadi penyedia **Layanan Solusi, Konsultasi Arsitektur, dan Modernisasi Java Enterprise**. Kami membantu institusi perbankan, finansial, dan korporasi mentransformasikan armada Apache Tomcat warisan ke arsitektur container modern multi-OS (Linux & Windows Server) yang memenuhi standar kepatuhan **CIS Benchmark Level 1**, **Zero-Downtime Staging Rollout**, dan **Autonomous Incident Diagnostics (MTTR < 3s)**.
+Selamat datang. Website ini sedang saya persiapkan untuk menghadirkan **layanan konsultasi arsitektur, modernisasi sistem, dan solusi keandalan Java skala enterprise**. Berdasarkan pengalaman panjang menangani infrastruktur produksi berskala besar, saya membantu perusahaan memindahkan aplikasi Java dan Apache Tomcat dari server fisik atau VM lama ke arsitektur container modern (Linux & Windows Server) — lengkap dengan standar keamanan **CIS Benchmark**, proses rilis **tanpa downtime**, dan sistem **diagnosa insiden otomatis (MTTR < 3 detik)**.
 {{< /lead >}}
 
 ---
 
-### 🛡️ Fokus Solusi & Layanan Kemitraan Enterprise
+### 🛡️ Fokus Layanan & Solusi
 
 > [!TIP]
-> **1. Enterprise Java Modernization & Fleet Migration Accelerator**  
-> Layanan akselerasi dan konsultasi arsitektur untuk memigrasikan sistem Apache Tomcat dari Virtual Machine ke armada container (Podman/Docker/Kubernetes/OpenShift) dengan jaminan zero downtime, multi-SAN PKI mutual TLS, dan dynamic JVM memory tuning.
+> **1. Migrasi Java & Tomcat ke Container**  
+> Membantu tim Anda memindahkan aplikasi Java dan Tomcat dari VM lama ke container (Podman, Docker, atau Kubernetes) tanpa risiko downtime, lengkap dengan optimasi memori JVM dan keamanan TLS.
 
 > [!NOTE]
-> **2. Security Hardening & Regulatory Compliance**  
-> Standardisasi pengamanan sistem host dan container sesuai spesifikasi CIS Benchmark Level 1, penegakan hak akses non-root ContainerUser, konfigurasi read-only, serta integrasi pemindaian kerentanan otomatis sebagai automated quality gate.
+> **2. Standardisasi & Pengerasan Keamanan (CIS Benchmark)**  
+> Memastikan container dan server Anda siap lolos audit keamanan perbankan melalui penerapan standar CIS Benchmark Level 1, penegakan hak akses non-root, dan pemindaian celah keamanan otomatis di pipeline rilis.
 
 > [!IMPORTANT]
-> **3. Autonomous SRE Diagnostics & Incident Reduction Platform**  
-> Implementasi mesin penentu keputusan insiden deterministik untuk mereduksi MTTR dari jam menjadi < 3 detik, mengeliminasi alert fatigue, dan menyajikan laporan forensik 7-seksi berstandar SRE langsung ke tim on-call.
+> **3. Diagnostik Insiden Otomatis (MTTR < 3 Detik)**  
+> Mengatasi masalah crash aplikasi, memori bocor (OOM), dan thread jenuh secara instan. Sistem otomatis menganalisis akar masalah dan mengirimkan laporan forensik lengkap langsung ke tim on-call.
 
 ---
 
-### 🔒 Akses Blueprint Arsitektur & Demonstrasi Privat
+### 🔒 Akses Blueprint Arsitektur & Sesi Demo Khusus
 
-Dalam rangka melindungi hak kekayaan intelektual (IP) dan kerahasiaan teknologi komersial, dokumentasi arsitektur mendalam, blueprint teknis, serta demonstrasi langsung (*private live demo*) kini dialihkan melalui jalur konsultasi langsung.
+Untuk melindungi kekayaan intelektual (IP) serta menjaga kepatuhan komersial, blueprint arsitektur detail, modul internal, dan sesi demo langsung (*private live demo*) kini kami sediakan melalui jalur konsultasi langsung.
 
-[👉 **Hubungi Eddy Wiyatno untuk Diskusi Kemitraan & Penjajakan Teknis →**]({{< relref "contact" >}})
+[👉 **Hubungi Saya untuk Jadwal Konsultasi & Demo →**]({{< relref "contact" >}})
