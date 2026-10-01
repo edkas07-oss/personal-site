@@ -8,6 +8,8 @@ buildDrafts = false
 buildFuture = false
 enableEmoji = true
 
+ignoreFiles = ["content/projects/.*", "content/journals/.*", "content/how-to/.*", "content/packages/.*"]
+
 [taxonomies]
   tag = "tags"
   category = "categories"

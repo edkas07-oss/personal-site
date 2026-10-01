@@ -25,11 +25,10 @@ smartTOCHideUnfocusedChildren = true
 
 [homepage]
   layout = "custom"
-  showRecent = true
-  showRecentItems = 6
-  showMoreLink = true
-  showMoreLinkDest = "journals"
-  cardView = true
+  showRecent = false
+  showRecentItems = 0
+  showMoreLink = false
+  cardView = false
   cardViewScreenWidth = false
 
 [article]
