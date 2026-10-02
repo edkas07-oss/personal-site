@@ -7,8 +7,10 @@ license = "Apache 2.0"
 weight = 1
 summary = "Single static CLI tool untuk manajemen lifecycle container, CIS hardening, konfigurasi TLS PKCS#12 & PEM, host bind-mount (conf:ro), tuning memori JVM dinamis (bin/setenv), dan orkestrasi GitOps di Linux & Windows Server."
 tags = ["Go 1.23+ Static", "Zero Runtime Dependencies", "Windows Server (Docker)", "Linux (Podman)"]
-guide_url = "/how-to/implement-pure-pull-based-gitops-and-ci-promotion-tomcat/"
-guide_label = "Panduan GitOps & Otomasi CI"
+project_url = "/projects/tcctl/"
+project_label = "Platform Blueprint & 7 Pilar"
+guide_url = "/how-to/deploy-tomcat-container-windows-server-tcctl/"
+guide_label = "Panduan Deploy Tomcat"
 repo_url = "https://github.com/edkas07-oss/tcctl"
 
 [[downloads]]

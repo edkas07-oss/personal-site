@@ -2,14 +2,14 @@
 title = "Tomcat Monitoring & Autonomous Diagnostic Platform"
 date = "2026-09-20T21:00:00+07:00"
 draft = false
-summary = "Platform pemantauan dan diagnosa insiden otonom untuk Apache Tomcat di lingkungan multi-OS (Linux & Windows) dengan kebijakan Zero Destructive Auto-Remediation, korelasi bukti forensik deterministik, dan modul terpadu: tm-agent dan diagnostic service."
+summary = "Platform pemantauan dan diagnosa insiden otonom untuk Apache Tomcat di lingkungan multi-OS (Linux & Windows) dengan kebijakan Zero Destructive Auto-Remediation, korelasi bukti forensik deterministik, dan tiga modul terpadu: tmctl, tm-agent, dan diagnostic service."
 author = "Eddy Wiyatno"
 categories = ["SRE", "Observability", "Platform Engineering"]
 tags = ["tomcat", "sre", "observability", "golang", "nodejs", "podman", "docker", "prometheus", "alertmanager"]
 series = ["Tomcat Autonomous Diagnostic Platform"]
 toc = true
 showSummary = true
-modules_subtitle = "Perangkat lunak mandiri yang menopang observabilitas dan diagnosa otonom Tomcat."
+modules_subtitle = "Tiga perangkat lunak mandiri yang menopang observabilitas dan diagnosa otonom Tomcat."
 +++
 
 {{< lead >}}
@@ -112,17 +112,23 @@ Arsitektur platform ini dikunci oleh seperangkat keputusan arsitektur resmi (*Ar
 
 ---
 
-## 📦 Modul Kunci Platform
+## 📦 Tiga Modul Kunci Platform
 
-Platform ini ditopang oleh pilar perangkat lunak mandiri yang saling berkolaborasi:
+Platform ini ditopang oleh 3 pilar perangkat lunak mandiri yang saling berkolaborasi:
 
-### 1. [tm-agent — High-Throughput Event Collector Daemon]({{< ref "projects/tomcat-monitoring/tm-agent" >}})
+### 1. [tmctl — Unified Cross-Platform Operator CLI]({{< ref "projects/tomcat-monitoring/tmctl" >}})
+* **Bahasa & Arsitektur:** Go 1.23+ (Single Static Binary, Zero Dependency).
+* **Fokus Rekayasa:** Pengganti skrip imperatif shell. Mengorkestrasi container lifecycle, validasi kepatuhan platform (*compliance checks*), sinkronisasi aturan diagnosa (*rulepacks*), dan mekanisme *stateful rollback* saat health probe gagal.
+* **Keunggulan:** Komunikasi socket native (Podman Unix Socket & Windows Named Pipe `\\.\pipe\docker_engine`), response JSON terstruktur tanpa text scraping (`grep`/`awk`).
+* [👉 Pelajari Arsitektur & Perintah `tmctl` →]({{< ref "projects/tomcat-monitoring/tmctl" >}})
+
+### 2. [tm-agent — High-Throughput Event Collector Daemon]({{< ref "projects/tomcat-monitoring/tm-agent" >}})
 * **Bahasa & Arsitektur:** Go 1.23+ (Lightweight Background Daemon).
 * **Fokus Rekayasa:** Mengonsumsi event stream lifecycle container secara real-time langsung dari engine socket.
 * **Keunggulan:** Deteksi instan (<10ms) untuk kejadian *OOM-Killed*, exit code 137, dan kematian proses mendadak. Menggunakan teknik *atomic file write* (`.tmp` $\rightarrow$ `.json` rename) pada direktori spool berizin `0700` untuk mencegah *race condition* saat dibaca oleh Diagnostic Service.
 * [👉 Pelajari Pipeline Event `tm-agent` →]({{< ref "projects/tomcat-monitoring/tm-agent" >}})
 
-### 2. [Tomcat Diagnostic Service — Autonomous Decision Authority]({{< ref "projects/tomcat-monitoring/diagnostic-service" >}})
+### 3. [Tomcat Diagnostic Service — Autonomous Decision Authority]({{< ref "projects/tomcat-monitoring/diagnostic-service" >}})
 * **Bahasa & Arsitektur:** Node.js 24 LTS (Deterministic Multi-Domain Rulepack Engine).
 * **Fokus Rekayasa:** Otak analisis insiden. Menerima webhook Alertmanager, mengorelasikan telemetri metrik Prometheus dengan log Tomcat dan event spool `tm-agent`.
 * **Keunggulan:** Mengklasifikasikan insiden ke dalam **8 Failure Domain Taxonomy**, mencatat histori insiden ke SQLite lokal, dan mendistribusikan laporan insiden kanonikal 7-seksi dengan rekomendasi SOP SRE via email SMTP.

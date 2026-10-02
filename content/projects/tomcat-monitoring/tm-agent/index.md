@@ -127,4 +127,4 @@ tm-agent --run-once --spool-dir /opt/tm-home/spool
 ## 🔗 Bagian dari Platform
 Halaman ini merupakan sub-modul dari:
 * [**Tomcat Monitoring & Autonomous Diagnostic Platform**]({{< ref "projects/tomcat-monitoring" >}})
-* Sub-modul lainnya: [**Diagnostic Service**]({{< ref "projects/tomcat-monitoring/diagnostic-service" >}})
+* Sub-modul lainnya: [**tmctl**]({{< ref "projects/tomcat-monitoring/tmctl" >}}) · [**Diagnostic Service**]({{< ref "projects/tomcat-monitoring/diagnostic-service" >}})

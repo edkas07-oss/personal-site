@@ -124,4 +124,4 @@ Diagnostic Service mendukung injeksi dan pembaruan aturan diagnosa melalui endpo
 ## 🔗 Bagian dari Platform
 Halaman ini merupakan sub-modul dari:
 * [**Tomcat Monitoring & Autonomous Diagnostic Platform**]({{< ref "projects/tomcat-monitoring" >}})
-* Sub-modul lainnya: [**tm-agent**]({{< ref "projects/tomcat-monitoring/tm-agent" >}})
+* Sub-modul lainnya: [**tmctl**]({{< ref "projects/tomcat-monitoring/tmctl" >}}) · [**tm-agent**]({{< ref "projects/tomcat-monitoring/tm-agent" >}})
