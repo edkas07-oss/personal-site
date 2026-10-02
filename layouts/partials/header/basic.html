@@ -3,8 +3,14 @@
     Home
   </a>
 
-
-  <div class="flex items-center ms-auto">
+  {{/* ── Center Teaser: Tomcat Super Module (tcctl) ── */}}
+  <div class="ew-header-teaser-wrapper">
+    <a href="{{ "/packages/tcctl/" | relLangURL }}" class="ew-header-teaser" title="Apache Tomcat Enterprise Super Module (tcctl)">
+      <span class="ew-header-teaser__title">Tomcat Super Module (tcctl)</span>
+      <span class="ew-header-teaser__arrow">&rarr;</span>
+      <span class="ew-header-teaser__badge">Tool</span>
+    </a>
+  </div>
     <div class="hidden md:flex">
       {{ partial "header/components/desktop-menu.html" . }}
     </div>
