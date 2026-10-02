@@ -1,41 +1,45 @@
-{{/* Custom homepage: Strategic Transformation & Enterprise Solutions (IP-Protected) */}}
+{{/* Custom homepage: full-width hero + article grid */}}
 
-{{/* ── 1. HERO BANNER ────────────────────────────────────────────────── */}}
+{{/* ── Build-time: embed all articles as JSON for JS runtime ────────── */}}
+{{ $articles := where .Site.RegularPages "Section" "journals" }}
+<script>
+  window.__EW_ARTICLES__ = [
+    {{ range $articles -}}
+    {
+      title: {{ .Title | htmlUnescape | jsonify | safeJS }},
+      url:   {{ .RelPermalink | jsonify | safeJS }},
+      cat:   {{ with .Params.categories }}{{ index . 0 | jsonify | safeJS }}{{ else }}""{{ end }},
+      date:  {{ .Date.Format "2 Jan 2006" | jsonify | safeJS }}
+    },
+    {{ end }}
+  ];
+</script>
+
+{{/* ── 1. HERO BANNER ──────────────────────────────────────────────── */}}
 <section class="ew-hero">
   <div class="ew-hero__inner">
 
     <div class="ew-hero__left">
-      <div class="ew-commercial-pill">
-        <span class="pill-dot"></span>
-        <span>Solusi &amp; Konsultasi Modernisasi Java Enterprise</span>
-      </div>
-
-      <p class="ew-hero__eyebrow">Platform Engineering · SRE · DevOps Architecture</p>
+      <p class="ew-hero__eyebrow">Platform Engineering · SRE · DevOps</p>
       <h1 class="ew-hero__name">Eddy Wiyatno</h1>
-      <p class="ew-hero__role">Principal Systems &amp; DevOps Architect</p>
-      
-      <p class="ew-hero__bio">
-        Selamat datang. Website ini sedang saya persiapkan untuk menghadirkan <strong>layanan konsultasi arsitektur, modernisasi sistem, dan solusi keandalan Java skala enterprise</strong>.
-        <br><br>
-        Berdasarkan pengalaman panjang menangani infrastruktur produksi berskala besar, saya membantu perusahaan memindahkan aplikasi Java dan Apache Tomcat dari server fisik atau VM lama ke arsitektur container modern (Linux &amp; Windows Server) — lengkap dengan standar keamanan <strong>CIS Benchmark</strong>, proses rilis <strong>tanpa downtime</strong>, dan sistem <strong>diagnosa insiden otomatis (MTTR &lt; 3 detik)</strong>.
-      </p>
-
-      <div class="ew-hero-badges">
-        <span class="ew-hero-badge">🛡️ Kepatuhan CIS Benchmark</span>
-        <span class="ew-hero-badge">🌐 Multi-OS (Linux &amp; Windows Server)</span>
-        <span class="ew-hero-badge">⚡ Akses Langsung Socket Engine</span>
-        <span class="ew-hero-badge">🤖 Diagnosa Insiden &lt; 3 Detik</span>
-        <span class="ew-hero-badge">🔒 Kerahasiaan &amp; Demo Privat</span>
-      </div>
-
+      <p class="ew-hero__role">Senior DevOps &amp; Site Reliability Engineer</p>
       <div class="ew-hero__divider"></div>
 
-      <div class="ew-hero__cta flex-wrap gap-3">
-        <a href="{{ "/contact/" | relLangURL }}" class="ew-btn ew-btn--primary">
-          💬 Hubungi Saya untuk Konsultasi →
+      {{/* Dynamic random article highlight — rendered by JS on each page load */}}
+      <div class="ew-spotlight" id="ew-spotlight" style="display:none;" aria-live="polite">
+        <div class="ew-spotlight__header">
+          <span class="ew-spotlight__label">📖 Rekomendasi Jurnal</span>
+          <button class="ew-spotlight__shuffle" id="ew-spotlight-shuffle" title="Pilih jurnal lain" aria-label="Shuffle jurnal">↻</button>
+        </div>
+        <a class="ew-spotlight__link" id="ew-spotlight-link" href="#"></a>
+      </div>
+
+      <div class="ew-hero__cta">
+        <a href="{{ "/journals/" | relLangURL }}" id="ew-cta-read" class="ew-btn ew-btn--primary">
+          Baca Jurnal →
         </a>
-        <a href="mailto:edkas07@gmail.com" class="ew-btn ew-btn--ghost">
-          📧 edkas07@gmail.com
+        <a href="{{ "/journals/" | relLangURL }}" class="ew-btn ew-btn--ghost">
+          Semua Jurnal
         </a>
         <a href="https://github.com/edkas07-oss" target="_blank" rel="noopener" class="ew-btn ew-btn--ghost">
           GitHub
@@ -45,214 +49,354 @@
 
     <div class="ew-hero__right">
       <div class="ew-stack__grid">
-        <span class="ew-stack__item font-bold text-blue-300">Modernisasi Java</span>
-        <span class="ew-stack__item">Standar CIS</span>
-        <span class="ew-stack__item">Engine Socket</span>
-        <span class="ew-stack__item font-bold text-emerald-300">MTTR &lt; 3 Detik</span>
-        <span class="ew-stack__item">Windows NanoServer</span>
-        <span class="ew-stack__item">Linux Podman</span>
-        <span class="ew-stack__item font-bold text-purple-300">GitOps Otomatis</span>
-        <span class="ew-stack__item">Rilis Zero-Downtime</span>
-        <span class="ew-stack__item">Air-Gapped Offline</span>
-        <span class="ew-stack__item">Keamanan TLS</span>
-        <span class="ew-stack__item">Tuning Memori JVM</span>
-        <span class="ew-stack__item font-bold text-sky-300">Tata Kelola SRE</span>
+        <span class="ew-stack__item">Observability</span>
+        <span class="ew-stack__item">Container Technology</span>
+        <span class="ew-stack__item">System Integration</span>
+        <span class="ew-stack__item">Incident Response</span>
+        <span class="ew-stack__item">Platform Engineering</span>
+        <span class="ew-stack__item">Infrastructure as Code</span>
+        <span class="ew-stack__item">CI/CD Pipeline</span>
+        <span class="ew-stack__item">GitOps</span>
+        <span class="ew-stack__item">SRE Governance</span>
+        <span class="ew-stack__item">High Availability</span>
+        <span class="ew-stack__item">Fleet Orchestration</span>
+        <span class="ew-stack__item">Cloud Native</span>
       </div>
     </div>
+
 
   </div>
 </section>
 
-{{/* ── 2. LAYANAN & SOLUSI UNGGULAN ───────────────────────────────────── */}}
-<section class="ew-solutions-section">
+{{/* ── JS: random pick per page load + fade-in + shuffle button ─────── */}}
+<script>
+(function () {
+  var articles = (window.__EW_ARTICLES__ || []).filter(function (a) {
+    return a.title && a.url && a.url.indexOf('/journals/') !== -1;
+  });
+  if (!articles.length) return;
+
+  var wrapper  = document.getElementById('ew-spotlight');
+  var link     = document.getElementById('ew-spotlight-link');
+  var shuffleBtn = document.getElementById('ew-spotlight-shuffle');
+  if (!wrapper || !link) return;
+
+  var lastIdx = -1;
+
+  function pickRandom() {
+    if (articles.length === 1) return 0;
+    var idx;
+    do { idx = Math.floor(Math.random() * articles.length); } while (idx === lastIdx);
+    lastIdx = idx;
+    return idx;
+  }
+
+  function fadeIn(el, cb) {
+    el.style.opacity = '0';
+    el.style.display = 'flex';
+    el.style.transition = 'opacity 0.55s ease';
+    requestAnimationFrame(function () {
+      requestAnimationFrame(function () {
+        el.style.opacity = '1';
+        if (cb) cb();
+      });
+    });
+  }
+
+  function fadeOut(el, cb) {
+    el.style.transition = 'opacity 0.25s ease';
+    el.style.opacity = '0';
+    setTimeout(cb, 280);
+  }
+
+  var ctaBtn = document.getElementById('ew-cta-read');
+
+  function render(idx) {
+    var a = articles[idx];
+    link.href        = a.url;
+    link.textContent = a.title;
+    /* Sync tombol CTA utama ke jurnal spotlight */
+    if (ctaBtn) {
+      ctaBtn.href        = a.url;
+      ctaBtn.textContent = 'Baca Jurnal →';
+    }
+  }
+
+  /* Initial load */
+  render(pickRandom());
+  fadeIn(wrapper);
+
+  /* Shuffle button */
+  if (shuffleBtn) {
+    shuffleBtn.addEventListener('click', function () {
+      fadeOut(wrapper, function () {
+        render(pickRandom());
+        fadeIn(wrapper);
+      });
+    });
+  }
+})();
+</script>
+
+{{/* ── 1.5. FEATURED PLATFORMS & MODULES (SCROLL REVEAL ANIMATION) ──── */}}
+<section class="ew-featured-section">
   <div class="ew-featured-section__header ew-reveal">
     <div class="flex items-center justify-between gap-4 flex-wrap">
       <div>
-        <p class="ew-hero__eyebrow mb-1">Fokus Layanan &amp; Solusi</p>
-        <h2 class="ew-articles__title">Layanan Modernisasi &amp; Keandalan Sistem</h2>
+        <p class="ew-hero__eyebrow mb-1">Produk &amp; Modul Karya Mandiri</p>
+        <h2 class="ew-articles__title">Platform &amp; Komponen Unggulan</h2>
       </div>
-      <a href="{{ "/contact/" | relLangURL }}" class="ew-articles__more">
-        Diskusikan Kebutuhan Perusahaan Anda →
+      <a href="{{ "/projects/" | relLangURL }}" class="ew-articles__more">
+        Semua Proyek &amp; Platform →
       </a>
     </div>
     <p class="text-sm sm:text-base text-neutral-600 dark:text-neutral-400 mt-2 max-w-none w-full">
-      Solusi komprehensif untuk membantu tim Anda memodernisasi aplikasi Java dengan aman, cepat, dan teruji di lingkungan produksi.
+      Koleksi platform dan modul sistem yang saya bangun berdasarkan kebutuhan nyata di skala enterprise.
     </p>
   </div>
 
-  <div class="ew-solutions-grid">
-    
-    {{/* Pillar 1: Modernisasi & Migrasi */}}
-    <div class="ew-solution-card featured ew-reveal ew-reveal-delay-1">
-      <div class="ew-solution-icon">🚀</div>
-      <div class="ew-solution-target text-purple-300">Modernisasi Aplikasi / Cloud Migration</div>
-      <h3 class="ew-solution-title">Migrasi Java &amp; Tomcat ke Container</h3>
-      <p class="ew-solution-desc">
-        Bantu tim Anda memindahkan aplikasi Java dan Tomcat dari VM lama ke container (Podman, Docker, atau Kubernetes) tanpa risiko downtime, lengkap dengan optimasi memori JVM dan keamanan TLS.
-      </p>
-      <ul class="ew-solution-features">
-        <li>
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
-          <span>Rollout bertahap tanpa memutus layanan pengguna (zero-downtime)</span>
-        </li>
-        <li>
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
-          <span>Penyetelan memori JVM &amp; garbage collection agar efisien dan stabil</span>
-        </li>
-        <li>
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
-          <span>Kompatibel penuh untuk Linux maupun Windows Server (NanoServer)</span>
-        </li>
-      </ul>
-      <div class="ew-solution-cta">
-        <a href="{{ "/contact/" | relLangURL }}" class="ew-btn ew-btn--primary w-full text-center text-xs py-2">
-          Jadwalkan Konsultasi Teknis →
-        </a>
-      </div>
-    </div>
+  <div class="flex flex-col gap-8">
+    {{/* ── Banner 1: Apache Tomcat Enterprise Super Module (tcctl) ── */}}
+    <div class="ew-featured-banner ew-reveal ew-reveal-delay-1">
+      <div class="ew-featured-banner__content">
+        <div class="flex flex-wrap items-center gap-2 mb-3">
+          <span class="ew-tag ew-tag--cat">Flagship Platform</span>
+          <span class="ew-fs-badge ew-fs--blue">Platform Engineering &amp; GitOps</span>
+          <span class="ew-fs-badge ew-fs--purple">Multi-OS</span>
+          <span class="ew-fs-badge ew-fs--green">CIS Benchmark &amp; Zero-Git</span>
+        </div>
 
-    {{/* Pillar 2: Security Hardening */}}
-    <div class="ew-solution-card ew-reveal ew-reveal-delay-2">
-      <div class="ew-solution-icon">🛡️</div>
-      <div class="ew-solution-target">Keamanan, Kepatuhan &amp; Tata Kelola</div>
-      <h3 class="ew-solution-title">Standardisasi &amp; Pengerasan Keamanan (CIS)</h3>
-      <p class="ew-solution-desc">
-        Memastikan container dan server Anda siap lolos audit keamanan perbankan melalui penerapan standar CIS Benchmark Level 1 dan pembatasan hak akses non-root.
-      </p>
-      <ul class="ew-solution-features">
-        <li>
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
-          <span>Audit konfigurasi otomatis berbasis 9 aturan CIS Benchmark</span>
-        </li>
-        <li>
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
-          <span>Menjalankan container tanpa akses root (ContainerUser)</span>
-        </li>
-        <li>
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
-          <span>Pemindaian celah keamanan otomatis di pipeline rilis</span>
-        </li>
-      </ul>
-      <div class="ew-solution-cta">
-        <a href="{{ "/contact/" | relLangURL }}" class="ew-btn ew-btn--ghost w-full text-center text-xs py-2">
-          Pelajari Standar Keamanan →
-        </a>
-      </div>
-    </div>
-
-    {{/* Pillar 3: Autonomous SRE Diagnostics */}}
-    <div class="ew-solution-card ew-reveal ew-reveal-delay-3">
-      <div class="ew-solution-icon">🤖</div>
-      <div class="ew-solution-target">SRE, Monitoring &amp; Tim Operasional</div>
-      <h3 class="ew-solution-title">Diagnostik Insiden Otomatis (MTTR &lt; 3s)</h3>
-      <p class="ew-solution-desc">
-        Mengatasi masalah crash aplikasi, memori bocor (OOM), dan thread jenuh secara instan. Sistem otomatis menganalisis akar masalah dan mengirimkan laporan forensik lengkap ke tim on-call.
-      </p>
-      <ul class="ew-solution-features">
-        <li>
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
-          <span>Analisis akar masalah deterministik dalam &lt; 3 detik</span>
-        </li>
-        <li>
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
-          <span>Notifikasi bertingkat: alert cepat L1 &amp; laporan mendalam L2</span>
-        </li>
-        <li>
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
-          <span>Menghilangkan alert fatigue dan mempercepat pemulihan layanan</span>
-        </li>
-      </ul>
-      <div class="ew-solution-cta">
-        <a href="{{ "/contact/" | relLangURL }}" class="ew-btn ew-btn--ghost w-full text-center text-xs py-2">
-          Diskusikan Solusi Diagnostik →
-        </a>
-      </div>
-    </div>
-
-  </div>
-</section>
-
-{{/* ── 3. MENGAPA PENDEKATAN INI BERBEDA? ─────────────────────────────── */}}
-<section class="ew-value-section">
-  <div class="ew-featured-section__header ew-reveal">
-    <h2 class="ew-articles__title">Mengapa Memilih Solusi Ini?</h2>
-    <p class="text-sm sm:text-base text-neutral-600 dark:text-neutral-400 mt-2 max-w-none w-full">
-      Dirancang dari pengalaman lapangan untuk menjawab tantangan nyata di lingkungan produksi perbankan dan enterprise.
-    </p>
-  </div>
-
-  <div class="ew-value-grid">
-    <div class="ew-value-card ew-reveal ew-reveal-delay-1">
-      <div class="ew-value-icon">🔒</div>
-      <h3 class="ew-value-title">Siap Audit Keamanan</h3>
-      <p class="ew-value-desc">Memenuhi standar kepatuhan industri finansial dengan audit CIS Benchmark dan proteksi non-root.</p>
-    </div>
-
-    <div class="ew-value-card ew-reveal ew-reveal-delay-2">
-      <div class="ew-value-icon">⚡</div>
-      <h3 class="ew-value-title">Komunikasi Direct Socket</h3>
-      <p class="ew-value-desc">Mengakses socket engine secara langsung tanpa dependensi CLI tambahan yang rentan proses macet.</p>
-    </div>
-
-    <div class="ew-value-card ew-reveal ew-reveal-delay-3">
-      <div class="ew-value-icon">📦</div>
-      <h3 class="ew-value-title">Siap untuk Datacenter Offline</h3>
-      <p class="ew-value-desc">Dapat diinstal di server on-premise atau datacenter terisolasi tanpa memerlukan internet.</p>
-    </div>
-
-    <div class="ew-value-card ew-reveal ew-reveal-delay-4">
-      <div class="ew-value-icon">⏱️</div>
-      <h3 class="ew-value-title">Pemulihan Cepat (MTTR &lt; 3s)</h3>
-      <p class="ew-value-desc">Keputusan insiden otonom dan rekomendasi mitigasi presisi untuk menjaga uptime aplikasi.</p>
-    </div>
-  </div>
-</section>
-
-{{/* ── 4. KERAHASIAAN & SESI DEMO KHUSUS ──────────────────────────────── */}}
-<section class="ew-featured-section ew-reveal">
-  <div class="ew-featured-banner p-6 sm:p-8 border border-blue-900/50 bg-slate-900/60 rounded-xl">
-    <div class="flex items-start gap-4">
-      <span class="text-3xl flex-shrink-0">🔒</span>
-      <div>
-        <h3 class="text-lg sm:text-xl font-bold text-white mb-2">
-          Akses Blueprint Arsitektur &amp; Sesi Demo Khusus
+        <h3 class="text-xl sm:text-2xl font-bold text-white mb-2 tracking-tight">
+          <a href="{{ "/projects/tcctl/" | relLangURL }}" class="hover:text-blue-400 transition-colors">
+            Apache Tomcat Enterprise Super Module (tcctl)
+          </a>
         </h3>
-        <p class="text-slate-300 text-xs sm:text-sm leading-relaxed mb-4">
-          Untuk melindungi kekayaan intelektual (IP) serta menjaga kepatuhan komersial, blueprint arsitektur detail, modul internal, dan sesi demo langsung (<em>private live demo</em>) kini kami sediakan melalui jalur konsultasi langsung.
+
+        <p class="text-slate-300 text-xs sm:text-sm leading-relaxed mb-6 max-w-none w-full">
+          Platform operator terpadu (Super Module) berbasis Go untuk tata kelola siklus hidup, security hardening CIS Benchmark, audit kerentanan Trivy, GitOps otonom (<strong>Zero-Git</strong> via Gitea REST API), dynamic JVM tuning, dan zero-downtime temporary staging rollout Apache Tomcat di Windows Server dan Linux.
         </p>
-        <div class="flex flex-wrap items-center gap-3">
-          <a href="{{ "/contact/" | relLangURL }}" class="ew-btn ew-btn--primary text-xs sm:text-sm py-2 px-4">
-            💬 Hubungi Saya untuk Jadwal Demo →
+
+        {{/* 3 Modules Grid */}}
+        <div class="ew-featured-modules-grid">
+          
+          <a href="{{ "/projects/tcctl/staging-rollout/" | relLangURL }}" class="ew-feat-module-card ew-reveal-pop ew-reveal-delay-2 group">
+            <div class="flex items-center justify-between mb-2">
+              <span class="text-xl">🚀</span>
+              <span class="text-[11px] font-bold text-blue-400 uppercase tracking-wider font-mono">Go Staging Rollout</span>
+            </div>
+            <h4 class="text-sm font-bold text-white group-hover:text-blue-300 transition-colors mb-1">
+              tcctl deploy
+            </h4>
+            <p class="text-xs text-slate-300 leading-relaxed line-clamp-2">
+              Zero-downtime temporary staging rollout (:9080 &rarr; :8080), dynamic bin/setenv JVM memory tuning, dan safe rollback atomik.
+            </p>
+            <span class="mt-2 inline-flex items-center gap-1 text-xs font-semibold text-blue-400 group-hover:underline">
+              Detail Modul →
+            </span>
           </a>
-          <a href="mailto:edkas07@gmail.com" class="ew-btn ew-btn--ghost text-xs sm:text-sm py-2 px-4 text-slate-300 border-slate-600 hover:border-blue-400">
-            📧 Kirim Email Langsung
+
+          <a href="{{ "/projects/tcctl/hardening-audit/" | relLangURL }}" class="ew-feat-module-card ew-reveal-pop ew-reveal-delay-3 group">
+            <div class="flex items-center justify-between mb-2">
+              <span class="text-xl">🛡️</span>
+              <span class="text-[11px] font-bold text-emerald-400 uppercase tracking-wider font-mono">CIS Benchmark &amp; VA</span>
+            </div>
+            <h4 class="text-sm font-bold text-white group-hover:text-emerald-300 transition-colors mb-1">
+              tcctl hardening &amp; va
+            </h4>
+            <p class="text-xs text-slate-300 leading-relaxed line-clamp-2">
+              Audit statis 9 aturan CIS Benchmark untuk XML Tomcat, penegakan non-root ContainerUser, dan scanner Trivy sebagai CI quality gate.
+            </p>
+            <span class="mt-2 inline-flex items-center gap-1 text-xs font-semibold text-emerald-400 group-hover:underline">
+              Detail Modul →
+            </span>
           </a>
+
+          <a href="{{ "/projects/tcctl/gitops-reconciler/" | relLangURL }}" class="ew-feat-module-card ew-reveal-pop ew-reveal-delay-4 group">
+            <div class="flex items-center justify-between mb-2">
+              <span class="text-xl">🔄</span>
+              <span class="text-[11px] font-bold text-purple-400 uppercase tracking-wider font-mono">Zero-Git Reconciler</span>
+            </div>
+            <h4 class="text-sm font-bold text-white group-hover:text-purple-300 transition-colors mb-1">
+              tcctl gitops
+            </h4>
+            <p class="text-xs text-slate-300 leading-relaxed line-clamp-2">
+              Rekonsiliator GitOps otonom berbasis REST API Gitea (Zero-Git dependency), deteksi drift atomik, dan eksekusi background daemon.
+            </p>
+            <span class="mt-2 inline-flex items-center gap-1 text-xs font-semibold text-purple-400 group-hover:underline">
+              Detail Modul →
+            </span>
+          </a>
+
+        </div>
+
+        {{/* Action Link */}}
+        <div class="mt-6 pt-4 border-t border-blue-900/60 flex flex-wrap items-center justify-between gap-4">
+          <div class="flex flex-wrap gap-3">
+            <a href="{{ "/projects/tcctl/" | relLangURL }}" class="ew-btn ew-btn--primary text-xs sm:text-sm py-2 px-4">
+              📖 Buka Blueprint Super Module →
+            </a>
+            <a href="{{ "/packages/tcctl/" | relLangURL }}" class="ew-btn ew-btn--ghost text-xs sm:text-sm py-2 px-3 text-slate-300 border-slate-600 hover:border-blue-400">
+              📦 Unduh Biner di Packages →
+            </a>
+          </div>
+          <div class="flex items-center gap-2 text-xs text-slate-400">
+            <span>Runtime:</span>
+            <span class="text-slate-300 font-mono">Windows (Docker)</span> ·
+            <span class="text-slate-300 font-mono">Linux (Podman)</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    {{/* ── Banner 2: Tomcat Monitoring & Autonomous Diagnostic Platform ── */}}
+    <div class="ew-featured-banner ew-reveal ew-reveal-delay-2">
+      <div class="ew-featured-banner__content">
+        <div class="flex flex-wrap items-center gap-2 mb-3">
+          <span class="ew-tag ew-tag--cat">Flagship Platform</span>
+          <span class="ew-fs-badge ew-fs--blue">SRE &amp; Observability</span>
+          <span class="ew-fs-badge ew-fs--purple">Multi-OS</span>
+          <span class="ew-fs-badge ew-fs--green">Zero Auto-Remediation</span>
+        </div>
+
+        <h3 class="text-xl sm:text-2xl font-bold text-white mb-2 tracking-tight">
+          <a href="{{ "/projects/tomcat-monitoring/" | relLangURL }}" class="hover:text-blue-400 transition-colors">
+            Tomcat Monitoring &amp; Autonomous Diagnostic Platform
+          </a>
+        </h3>
+
+        <p class="text-slate-300 text-xs sm:text-sm leading-relaxed mb-6 max-w-none w-full">
+          Platform observabilitas dan penentu keputusan insiden otonom untuk runtime Apache Tomcat di lingkungan Linux (Podman rootless) dan Windows Server (Docker). Menerapkan kebijakan <strong>Zero Destructive Auto-Remediation</strong> (TM-ADR-0014) dan korelasi bukti forensik multi-sumber.
+        </p>
+
+        {{/* 3 Modules Grid */}}
+        <div class="ew-featured-modules-grid">
+          
+          <a href="{{ "/projects/tomcat-monitoring/tmctl/" | relLangURL }}" class="ew-feat-module-card ew-reveal-pop ew-reveal-delay-2 group">
+            <div class="flex items-center justify-between mb-2">
+              <span class="text-xl">🛠️</span>
+              <span class="text-[11px] font-bold text-blue-400 uppercase tracking-wider font-mono">Go CLI</span>
+            </div>
+            <h4 class="text-sm font-bold text-white group-hover:text-blue-300 transition-colors mb-1">
+              tmctl
+            </h4>
+            <p class="text-xs text-slate-300 leading-relaxed line-clamp-2">
+              Operator CLI via direct socket API (Podman Unix Socket &amp; Windows Named Pipe) dengan safe rollback.
+            </p>
+            <span class="mt-2 inline-flex items-center gap-1 text-xs font-semibold text-blue-400 group-hover:underline">
+              Detail Modul →
+            </span>
+          </a>
+
+          <a href="{{ "/projects/tomcat-monitoring/tm-agent/" | relLangURL }}" class="ew-feat-module-card ew-reveal-pop ew-reveal-delay-3 group">
+            <div class="flex items-center justify-between mb-2">
+              <span class="text-xl">📦</span>
+              <span class="text-[11px] font-bold text-emerald-400 uppercase tracking-wider font-mono">Go Daemon</span>
+            </div>
+            <h4 class="text-sm font-bold text-white group-hover:text-emerald-300 transition-colors mb-1">
+              tm-agent
+            </h4>
+            <p class="text-xs text-slate-300 leading-relaxed line-clamp-2">
+              Streaming event lifecycle container real-time, deteksi OOM instan (&lt;10ms), dan spool atomik.
+            </p>
+            <span class="mt-2 inline-flex items-center gap-1 text-xs font-semibold text-emerald-400 group-hover:underline">
+              Detail Modul →
+            </span>
+          </a>
+
+          <a href="{{ "/projects/tomcat-monitoring/diagnostic-service/" | relLangURL }}" class="ew-feat-module-card ew-reveal-pop ew-reveal-delay-4 group">
+            <div class="flex items-center justify-between mb-2">
+              <span class="text-xl">🚀</span>
+              <span class="text-[11px] font-bold text-purple-400 uppercase tracking-wider font-mono">Node.js 24</span>
+            </div>
+            <h4 class="text-sm font-bold text-white group-hover:text-purple-300 transition-colors mb-1">
+              Diagnostic Service
+            </h4>
+            <p class="text-xs text-slate-300 leading-relaxed line-clamp-2">
+              Otoritas diagnosa otonom dengan taksonomi 8 failure domain dan pelaporan insiden 7-seksi via SMTP.
+            </p>
+            <span class="mt-2 inline-flex items-center gap-1 text-xs font-semibold text-purple-400 group-hover:underline">
+              Detail Modul →
+            </span>
+          </a>
+
+        </div>
+
+        {{/* Action Link */}}
+        <div class="mt-6 pt-4 border-t border-blue-900/60 flex flex-wrap items-center justify-between gap-4">
+          <a href="{{ "/projects/tomcat-monitoring/" | relLangURL }}" class="ew-btn ew-btn--primary text-xs sm:text-sm py-2 px-4">
+            📖 Buka Blueprint Arsitektur Platform →
+          </a>
+          <div class="flex items-center gap-2 text-xs text-slate-400">
+            <span>Orkestrasi:</span>
+            <span class="text-slate-300 font-mono">Podman</span> ·
+            <span class="text-slate-300 font-mono">Docker</span>
+          </div>
         </div>
       </div>
     </div>
   </div>
 </section>
 
-{{/* ── 5. BOTTOM CTA BANNER ─────────────────────────────────────────── */}}
-<section class="ew-bottom-cta ew-reveal">
-  <h2>Siap Memodernisasi Sistem Java di Perusahaan Anda?</h2>
-  <p>
-    Mari diskusikan kebutuhan infrastruktur Anda, jadwalkan sesi live demo, atau rencanakan pilot project bersama saya.
-  </p>
-  <div class="ew-bottom-cta-buttons">
-    <a href="{{ "/contact/" | relLangURL }}" class="ew-btn ew-btn--primary py-3 px-8 text-sm font-bold">
-      💬 Hubungi Saya Sekarang →
-    </a>
+{{/* ── 2. RECENT ARTICLES ───────────────────────────────────────────── */}}
+<section class="ew-articles">
+  <div class="ew-articles__header ew-reveal">
+    <h2 class="ew-articles__title">Jurnal Rekayasa Terbaru</h2>
+    <a href="{{ "/journals/" | relLangURL }}" class="ew-articles__more">Lihat Semua →</a>
+  </div>
+
+  <div class="ew-grid">
+    {{ range first 6 $articles }}
+    {{ $shortTitle := index (split .Title ":") 0 | strings.TrimRight " " }}
+    <article class="ew-card">
+      <div class="ew-card__body">
+        {{/* Category badges */}}
+        <div class="ew-card__cats">
+          {{ with .Params.categories }}
+            {{ range . }}
+            <span class="ew-tag ew-tag--cat">{{ . }}</span>
+            {{ end }}
+          {{ end }}
+        </div>
+
+        {{/* Date & reading time */}}
+        <div class="ew-card__meta">{{ .Date.Format "2 Jan 2006" }} · {{ .ReadingTime }} min</div>
+
+        {{/* Title: potong di titik dua */}}
+        <h3 class="ew-card__title">
+          <a href="{{ .RelPermalink }}" class="ew-card__link">{{ $shortTitle }}</a>
+        </h3>
+
+        {{/* Summary */}}
+        {{ with .Params.summary }}
+        <p class="ew-card__summary">{{ . }}</p>
+        {{ end }}
+
+        {{/* Baca: div sendiri, kanan, di atas garis */}}
+        <div class="ew-card__action">
+          <a href="{{ .RelPermalink }}" class="ew-card__read">Baca →</a>
+        </div>
+      </div>
+
+      {{/* Tags footer — hanya tags, dengan garis atas */}}
+      <div class="ew-card__footer">
+        {{ with .Params.tags }}
+          {{ range first 3 . }}
+          <span class="ew-tag">#{{ . }}</span>
+          {{ end }}
+        {{ end }}
+      </div>
+    </article>
+    {{ end }}
   </div>
 </section>
 
-{{/* ── 6. SCROLL REVEAL INTERSECTION OBSERVER ───────────────────────── */}}
+{{/* ── 3. SCROLL REVEAL INTERSECTION OBSERVER ───────────────────────── */}}
 <script>
 (function () {
-  var sections = document.querySelectorAll('.ew-featured-section, .ew-solutions-section, .ew-value-section, .ew-bottom-cta');
-  if (!sections.length) return;
+  var section = document.querySelector('.ew-featured-section');
+  if (!section) return;
 
-  var items = document.querySelectorAll('.ew-reveal, .ew-reveal-pop');
+  var items = section.querySelectorAll('.ew-reveal, .ew-reveal-pop');
 
   if (!('IntersectionObserver' in window)) {
     items.forEach(function (el) { el.classList.add('is-visible'); });
@@ -262,23 +406,32 @@
   var observer = new IntersectionObserver(function (entries) {
     entries.forEach(function (entry) {
       if (entry.isIntersecting) {
-        var localItems = entry.target.querySelectorAll('.ew-reveal, .ew-reveal-pop');
-        localItems.forEach(function (el) {
+        items.forEach(function (el) {
           el.classList.add('is-visible');
         });
-        if (entry.target.classList.contains('ew-reveal')) {
-          entry.target.classList.add('is-visible');
-        }
-        observer.unobserve(entry.target);
+        observer.unobserve(section);
       }
     });
   }, {
-    threshold: 0.08,
-    rootMargin: '0px 0px -40px 0px'
+    threshold: 0.12,
+    rootMargin: '0px 0px -80px 0px'
   });
 
-  sections.forEach(function (sec) {
-    observer.observe(sec);
-  });
+  observer.observe(section);
+
+  /* Also observe recent articles header */
+  var artHeader = document.querySelector('.ew-articles__header');
+  if (artHeader) {
+    var artObserver = new IntersectionObserver(function (entries) {
+      entries.forEach(function (entry) {
+        if (entry.isIntersecting) {
+          artHeader.classList.add('is-visible');
+          artObserver.unobserve(artHeader);
+        }
+      });
+    }, { threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
+    artObserver.observe(artHeader);
+  }
 })();
 </script>
+

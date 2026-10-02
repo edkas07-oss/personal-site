@@ -1,5 +1,5 @@
 +++
-title = "Layanan Solusi & Konsultasi Modernisasi Java Enterprise"
+title = "Home"
 date = "2026-09-19T15:00:00+07:00"
 draft = false
 +++
@@ -7,29 +7,43 @@ draft = false
 {{< lead >}}
 **Platform Engineering · SRE · DevOps Architecture**
 
-Selamat datang. Website ini sedang saya persiapkan untuk menghadirkan **layanan konsultasi arsitektur, modernisasi sistem, dan solusi keandalan Java skala enterprise**. Berdasarkan pengalaman panjang menangani infrastruktur produksi berskala besar, saya membantu perusahaan memindahkan aplikasi Java dan Apache Tomcat dari server fisik atau VM lama ke arsitektur container modern (Linux & Windows Server) — lengkap dengan standar keamanan **CIS Benchmark**, proses rilis **tanpa downtime**, dan sistem **diagnosa insiden otomatis (MTTR < 3 detik)**.
+Jurnal rekayasa, studi kasus sistem berskala enterprise, dan dokumentasi arsitektur teknis — dari *Autonomous Incident Diagnostics* hingga *Hybrid-Cloud Fleet Automation*.
 {{< /lead >}}
 
 ---
 
-### 🛡️ Fokus Layanan & Solusi
-
-> [!TIP]
-> **1. Migrasi Java & Tomcat ke Container**  
-> Membantu tim Anda memindahkan aplikasi Java dan Tomcat dari VM lama ke container (Podman, Docker, atau Kubernetes) tanpa risiko downtime, lengkap dengan optimasi memori JVM dan keamanan TLS.
+### 🚀 Platform Rekayasa Unggulan
 
 > [!NOTE]
-> **2. Standardisasi & Pengerasan Keamanan (CIS Benchmark)**  
-> Memastikan container dan server Anda siap lolos audit keamanan perbankan melalui penerapan standar CIS Benchmark Level 1, penegakan hak akses non-root, dan pemindaian celah keamanan otomatis di pipeline rilis.
+> **[Apache Tomcat Enterprise Super Module (tcctl)]({{< relref "projects/tcctl" >}})**
+> Operator CLI mandiri (*Super Module*) berbasis Go untuk standarisasi tata kelola 7 pilar: pre-flight audit CIS Benchmark 9 aturan, quality gate Trivy vulnerability scanner, rollout zero-downtime berbasis temporary staging container, proteksi host bind-mount (`conf:ro`), dynamic JVM tuning (`bin/setenv`), dan pure pull-based GitOps otonom di Windows Server dan Linux.
+> 
+> [👉 **Telusuri Blueprint Arsitektur Super Module tcctl →**]({{< relref "projects/tcctl" >}})
 
-> [!IMPORTANT]
-> **3. Diagnostik Insiden Otomatis (MTTR < 3 Detik)**  
-> Mengatasi masalah crash aplikasi, memori bocor (OOM), dan thread jenuh secara instan. Sistem otomatis menganalisis akar masalah dan mengirimkan laporan forensik lengkap langsung ke tim on-call.
+> [!NOTE]
+> **[Tomcat Monitoring & Autonomous Diagnostic Platform]({{< relref "projects/tomcat-monitoring" >}})**
+> Platform observabilitas end-to-end dan penentu keputusan insiden otonom untuk runtime Apache Tomcat di lingkungan multi-OS (Linux Podman rootless & Windows Server Docker). 
+> 
+> Didukung oleh tiga modul terpadu:
+> * **[`tmctl`]({{< relref "projects/tomcat-monitoring/tmctl" >}})** — Cross-Platform Operator CLI berbasis Go untuk orkestrasi via Container Engine Socket API.
+> * **[`tm-agent`]({{< relref "projects/tomcat-monitoring/tm-agent" >}})** — High-Throughput Event Collector Daemon berbasis Go dengan *atomic spool evidence*.
+> * **[`diagnostic service`]({{< relref "projects/tomcat-monitoring/diagnostic-service" >}})** — Mesin triage insiden deterministik berbasis Node.js 24 LTS dengan laporan 7-seksi kanonikal.
+> 
+> [👉 **Telusuri Blueprint Arsitektur Platform →**]({{< relref "projects/tomcat-monitoring" >}})
 
 ---
 
-### 🔒 Akses Blueprint Arsitektur & Sesi Demo Khusus
+### Fokus Rekayasa
 
-Untuk melindungi kekayaan intelektual (IP) serta menjaga kepatuhan komersial, blueprint arsitektur detail, modul internal, dan sesi demo langsung (*private live demo*) kini kami sediakan melalui jalur konsultasi langsung.
+**🛡️ Autonomous Incident Diagnostics & SRE Governance**
+Menerapkan kebijakan *Zero Destructive Auto-Remediation*, korelasi bukti forensik deterministik multi-sumber, serta format laporan kanonikal 7-seksi untuk tim on-call.
 
-[👉 **Hubungi Saya untuk Jadwal Konsultasi & Demo →**]({{< relref "contact" >}})
+**📊 JVM & Deep Workload Observability**
+Analisis *GC Thrashing*, latensi Stop-The-World, kejenuhan *thread pool*, dan instrumentasi metrik JMX Prometheus di lingkungan produksi nyata.
+
+**🚀 Multi-OS Fleet Orchestration**
+Portabilitas multi-engine — Podman rootless di Linux dan Docker di Windows Server — terpadu melalui CLI `tmctl` dan Ansible playbook.
+
+**⚙️ Pipeline as Code & Immutable Delivery**
+Ephemeral build environment berbasis container (DooD), artefak CI *immutable*, dan orkestrasi rilis terpisah antara Jenkins dan Ansible.
+

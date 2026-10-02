@@ -1,6 +1,6 @@
 +++
-title = "How-To Guides & Field Engineering Manuals"
-description = "Panduan praktis dan petunjuk operasional rekayasa sistem untuk platform produksi enterprise."
-draft = true
-cascade = { draft = true }
+title = "How-To"
+description = "Koleksi panduan praktis, prosedur operasional standar (SOP), dan resep teknis implementasi sistem oleh Eddy Wiyatno."
 +++
+
+Kumpulan panduan praktis langkah-demi-langkah, prosedur operasional standar (SOP), dan resep teknis untuk implementasi, konfigurasi, serta otomatisasi sistem dan infrastruktur.
