@@ -18,23 +18,22 @@
   </header>
 
   {{/* ── Platform Showcase 1: tcctl ─────────────────────────────────── */}}
-  <div class="ew-project-showcase">
+  <div class="ew-project-showcase mb-14 sm:mb-16">
     <div class="ew-project-showcase__header">
-      <div class="flex flex-wrap items-center gap-2 mb-3">
-        <span class="ew-tag ew-tag--cat">Operator CLI</span>
+      <div class="flex flex-wrap items-center gap-2.5 mb-2.5">
+        <span class="ew-tag ew-tag--cat">⚡ Operator CLI</span>
         <span class="ew-fs-badge ew-fs--blue">Platform Engineering</span>
         <span class="ew-fs-badge ew-fs--purple">Multi-OS (Windows &amp; Linux)</span>
-        <span class="ew-fs-badge ew-fs--green">CIS Hardening</span>
       </div>
-      <h2 class="text-2xl sm:text-3xl font-bold text-white tracking-tight mb-2">
+      <h2 class="text-2xl sm:text-3xl font-bold text-white tracking-tight mb-1">
         <a href="{{ "/packages/#tcctl" | relLangURL }}" class="hover:text-blue-400 transition-colors">
           Apache Tomcat Enterprise Operator (tcctl)
         </a>
       </h2>
-      <p class="text-blue-200 text-sm sm:text-base font-semibold mb-4">
-        Universal CLI for Rolling Updates, Automated CIS Audit &amp; Configuration Immutability
+      <p class="text-blue-300 text-xs sm:text-sm font-medium mb-3 font-mono">
+        Automated Rolling Updates, CIS Hardening &amp; GitOps Immutability
       </p>
-      <p class="text-slate-300 text-sm sm:text-base leading-relaxed w-full max-w-none mb-6">
+      <p class="text-slate-300 text-sm leading-relaxed w-full max-w-none mb-6">
         Kakas CLI mandiri berbasis bahasa Go untuk standarisasi tata kelola, validasi kepatuhan CIS Benchmark, mitigasi drift konfigurasi, dan proses rolling update minim downtime pada kontainer Apache Tomcat di Windows Server dan Linux.
       </p>
     </div>
@@ -44,42 +43,42 @@
       
       {{/* Capability 1 */}}
       <div class="ew-module-card">
-        <div class="flex items-center justify-between mb-2">
-          <span class="text-lg">🚀</span>
-          <span class="text-xs font-bold text-blue-400 uppercase tracking-wider">HIGH AVAILABILITY</span>
+        <div class="ew-feat-module-card__header">
+          <span class="text-xl">🚀</span>
+          <span class="ew-feat-module-card__tag text-blue-400">HIGH AVAILABILITY</span>
         </div>
-        <h3 class="text-base font-bold text-white mb-1">
+        <h3 class="ew-feat-module-card__title">
           Rolling Update &amp; Staging
         </h3>
-        <p class="text-xs text-slate-300 leading-relaxed">
+        <p class="ew-feat-module-card__body">
           Pergantian versi runtime bertahap dengan health check terverifikasi (:9080 &rarr; :8080) dan mekanisme safe rollback jika rilis gagal.
         </p>
       </div>
 
       {{/* Capability 2 */}}
       <div class="ew-module-card">
-        <div class="flex items-center justify-between mb-2">
-          <span class="text-lg">🛡️</span>
-          <span class="text-xs font-bold text-emerald-400 uppercase tracking-wider">CIS &amp; AUDIT READY</span>
+        <div class="ew-feat-module-card__header">
+          <span class="text-xl">🛡️</span>
+          <span class="ew-feat-module-card__tag text-emerald-400">CIS &amp; AUDIT READY</span>
         </div>
-        <h3 class="text-base font-bold text-white mb-1">
+        <h3 class="ew-feat-module-card__title">
           Hardening &amp; Audit
         </h3>
-        <p class="text-xs text-slate-300 leading-relaxed">
+        <p class="ew-feat-module-card__body">
           Validasi otomatis konfigurasi Tomcat sesuai standar CIS Benchmark dan penegakan hak akses non-root (ContainerUser).
         </p>
       </div>
 
       {{/* Capability 3 */}}
       <div class="ew-module-card">
-        <div class="flex items-center justify-between mb-2">
-          <span class="text-lg">🔄</span>
-          <span class="text-xs font-bold text-purple-400 uppercase tracking-wider">ZERO-DRIFT</span>
+        <div class="ew-feat-module-card__header">
+          <span class="text-xl">🔄</span>
+          <span class="ew-feat-module-card__tag text-purple-400">ZERO-DRIFT</span>
         </div>
-        <h3 class="text-base font-bold text-white mb-1">
+        <h3 class="ew-feat-module-card__title">
           Proteksi Konfigurasi
         </h3>
-        <p class="text-xs text-slate-300 leading-relaxed">
+        <p class="ew-feat-module-card__body">
           Mencegah perubahan konfigurasi manual tidak terlacak di server live melalui proteksi bind-mount read-only (conf:ro).
         </p>
       </div>
@@ -108,23 +107,22 @@
   </div>
 
   {{/* ── Platform Showcase 2: tmctl ─────────────────────────────────── */}}
-  <div class="ew-project-showcase mt-10">
+  <div class="ew-project-showcase">
     <div class="ew-project-showcase__header">
-      <div class="flex flex-wrap items-center gap-2 mb-3">
-        <span class="ew-tag ew-tag--cat">Diagnostic Operator</span>
-        <span class="ew-fs-badge ew-fs--blue">Observability</span>
+      <div class="flex flex-wrap items-center gap-2.5 mb-2.5">
+        <span class="ew-tag ew-tag--cat">🔬 Diagnostic Operator</span>
+        <span class="ew-fs-badge ew-fs--blue">Observability &amp; SRE</span>
         <span class="ew-fs-badge ew-fs--purple">Multi-OS (Linux &amp; Windows)</span>
-        <span class="ew-fs-badge ew-fs--green">Non-Destructive SRE</span>
       </div>
-      <h2 class="text-2xl sm:text-3xl font-bold text-white tracking-tight mb-2">
+      <h2 class="text-2xl sm:text-3xl font-bold text-white tracking-tight mb-1">
         <a href="{{ "/packages/#tmctl" | relLangURL }}" class="hover:text-blue-400 transition-colors">
           Tomcat Monitoring Operator (tmctl)
         </a>
       </h2>
-      <p class="text-blue-200 text-sm sm:text-base font-semibold mb-4">
-        Unified Cross-Platform Operator for JVM Observability &amp; Incident Triage
+      <p class="text-blue-300 text-xs sm:text-sm font-medium mb-3 font-mono">
+        Unified Telemetry, Low-Latency Socket API &amp; Safe Incident Triage
       </p>
-      <p class="text-slate-300 text-sm sm:text-base leading-relaxed w-full max-w-none mb-6">
+      <p class="text-slate-300 text-sm leading-relaxed w-full max-w-none mb-6">
         Operator CLI mandiri berbasis Go untuk mengorkestrasi stack monitoring (Prometheus, JMX Exporter, Alertmanager) via Socket API langsung, melacak degradasi performa JVM, dan mengumpulkan bukti forensik insiden.
       </p>
     </div>
@@ -134,42 +132,42 @@
       
       {{/* Capability 1 */}}
       <div class="ew-module-card">
-        <div class="flex items-center justify-between mb-2">
-          <span class="text-lg">🛠️</span>
-          <span class="text-xs font-bold text-blue-400 uppercase tracking-wider">OBSERVABILITY</span>
+        <div class="ew-feat-module-card__header">
+          <span class="text-xl">🛠️</span>
+          <span class="ew-feat-module-card__tag text-blue-400">OBSERVABILITY</span>
         </div>
-        <h3 class="text-base font-bold text-white mb-1">
+        <h3 class="ew-feat-module-card__title">
           Runtime Telemetry
         </h3>
-        <p class="text-xs text-slate-300 leading-relaxed">
+        <p class="ew-feat-module-card__body">
           Monitoring lifecycle kontainer dan metrik internal JVM secara real-time via direct socket API tanpa overhead agent pihak ketiga.
         </p>
       </div>
 
       {{/* Capability 2 */}}
       <div class="ew-module-card">
-        <div class="flex items-center justify-between mb-2">
-          <span class="text-lg">⏱️</span>
-          <span class="text-xs font-bold text-emerald-400 uppercase tracking-wider">MTTR REDUCTION</span>
+        <div class="ew-feat-module-card__header">
+          <span class="text-xl">⏱️</span>
+          <span class="ew-feat-module-card__tag text-emerald-400">MTTR REDUCTION</span>
         </div>
-        <h3 class="text-base font-bold text-white mb-1">
+        <h3 class="ew-feat-module-card__title">
           Triage Insiden Cepat
         </h3>
-        <p class="text-xs text-slate-300 leading-relaxed">
+        <p class="ew-feat-module-card__body">
           Deteksi akar masalah JVM kritis (GC thrashing, thread deadlock, OOM) dan penyusunan bukti forensik terstruktur untuk tim on-call.
         </p>
       </div>
 
       {{/* Capability 3 */}}
       <div class="ew-module-card">
-        <div class="flex items-center justify-between mb-2">
-          <span class="text-lg">🛡️</span>
-          <span class="text-xs font-bold text-purple-400 uppercase tracking-wider">SAFE REMEDIATION</span>
+        <div class="ew-feat-module-card__header">
+          <span class="text-xl">🛡️</span>
+          <span class="ew-feat-module-card__tag text-purple-400">SAFE REMEDIATION</span>
         </div>
-        <h3 class="text-base font-bold text-white mb-1">
+        <h3 class="ew-feat-module-card__title">
           Remediasi Non-Destruktif
         </h3>
-        <p class="text-xs text-slate-300 leading-relaxed">
+        <p class="ew-feat-module-card__body">
           Menghindari auto-restart gegabah di lingkungan produksi; memprioritaskan isolasi traffic dan investigasi bukti forensik terlebih dahulu.
         </p>
       </div>
