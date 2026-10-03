@@ -1217,6 +1217,97 @@ section.prose.flex        { max-width: none !important; }
 }
 
 /* ================================================================
+   ENTERPRISE STRATEGIC ADVANTAGES (ew-value-*)
+   ================================================================ */
+.ew-value-section {
+  margin-top: 2.5rem;
+  margin-bottom: 3.5rem;
+}
+
+.ew-value-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.15rem;
+}
+
+@media (min-width: 640px) {
+  .ew-value-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 1024px) {
+  .ew-value-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+.ew-value-card {
+  display: flex;
+  flex-direction: column;
+  background: rgb(255 255 255 / 0.04);
+  border: 1px solid rgb(255 255 255 / 0.1);
+  border-radius: 0.85rem;
+  padding: 1.25rem;
+  transition: transform 0.2s ease, border-color 0.2s ease, background-color 0.2s ease;
+}
+
+.ew-value-card:hover {
+  transform: translateY(-3px);
+  background: rgb(59 130 246 / 0.1);
+  border-color: rgb(96 165 250 / 0.5);
+}
+
+.ew-value-card__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.65rem;
+}
+
+.ew-value-card__tag {
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+}
+
+.ew-value-card__title {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #ffffff;
+  margin: 0 0 0.5rem 0;
+  line-height: 1.35;
+}
+
+.ew-value-card__desc {
+  font-size: 0.82rem;
+  line-height: 1.6;
+  color: rgb(203 213 225);
+  margin: 0 0 0.75rem 0;
+}
+
+.ew-value-card__desc code {
+  font-size: 0.78rem;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  padding: 0.1em 0.35em;
+  border-radius: 0.25rem;
+  background: rgb(15 23 42 / 0.7);
+  color: rgb(147 197 253);
+  border: 1px solid rgb(59 130 246 / 0.3);
+}
+
+.ew-value-card__footer {
+  margin-top: auto;
+  padding-top: 0.65rem;
+  border-top: 1px solid rgb(255 255 255 / 0.08);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+/* ================================================================
    PACKAGES & TOOLS CARDS (ew-pkg-*)
    ================================================================ */
 .ew-packages-container {
