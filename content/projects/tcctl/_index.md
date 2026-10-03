@@ -1,7 +1,7 @@
 +++
 title = "Apache Tomcat Enterprise Super Module (tcctl)"
 date = "2026-09-25T23:45:00+07:00"
-draft = false
+draft = true
 summary = "Platform operator terpadu (Super Module) berbasis Go untuk tata kelola siklus hidup, security hardening CIS Benchmark, audit kerentanan Trivy, GitOps otonom (Zero-Git), dynamic JVM tuning, dan zero-downtime staging rollout Apache Tomcat di Windows Server dan Linux."
 author = "Eddy Wiyatno"
 categories = ["Platform Engineering", "Middleware", "DevOps", "Security"]

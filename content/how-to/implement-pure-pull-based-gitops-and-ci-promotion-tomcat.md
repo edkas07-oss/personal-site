@@ -485,5 +485,5 @@ Perintah ini menghasilkan dua output sekaligus:
 - [Panduan Praktis: Deploy Kontainer Apache Tomcat Hardened di Windows Server Menggunakan tcctl]({{< relref "how-to/deploy-tomcat-container-windows-server-tcctl" >}})
 - [Panduan Praktis: Build Image Container Apache Tomcat + Prometheus JMX Exporter di Windows NanoServer]({{< relref "how-to/build-tomcat-jmx-nanoserver-image" >}})
 - [Panduan Praktis: Instalasi Docker Engine Community Edition (CE) v27+ di Windows Server]({{< relref "how-to/install-docker-engine-windows-containers" >}})
-- [Tomcat Monitoring & Autonomous Diagnostic Platform]({{< relref "projects/tomcat-monitoring" >}})
+- [Katalog Paket & Panduan Biner Operator tmctl (Windows & Linux)]({{< relref "packages/tmctl" >}})
 - [Spesifikasi Standar CNCF OpenGitOps (OpenGitOps.dev)](https://opengitops.dev/)

@@ -1,7 +1,7 @@
 +++
 title = "tcctl hardening & va — Static CIS Benchmark 9 Rules & Trivy Vulnerability Auditor"
 date = "2026-09-25T23:50:00+07:00"
-draft = false
+draft = true
 summary = "Bedah arsitektur modul hardening dan vulnerability assessment (VA) tcctl: mesin audit statis 9 aturan CIS Benchmark untuk XML konfigurasi Tomcat, penegakan isolasi non-root ContainerUser, dan integrasi scanner Trivy sebagai quality gate deterministik."
 author = "Eddy Wiyatno"
 categories = ["Security", "DevSecOps", "Compliance"]

@@ -1,9 +1,4 @@
 [[main]]
-  name = "Products"
-  pageRef = "projects"
-  weight = 5
-
-[[main]]
   name = "Journals"
   pageRef = "journals"
   weight = 10
@@ -28,11 +23,6 @@
   pre = "github"
   url = "https://github.com/edkas07-oss"
   weight = 100
-
-[[footer]]
-  name = "Products"
-  pageRef = "projects"
-  weight = 5
 
 [[footer]]
   name = "Journals"

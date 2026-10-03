@@ -15,21 +15,16 @@ Jurnal rekayasa, studi kasus sistem berskala enterprise, dan dokumentasi arsitek
 ### 🚀 Platform Rekayasa Unggulan
 
 > [!NOTE]
-> **[Apache Tomcat Enterprise Operator (tcctl)]({{< relref "projects/tcctl" >}})**
+> **[Apache Tomcat Enterprise Operator (tcctl)]({{< relref "packages/tcctl" >}})**
 > Tool CLI mandiri berbasis Go untuk otomasi deployment zero-downtime, audit keamanan standar CIS Benchmark 9 aturan, scanner Trivy, proteksi bind-mount (`conf:ro`), tuning memori JVM dinamis (`bin/setenv`), dan rekonsiliasi GitOps di Windows Server maupun Linux.
 > 
-> [👉 **Lihat Dokumentasi Teknis tcctl →**]({{< relref "projects/tcctl" >}})
+> [👉 **Lihat Dokumentasi & Paket tcctl →**]({{< relref "packages/tcctl" >}})
 
 > [!NOTE]
-> **[Tomcat Monitoring & Diagnostic Platform]({{< relref "projects/tomcat-monitoring" >}})**
-> Platform monitoring dan diagnostik insiden untuk runtime Apache Tomcat di lingkungan multi-OS (Linux Podman rootless & Windows Server Docker). 
+> **[Tomcat Monitoring & Diagnostic Platform (tmctl)]({{< relref "packages/tmctl" >}})**
+> Platform monitoring dan diagnostik insiden untuk runtime Apache Tomcat di lingkungan multi-OS (Linux Podman rootless & Windows Server Docker) via Container Engine Socket API.
 > 
-> Didukung oleh tiga modul terpadu:
-> * **[`tmctl`]({{< relref "projects/tomcat-monitoring/tmctl" >}})** — Cross-Platform Operator CLI berbasis Go untuk orkestrasi via Container Engine Socket API.
-> * **[`tm-agent`]({{< relref "projects/tomcat-monitoring/tm-agent" >}})** — Event Collector Daemon berbasis Go dengan *atomic spool evidence*.
-> * **[`diagnostic service`]({{< relref "projects/tomcat-monitoring/diagnostic-service" >}})** — Mesin triage insiden berbasis Node.js dengan laporan forensik terstruktur.
-> 
-> [👉 **Lihat Dokumentasi Teknis Platform →**]({{< relref "projects/tomcat-monitoring" >}})
+> [👉 **Lihat Dokumentasi & Paket tmctl →**]({{< relref "packages/tmctl" >}})
 
 ---
 

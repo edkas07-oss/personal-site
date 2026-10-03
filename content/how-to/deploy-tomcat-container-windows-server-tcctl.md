@@ -419,5 +419,5 @@ Dengan memanfaatkan CLI tool **`tcctl`**, orkestrasi kontainer Apache Tomcat pad
 - [Panduan Praktis: Instalasi Docker Engine Community Edition (CE) v27+ di Windows Server]({{< relref "how-to/install-docker-engine-windows-containers" >}})
 - [Panduan Praktis: Build Image Container Apache Tomcat + Prometheus JMX Exporter di Windows NanoServer]({{< relref "how-to/build-tomcat-jmx-nanoserver-image" >}})
 - [Detailed Installation & Build Guide (INSTALL.md)](https://github.com/edkas07-oss/tcctl/blob/main/INSTALL.md)
-- [Tomcat Monitoring & Autonomous Diagnostic Platform]({{< relref "projects/tomcat-monitoring" >}})
+- [Katalog Paket & Panduan Biner Operator tmctl (Windows & Linux)]({{< relref "packages/tmctl" >}})
 - [Jurnal: Menjinakkan Windows Containers Tanpa Mengubah Basis Kode]({{< relref "journals/menjinakkan-windows-containers-docker-nanoserver-linux" >}})

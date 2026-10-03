@@ -1,7 +1,7 @@
 +++
 title = "tcctl gitops — Pure Pull-Based Zero-Git Declarative Reconciler"
 date = "2026-09-25T23:50:00+07:00"
-draft = false
+draft = true
 summary = "Bedah arsitektur modul gitops tcctl: mesin rekonsiliasi state deklaratif pull-based murni langsung via REST API Gitea (Zero-Git dependency) dengan deteksi drift atomik, locking mechanism, dan otomatisasi task background OS native."
 author = "Eddy Wiyatno"
 categories = ["GitOps", "Platform Engineering", "Automation"]

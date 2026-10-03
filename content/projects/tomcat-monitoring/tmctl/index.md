@@ -1,7 +1,7 @@
 +++
 title = "tmctl — Unified Cross-Platform Operator CLI for Socket-Based Container Orchestration"
 date = "2026-09-20T21:00:00+07:00"
-draft = false
+draft = true
 summary = "Bedah arsitektur tmctl: binary Go statis mandiri untuk orkestrasi container engine via Socket API (Podman Unix Socket & Windows Named Pipe), dynamic rulepack ingestion, dan stateful safe rollback tanpa ketergantungan skrip shell."
 author = "Eddy Wiyatno"
 categories = ["DevOps", "Platform Engineering", "Go"]
