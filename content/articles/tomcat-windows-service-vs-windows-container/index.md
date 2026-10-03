@@ -9,7 +9,7 @@ tags = ["tomcat", "windows-containers", "docker", "nanoserver", "windows-service
 series = ["Enterprise Observability & Multi-OS Architecture"]
 toc = true
 showSummary = true
-aliases = ["/articles/tomcat-windows-service-vs-windows-container/"]
+aliases = ["/journals/tomcat-windows-service-vs-windows-container/"]
 +++
 
 ## 📌 Ringkasan Eksekutif (TL;DR)

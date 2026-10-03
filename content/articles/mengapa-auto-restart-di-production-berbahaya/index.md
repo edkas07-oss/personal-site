@@ -9,7 +9,7 @@ tags = ["tomcat", "incident-response", "zero-remediation", "prometheus", "alertm
 series = ["SRE & Incident Diagnostics Architecture"]
 toc = true
 showSummary = true
-aliases = ["/articles/mengapa-auto-restart-di-production-berbahaya/"]
+aliases = ["/journals/mengapa-auto-restart-di-production-berbahaya/"]
 +++
 
 ## 📌 Ringkasan Eksekutif (TL;DR)
@@ -249,7 +249,7 @@ Ketika Anda menerima email laporan insiden 7-seksi dari Diagnostic Service di in
 ---
 
 ### 📚 Referensi & Artikel Terkait
-- [Artikel: Mendeteksi Concurrency Saturation & GC Thrashing: Jangan Hanya Mengandalkan Metrik CPU & Memory Biasa]({{< relref "journals/mendeteksi-concurrency-saturation-dan-gc-thrashing" >}})
-- [Artikel: Deep-Dive Observability Apache Tomcat: Mengamankan JMX Exporter dengan TLS & Keystore]({{< relref "journals/deep-dive-observability-apache-tomcat-jmx-exporter-tls" >}})
+- [Artikel: Mendeteksi Concurrency Saturation & GC Thrashing: Jangan Hanya Mengandalkan Metrik CPU & Memory Biasa]({{< relref "articles/mendeteksi-concurrency-saturation-dan-gc-thrashing" >}})
+- [Artikel: Deep-Dive Observability Apache Tomcat: Mengamankan JMX Exporter dengan TLS & Keystore]({{< relref "articles/deep-dive-observability-apache-tomcat-jmx-exporter-tls" >}})
 - [Google SRE Book: Addressing Cascading Failures](https://sre.google/sre-book/addressing-cascading-failures/)
 - [CNCF OpenTelemetry Specification](https://opentelemetry.io/docs/specs/otel/)

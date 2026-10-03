@@ -420,4 +420,4 @@ Dengan memanfaatkan CLI tool **`tcctl`**, orkestrasi kontainer Apache Tomcat pad
 - [Panduan Praktis: Build Image Container Apache Tomcat + Prometheus JMX Exporter di Windows NanoServer]({{< relref "how-to/build-tomcat-jmx-nanoserver-image" >}})
 - [Detailed Installation & Build Guide (INSTALL.md)](https://github.com/edkas07-oss/tcctl/blob/main/INSTALL.md)
 - [Katalog Paket & Panduan Biner Operator tmctl (Windows & Linux)]({{< relref "packages/tmctl" >}})
-- [Jurnal: Menjinakkan Windows Containers Tanpa Mengubah Basis Kode]({{< relref "journals/menjinakkan-windows-containers-docker-nanoserver-linux" >}})
+- [Jurnal: Menjinakkan Windows Containers Tanpa Mengubah Basis Kode]({{< relref "articles/menjinakkan-windows-containers-docker-nanoserver-linux" >}})

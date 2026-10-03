@@ -6,7 +6,7 @@ enableSearch = true
 enableCodeCopy = true
 enableStructuredBreadcrumbs = true
 
-mainSections = ["journals"]
+mainSections = ["articles"]
 disableImageOptimization = true
 
 highlightCurrentMenuArea = true

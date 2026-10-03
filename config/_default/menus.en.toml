@@ -1,7 +1,7 @@
 [[main]]
   name = "Articles"
-  pageRef = "journals"
-  url = "/journals/"
+  pageRef = "articles"
+  url = "/articles/"
   weight = 10
 
 [[main]]
@@ -36,8 +36,8 @@
 
 [[footer]]
   name = "Articles"
-  pageRef = "journals"
-  url = "/journals/"
+  pageRef = "articles"
+  url = "/articles/"
   weight = 10
 
 [[footer]]

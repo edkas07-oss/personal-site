@@ -9,7 +9,7 @@ tags = ["jvm", "tomcat", "garbage-collection", "concurrency", "promql", "prometh
 series = ["JVM & Tomcat Performance Engineering"]
 toc = true
 showSummary = true
-aliases = ["/articles/mendeteksi-concurrency-saturation-dan-gc-thrashing/"]
+aliases = ["/journals/mendeteksi-concurrency-saturation-dan-gc-thrashing/"]
 +++
 
 ## 📌 Ringkasan Eksekutif (TL;DR)
@@ -225,7 +225,7 @@ Beralih dari metrik kapasitas statis mentah menuju **sinyal kejenuhan beban nyat
 ---
 
 ### 📚 Referensi & Artikel Terkait
-- [Artikel: Deep-Dive Observability Apache Tomcat: Mengamankan JMX Exporter dengan TLS & Keystore]({{< relref "journals/deep-dive-observability-apache-tomcat-jmx-exporter-tls" >}})
-- [Artikel: Mengapa Auto-Restart di Production Berbahaya: Pendekatan Non-Destruktif untuk Remediasi Insiden]({{< relref "journals/mengapa-auto-restart-di-production-berbahaya" >}})
+- [Artikel: Deep-Dive Observability Apache Tomcat: Mengamankan JMX Exporter dengan TLS & Keystore]({{< relref "articles/deep-dive-observability-apache-tomcat-jmx-exporter-tls" >}})
+- [Artikel: Mengapa Auto-Restart di Production Berbahaya: Pendekatan Non-Destruktif untuk Remediasi Insiden]({{< relref "articles/mengapa-auto-restart-di-production-berbahaya" >}})
 - [Prometheus Official Documentation: Querying Basics](https://prometheus.io/docs/prometheus/latest/querying/basics/)
 - [Java Platform, Standard Edition Troubleshooting Guide (Oracle)](https://docs.oracle.com/en/java/javase/)

@@ -1,7 +1,7 @@
 {{/* Custom homepage: full-width hero + article grid */}}
 
 {{/* ── Build-time: embed all articles as JSON for JS runtime ────────── */}}
-{{ $articles := where .Site.RegularPages "Section" "journals" }}
+{{ $articles := where .Site.RegularPages "Section" "articles" }}
 <script>
   window.__EW_ARTICLES__ = [
     {{ range $articles -}}
@@ -35,7 +35,7 @@
       </div>
 
       <div class="ew-hero__cta">
-        <a href="{{ "/journals/" | relLangURL }}" id="ew-cta-read" class="ew-btn ew-btn--primary">
+        <a href="{{ "/articles/" | relLangURL }}" id="ew-cta-read" class="ew-btn ew-btn--primary">
           Baca Artikel Teknis →
         </a>
         <a href="{{ "/packages/" | relLangURL }}" class="ew-btn ew-btn--ghost">
@@ -72,7 +72,7 @@
 <script>
 (function () {
   var articles = (window.__EW_ARTICLES__ || []).filter(function (a) {
-    return a.title && a.url && a.url.indexOf('/journals/') !== -1;
+    return a.title && a.url && a.url.indexOf('/articles/') !== -1;
   });
   if (!articles.length) return;
 
@@ -370,7 +370,7 @@
 <section class="ew-articles">
   <div class="ew-articles__header ew-reveal">
     <h2 class="ew-articles__title">Artikel Rekayasa Sistem Terbaru</h2>
-    <a href="{{ "/journals/" | relLangURL }}" class="ew-articles__more">Lihat Semua Artikel →</a>
+    <a href="{{ "/articles/" | relLangURL }}" class="ew-articles__more">Lihat Semua Artikel →</a>
   </div>
 
   <div class="ew-grid">
