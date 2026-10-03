@@ -1,35 +1,30 @@
 +++
 title = "Packages & Tools"
-description = "Distribusi resmi standalone static binary untuk tooling operator platform engineering, runtime governance, dan enterprise observability."
+description = "Distribusi resmi berkas biner mandiri (Community Edition) untuk tooling platform engineering, runtime governance, dan observabilitas."
 cascade = { showDate = false, showAuthor = false }
 +++
 
 > [!NOTE]
-> **Filosofi Distribusi & Edisi Komunitas:**  
-> Seluruh paket biner di bawah ini didistribusikan sebagai **Community Edition (Freeware)** untuk keperluan pengujian mandiri (*developer workstation*), standardisasi lab internal, dan riset platform engineering tanpa transaksi komersial.
+> **Distribusi Resmi Community Edition:**  
+> Seluruh berkas biner yang tersedia di halaman ini didistribusikan secara cuma-cuma sebagai **Community Edition (Freeware)** untuk keperluan pengujian mandiri (*developer workstation*), standardisasi lab internal, dan riset platform engineering independen tanpa unsur komersial.
 
 ---
 
-### 🏛️ Matriks Kapabilitas: Community vs Enterprise Architecture
+### 📦 Berkas Distribusi & Verifikasi Integritas
 
-Untuk memberikan gambaran batasan antara pengujian mandiri (*Community Lab*) dan implementasi tata kelola skala korporasi (*High-Availability Enterprise*):
+Setiap rilis biner dan arsip distribusi telah disertai nilai *hash* kriptografis SHA256 untuk memastikan keaslian dan integritas berkas saat diunduh:
 
-| Dimensi Fitur | Community Edition (Bebas Unduh) | Enterprise Blueprint (Arsitektur Lanjutan) |
-| :--- | :--- | :--- |
-| **Lingkup Beban Kerja** | Single Host / Local Container Workstation (Podman & Docker) | Multi-Node Clustered Fleet & Distributed Hosts |
-| **Governance & Hardening** | Standar CIS Benchmark Audit (v10/v9) via CLI stdout + JSON | Dynamic Policy-as-Code & Centralized SIEM Ingestion |
-| **Format Dokumen Audit** | Teks Terminal ANSI & JSON Artifact | **Dokumen Kepatuhan Formal (Signed PDF / OJK / PCI-DSS)** |
-| **TLS & PKCS#12 Automation** | Local Keystore & Truststore Automated Generation | Enterprise HashiCorp Vault / Cloud HSM Integration |
-| **Observability & Diagnostics** | Prometheus, Alertmanager, Telegraf Single Stack | Autonomous AI Diagnostic Engine & Dynamic Rulepacks |
-| **Deployment Mode** | Direct CLI Orchestration & Local Pull-Based GitOps | Centralized Distributed GitOps & Zero-Downtime Blue/Green Fleet |
-| **Model Distribusi** | Free Standalone Binary (.tar.gz / .zip) | Architecture Advisory, Whitepaper & Custom Engineering |
+* **Linux (Verifikasi Checksum):**
+  ```bash
+  sha256sum --check sha256sums.txt
+  ```
+* **Windows Server (PowerShell):**
+  ```powershell
+  Get-FileHash -Algorithm SHA256 tcctl-v1.0.0-windows-amd64.zip
+  ```
 
 ---
 
-### 🛡️ Disclaimer Independensi Riset & Hak Cipta
+### 🛡️ Disclaimer Independensi Riset
 
-Seluruh arsitektur, *blueprint*, dan *operator tooling* yang dipublikasikan di portal ini dirancang dan diverifikasi secara independen di lingkungan laboratorium rekayasa personal. Biner publik disediakan secara cuma-cuma untuk evaluasi teknis.
-
-> [!TIP]
-> **Kebutuhan Konsultasi Arsitektur Enterprise:**  
-> Untuk diskusi arsitektur tingkat lanjut, integrasi multi-cluster, kustomisasi *rulepack* diagnostik AI, atau adopsi tata kelola enterprise, silakan terhubung melalui halaman **[Contact / Inquiries]({{< relref "contact" >}})**.
+Seluruh *operator tooling*, skrip otomasi, dan arsitektur yang dibagikan pada portal ini diriset, dibangun, dan diuji secara independen di laboratorium rekayasa personal. Biner disediakan secara "as-is" untuk mempermudah standarisasi operasional sesama engineer dan praktisi SRE.

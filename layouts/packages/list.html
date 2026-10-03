@@ -67,10 +67,10 @@
 
       {{/* Direct Downloads Section */}}
       {{ with .Params.downloads }}
-      <div class="ew-pkg-section-title">Download Biner Resmi:</div>
+      <div class="ew-pkg-section-title">Download Berkas Rilis (Community Edition):</div>
       <div class="ew-pkg-downloads">
         {{ range . }}
-        <a href="{{ .url }}" class="ew-pkg-dl-btn group" target="_blank" rel="noopener noreferrer">
+        <a href="{{ .url | relLangURL }}" class="ew-pkg-dl-btn group" download>
           <div class="flex items-center gap-3 min-w-0">
             <span class="text-2xl shrink-0">{{ .icon }}</span>
             <div class="text-left min-w-0">
@@ -84,11 +84,35 @@
       </div>
       {{ end }}
 
+      {{/* SHA256 Checksums Box */}}
+      {{ with .Params.downloads }}
+      <div class="mt-4 p-3.5 rounded-xl bg-slate-50 dark:bg-neutral-900/80 border border-slate-200 dark:border-neutral-700/60 text-xs">
+        <div class="flex items-center justify-between mb-2">
+          <span class="font-bold text-neutral-700 dark:text-neutral-200 flex items-center gap-1.5">
+            <span>🔒</span> SHA256 Integrity Checksums:
+          </span>
+          {{ with $p.Params.checksum_url }}
+          <a href="{{ . | relLangURL }}" class="text-[11px] font-mono text-blue-600 dark:text-blue-400 hover:underline" target="_blank">sha256sums.txt ↗</a>
+          {{ end }}
+        </div>
+        <div class="space-y-1.5 font-mono text-[11px] text-slate-600 dark:text-slate-400">
+          {{ range . }}
+          {{ with .sha256 }}
+          <div class="flex items-center justify-between gap-2 p-1.5 rounded bg-white dark:bg-neutral-800 border border-slate-100 dark:border-neutral-700">
+            <span class="truncate" title="{{ . }}">{{ . }}</span>
+            <button type="button" class="shrink-0 text-slate-400 hover:text-blue-500" onclick="navigator.clipboard.writeText('{{ . }}'); this.innerText='✓'; const b=this; setTimeout(function(){ b.innerText='📋'; }, 1500);" title="Salin SHA256">📋</button>
+          </div>
+          {{ end }}
+          {{ end }}
+        </div>
+      </div>
+      {{ end }}
+
       {{/* Quick Install Box */}}
       {{ with .Params.downloads }}
       <div class="ew-pkg-install">
         <div class="ew-pkg-install-header">
-          <span>⚡ One-Liner Quick Install</span>
+          <span>⚡ One-Liner Quick Install (Standalone Binary)</span>
         </div>
         {{ range . }}
         <div class="ew-pkg-cmd-block">
@@ -133,20 +157,15 @@
     {{ end }}
   </div>
 
-  {{/* ── Enterprise Architecture Advisory CTA ───────────────────────── */}}
-  <div class="mt-14 p-6 sm:p-8 rounded-2xl bg-gradient-to-r from-blue-500/10 via-indigo-500/10 to-purple-500/10 border border-blue-200 dark:border-blue-900/50 flex flex-col md:flex-row items-center justify-between gap-6 shadow-sm">
-    <div class="space-y-1.5 text-left">
-      <div class="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-blue-600 dark:text-blue-400">
-        <span>🏛️ Enterprise Architecture Advisory</span>
+  {{/* ── Non-Commercial Research & Community Notice ──────────────────── */}}
+  <div class="mt-12 p-6 rounded-2xl bg-slate-50 dark:bg-neutral-800/60 border border-slate-200 dark:border-neutral-700/60 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-neutral-600 dark:text-neutral-300">
+    <div class="flex items-center gap-3">
+      <span class="text-2xl shrink-0">🛡️</span>
+      <div>
+        <strong class="font-semibold text-neutral-900 dark:text-white">Community Edition &amp; Independent Engineering Research</strong>
+        <p class="mt-0.5 text-neutral-500 dark:text-neutral-400">Seluruh biner di atas disediakan gratis untuk evaluasi lab dan standardisasi workstation tanpa unsur komersial.</p>
       </div>
-      <h3 class="text-xl font-bold text-neutral-900 dark:text-white">Butuh Implementasi Skala Korporasi?</h3>
-      <p class="text-sm text-neutral-600 dark:text-neutral-300 max-w-2xl">
-        Untuk adopsi <strong>Multi-Node Fleet Orchestration</strong>, integrasi <strong>Signed Compliance Audit Report (PDF/OJK/PCI-DSS)</strong>, streaming telemetri SIEM, atau konsultasi arsitektur platform perbankan.
-      </p>
     </div>
-    <a href="{{ "/contact/" | relLangURL }}" class="shrink-0 inline-flex items-center gap-2 px-6 py-3 rounded-xl font-bold text-sm text-white bg-blue-600 hover:bg-blue-700 transition shadow hover:shadow-md">
-      💬 Diskusikan Kebutuhan Enterprise →
-    </a>
   </div>
 
 </div>
