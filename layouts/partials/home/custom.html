@@ -28,7 +28,7 @@
       {{/* Dynamic random article highlight — rendered by JS on each page load */}}
       <div class="ew-spotlight" id="ew-spotlight" style="display:none;" aria-live="polite">
         <div class="ew-spotlight__header">
-          <span class="ew-spotlight__label">📖 CATATAN PILIHAN</span>
+          <span class="ew-spotlight__label">📖 CATATAN TEKNIS PILIHAN</span>
           <button class="ew-spotlight__shuffle" id="ew-spotlight-shuffle" title="Pilih catatan lain" aria-label="Shuffle catatan">↻</button>
         </div>
         <a class="ew-spotlight__link" id="ew-spotlight-link" href="#"></a>
@@ -37,6 +37,12 @@
       <div class="ew-hero__cta">
         <a href="{{ "/journals/" | relLangURL }}" id="ew-cta-read" class="ew-btn ew-btn--primary">
           Baca Catatan Teknis →
+        </a>
+        <a href="{{ "/packages/" | relLangURL }}" class="ew-btn ew-btn--ghost">
+          🛠️ Explore Tools
+        </a>
+        <a href="https://github.com/edkas07-oss" target="_blank" rel="noopener" class="ew-btn ew-btn--ghost">
+          GitHub
         </a>
       </div>
     </div>
@@ -137,7 +143,7 @@
   <div class="ew-featured-section__header ew-reveal">
     <div class="flex items-center justify-between gap-4 flex-wrap">
       <div>
-        <p class="ew-hero__eyebrow mb-1">Produk &amp; Modul Karya Mandiri</p>
+        <p class="ew-hero__eyebrow mb-1">Karya &amp; Platform Mandiri</p>
         <h2 class="ew-articles__title">Platform &amp; Komponen Unggulan</h2>
       </div>
       <a href="{{ "/projects/" | relLangURL }}" class="ew-articles__more">
@@ -227,7 +233,7 @@
         <div class="mt-6 pt-4 border-t border-blue-900/60 flex flex-wrap items-center justify-between gap-4">
           <div class="flex flex-wrap gap-3">
             <a href="{{ "/projects/tcctl/" | relLangURL }}" class="ew-btn ew-btn--primary text-xs sm:text-sm py-2 px-4">
-              📖 Blueprint Platform →
+              📖 Dokumentasi Modul →
             </a>
             <a href="{{ "/packages/#tcctl" | relLangURL }}" class="ew-btn ew-btn--ghost text-xs sm:text-sm py-2 px-3 text-slate-300 border-slate-600 hover:border-blue-400">
               📦 Explore Packages →
@@ -319,7 +325,7 @@
         <div class="mt-6 pt-4 border-t border-blue-900/60 flex flex-wrap items-center justify-between gap-4">
           <div class="flex flex-wrap gap-3">
             <a href="{{ "/projects/tomcat-monitoring/" | relLangURL }}" class="ew-btn ew-btn--primary text-xs sm:text-sm py-2 px-4">
-              📖 Blueprint Arsitektur Platform →
+              📖 Dokumentasi Modul →
             </a>
             <a href="{{ "/packages/#tmctl" | relLangURL }}" class="ew-btn ew-btn--ghost text-xs sm:text-sm py-2 px-3 text-slate-300 border-slate-600 hover:border-blue-400">
               📦 Explore Packages →
