@@ -25,9 +25,9 @@ Solusi rekayasa yang kami terapkan pada platform [`tomcat-monitoring`](https://g
 Artikel mendalam ini membedah solusi teknis nyata dalam menaklukkan friksi container Windows di level produksi:
 - Menangani pembatasan mutlak **Kernel Matching Constraint** pada Windows Server LTSC (2019 vs 2022 vs 2025).
 - Menegakkan prinsip keamanan *Least Privilege* menggunakan akun non-admin **`ContainerUser`** tanpa terkena petaka *Access Denied* pada *named volumes* dan *bind mounts*.
-- Mengotomatiskan pemberian izin **NTFS Access Control Lists (ACLs)** granular melalui automasi PowerShell dan Ansible merujuk pada standar [`TM-ADR-0031`](https://edkas07-oss.github.io/devops-handbook/adr/tomcat-monitoring/adr-records/TM-ADR-0031/).
-- Mengisolasi penyimpanan data melalui **Two-Tier Storage Architecture** dan menegakkan aturan keras **"Zero `/tmp`"** merujuk pada standar [`TM-ADR-0030`](https://edkas07-oss.github.io/devops-handbook/adr/tomcat-monitoring/adr-records/TM-ADR-0030/).
-- Menyamarkan disparitas sistem operasi bagi tim SRE menggunakan kakas CLI operator terpadu berbasis Go, **`tmctl`**, merujuk pada standar [`TM-ADR-0027`](https://edkas07-oss.github.io/devops-handbook/adr/tomcat-monitoring/adr-records/TM-ADR-0027/).
+- Mengotomatiskan pemberian izin **NTFS Access Control Lists (ACLs)** granular melalui automasi PowerShell dan Ansible.
+- Mengisolasi penyimpanan data melalui **Two-Tier Storage Architecture** dan menegakkan aturan keras **"Zero `/tmp`"**.
+- Menyamarkan disparitas sistem operasi bagi tim SRE menggunakan kakas CLI operator terpadu berbasis Go.
 
 ---
 
@@ -213,7 +213,7 @@ err="open C:\\prometheus\\data\\queries.active: Access is denied." panic: Unable
 level=fatal msg="[db] open C:\data\mailpit.db: Access is denied."
 ```
 
-Inilah akar masalah yang diselesaikan secara definitif oleh keputusan arsitektur [`TM-ADR-0031`](https://edkas07-oss.github.io/devops-handbook/adr/tomcat-monitoring/adr-records/TM-ADR-0031/).
+Inilah akar masalah yang diselesaikan secara tuntas melalui standarisasi hak akses NTFS.
 
 ### 5. Misteri `netapi32.dll` pada Binary Go & Ekosistem Node.js
 
@@ -234,7 +234,7 @@ Sementara di sisi Node.js (`tomcat-diagnostic-service`), kami menetapkan standar
 
 ---
 
-## 🔐 Mengatur NTFS Access Control Lists (ACLs) Secara Otomatis (TM-ADR-0031)
+## 🔐 Mengatur NTFS Access Control Lists (ACLs) Secara Otomatis
 
 Pada sistem operasi Linux, menetapkan isolasi keamanan file dapat dilakukan secara intuitif melalui perintah POSIX standar:
 
@@ -262,7 +262,7 @@ Setiap aturan hak akses (*Access Control Entry* — ACE) pada NTFS memiliki *inh
 
 ### Matriks Pemetaan POSIX ke Windows NTFS ACL
 
-Berdasarkan keputusan resmi [`TM-ADR-0031`](https://edkas07-oss.github.io/devops-handbook/adr/tomcat-monitoring/adr-records/TM-ADR-0031/), kami menetapkan matriks konversi izin lintas OS sebagai berikut:
+Berikut matriks konversi izin lintas OS yang kami terapkan:
 
 | Kebutuhan Data | Linux POSIX | Windows Target Path | Aturan NTFS ACL (DACL) | Justifikasi Keamanan |
 | :--- | :---: | :--- | :--- | :--- |
@@ -329,7 +329,7 @@ Dengan injeksi ACL terstruktur ini, container NanoServer yang berjalan dengan ak
 
 ---
 
-## 💾 Arsitektur Two-Tier Storage & Aturan "Zero `/tmp`" (TM-ADR-0030)
+## 💾 Arsitektur Two-Tier Storage & Aturan "Zero `/tmp`"
 
 Salah satu kebiasaan buruk dalam rekayasa aplikasi multi-OS adalah memperlakukan folder temporer sistem (`/tmp` di Linux atau `C:\Windows\Temp` di Windows) sebagai tempat penyimpanan data sementara (*scratchpad*).
 
@@ -340,7 +340,7 @@ Salah satu kebiasaan buruk dalam rekayasa aplikasi multi-OS adalah memperlakukan
 
 Oleh karena itu, arsitektur kami memberlakukan aturan keras: **"Zero `/tmp` Policy"**. Tidak ada satu pun komponen monitoring yang diizinkan menulis data kerja ke direktori temporer sistem host maupun container.
 
-Sebagai gantinya, kami merancang **Two-Tier Storage Architecture** yang diresmikan dalam keputusan [`TM-ADR-0030`](https://edkas07-oss.github.io/devops-handbook/adr/tomcat-monitoring/adr-records/TM-ADR-0030/).
+Sebagai gantinya, kami merancang **Two-Tier Storage Architecture**:
 
 {{< mermaid >}}
 flowchart TB
@@ -588,11 +588,11 @@ Ketika Ansible mengeksekusi task deployment pada node Windows Server, perintah `
 
 ---
 
-## 🛠️ Unifikasi Tooling: Operator CLI `tmctl` & Agen `tm-agent` (TM-ADR-0027)
+## 🛠️ Unifikasi Tooling: Operator CLI `tmctl`
 
 Bahkan jika kontainer dapat berjalan simetris di kedua OS, friksi operasional sering kali berpindah ke tim SRE: operator Linux terbiasa dengan skrip Bash (`deploy.sh`, `validate.sh`), sedangkan operator Windows harus menghafal perintah PowerShell (`deploy.ps1`, `validate.ps1`). Perbedaan sintaksis, penanganan *line endings* (`LF` vs `CRLF`), dan mekanisme subshell selalu menjadi sumber kegagalan otomasi CI/CD.
 
-Berdasarkan keputusan arsitektur [`TM-ADR-0027: Adopt Container Engine Socket API and Unified Cross-Platform Tooling`](https://edkas07-oss.github.io/devops-handbook/adr/tomcat-monitoring/adr-records/TM-ADR-0027/), kami menghentikan ketergantungan pada skrip shell imperatif di target host dan membangun satu biner terpadu berbasis Go: **`tmctl`**.
+Untuk mengeliminasi friksi ini, kami membangun satu biner terpadu berbasis Go yang mandiri: **`tmctl`**.
 
 {{< mermaid >}}
 flowchart LR
@@ -665,7 +665,7 @@ Sebelum meluncurkan Windows Containers ke lingkungan produksi enterprise, gunaka
 
 ## 🚀 Bukti Verifikasi Lapangan (Live Multi-Node Fleet)
 
-Penerapan standar arsitektur [`TM-ADR-0030`](https://edkas07-oss.github.io/devops-handbook/adr/tomcat-monitoring/adr-records/TM-ADR-0030/) dan [`TM-ADR-0031`](https://edkas07-oss.github.io/devops-handbook/adr/tomcat-monitoring/adr-records/TM-ADR-0031/) telah diuji dan divalidasi secara nyata pada klaster pengujian hybrid di AWS EC2 (*Amazon Linux 2023* dan *Windows Server 2022 Datacenter*):
+Penerapan standar arsitektur di atas telah diuji dan divalidasi secara nyata pada klaster pengujian hybrid di AWS EC2 (*Amazon Linux 2023* dan *Windows Server 2022 Datacenter*):
 
 ```text
 ================================================================================
@@ -712,9 +712,8 @@ Menjalankan stack pemantauan modern di Windows Containers sering kali dianggap s
 3. **Terapkan Two-Tier Storage & Singkirkan `/tmp`:** Pisahkan database ber-I/O tinggi ke dalam Named Volumes engine, dan standarisasikan seluruh kontrol plane konfigurasi ke dalam ruang kerja yang terstruktur (`tm_home`).
 4. **Unifikasi Pengalaman SRE dengan Go:** Gunakan kakas CLI berbasis Go seperti `tmctl` yang berinteraksi langsung ke Container Engine Socket API untuk menghapus disparitas antarmuka antara PowerShell dan Bash.
 
-### Referensi Resmi Arsitektur (DevOps Handbook):
-- 📘 [`TM-ADR-0030: Standardize Host Workspace Directory to tm_home, Two-Tier Storage Architecture, Parameterized Drive Mounting, and Pure Container Logging Model`](https://edkas07-oss.github.io/devops-handbook/adr/tomcat-monitoring/adr-records/TM-ADR-0030/)
-- 📘 [`TM-ADR-0031: Granular Least-Privilege NTFS Volume Access Controls for Non-Admin Windows Containers, Configuration Namespace Alignment, and Diagnostic Runtime Integrity`](https://edkas07-oss.github.io/devops-handbook/adr/tomcat-monitoring/adr-records/TM-ADR-0031/)
-- 📘 [`TM-ADR-0027: Adopt Container Engine Socket API and Unified Cross-Platform Tooling for Multi-OS Orchestration`](https://edkas07-oss.github.io/devops-handbook/adr/tomcat-monitoring/adr-records/TM-ADR-0027/)
-- 📘 [`TM-ADR-0026: Multi-Engine Container Portability (Docker & Podman)`](https://edkas07-oss.github.io/devops-handbook/adr/tomcat-monitoring/adr-records/TM-ADR-0026/)
-- 📦 Repositori Implementasi: [github.com/edkas07-oss/tomcat-monitoring](https://github.com/edkas07-oss/tomcat-monitoring)
+### 📚 Panduan & Referensi Terkait:
+- [Panduan Praktis: Instalasi Docker Engine Community Edition di Windows Server]({{< relref "how-to/install-docker-engine-windows-containers" >}})
+- [Panduan Praktis: Build Image Container Apache Tomcat + Prometheus JMX Exporter di Windows NanoServer]({{< relref "how-to/build-tomcat-jmx-nanoserver-image" >}})
+- [Katalog Paket & Panduan Biner Operator tmctl]({{< relref "packages/tmctl" >}})
+- [Microsoft Official Windows Containers Documentation](https://learn.microsoft.com/en-us/virtualization/windowscontainers/)

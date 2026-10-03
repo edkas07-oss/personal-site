@@ -1,7 +1,7 @@
 +++
 title = "Merancang Autonomous Diagnostic Engine: Mengubah Diagnosa Insiden Manual Menjadi Evaluasi Otomatis Real-Time"
 date = "2026-09-21T08:30:00+07:00"
-draft = false
+draft = true
 summary = "Membedah arsitektur Autonomous Diagnostic Engine pada project tomcat-diagnostic-service: bagaimana mentransformasikan proses diagnosa insiden yang selama ini manual, lambat, dan membebani on-call SRE menjadi evaluasi otomatis real-time berbasis declarative JSON rulepack yang dapat di-hot-reload di runtime tanpa restart container, analisis keputusan arsitektur TM-ADR-0013 (Node.js 24 ESM + SQLite WAL), 5-Layer Defense-in-Depth ingestion guard (TM-ADR-0018), serta Out-of-Band AI Forensic Enrichment Loop (TM-ADR-0019)."
 author = "Eddy Wiyatno"
 categories = ["Architecture", "SRE"]

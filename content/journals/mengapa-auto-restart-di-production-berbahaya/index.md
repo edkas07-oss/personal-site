@@ -18,7 +18,7 @@ Ketika layanan mission-critical seperti Apache Tomcat mengalami kegagalan di *pr
 
 Namun, dalam arsitektur sistem enterprise modern, **auto-restart tanpa diagnosis forensik adalah anti-pattern yang berbahaya**. Tindakan perbaikan buta ini kerap memicu *reboot loops*, melenyapkan artefak diagnostik memori (*heap dump* dan *crash log*), melipatgandakan *blast radius* keamanan akibat kebutuhan *privilege escalation*, dan menyamarkan degradasi laten hingga berujung pada pemadaman total (*catastrophic outage*).
 
-Artikel ini mengulas alasan teknis mendasar mengapa arsitektur pemantauan Tomcat kami menetapkan kebijakan **Zero Destructive Auto-Remediation** (`TM-ADR-0014`), bagaimana kami mengisolasi mesin analisis dalam batas *read-only* yang ketat, dan bagaimana pola **Canonical Incident Notification Authority** (`TM-ADR-0016`) menyajikan laporan insiden terstruktur 7-seksi (*7-Section SRE Incident Report*) yang memberdayakan operator manusia (*human-in-the-loop*) untuk mengambil keputusan mitigasi yang tepat, terverifikasi, dan aman.
+Artikel ini mengulas alasan teknis mendasar mengapa arsitektur pemantauan sistem misi-kritis menetapkan kebijakan **Non-Destructive Incident Remediation**, bagaimana mengisolasi mesin analisis dalam batas *read-only* yang ketat, dan bagaimana pola pelaporan insiden terstruktur memberdayakan operator manusia (*human-in-the-loop*) untuk mengambil keputusan mitigasi yang tepat, terverifikasi, dan aman.
 
 ---
 
@@ -243,14 +243,13 @@ Ketika Anda menerima email laporan insiden 7-seksi dari Diagnostic Service di in
   - Jika `Confidence: HIGH` (misal: `ExitCode: 137 OOMKilled` atau `PortConflict` terverifikasi): Lanjutkan langsung ke langkah mitigasi Section 6.
   - Jika `Confidence: LOW / UNDETERMINED`: Buka sesi investigasi manual menggunakan panduan log di Section 5.
 - [ ] **3. Identifikasi Section 3 (Failure Domain):** Rujuk tiket eskalasi ke tim spesialis terkait (DBA untuk `database_persistence`, Dev untuk `application_lifecycle`, Jaringan untuk `network_integration`).
-- [ ] **4. Eksekusi SOP Manual di Section 6:** Jalankan perintah mitigasi yang direkomendasikan secara terkontrol melalui SSH / `tmctl`.
-- [ ] **5. Verifikasi Status Pemulihan (*Resolved Notification*):** Pastikan email penutupan insiden (*Resolved Notification*) diterima setelah metrik health probe kembali stabil.
+- [ ] **4. Eksekusi Mitigasi Manual:** Jalankan perintah perbaikan yang direkomendasikan secara terkontrol dan terverifikasi.
+- [ ] **5. Verifikasi Status Pemulihan (*Resolved Status*):** Pastikan metrik health probe kembali stabil dan transaksi normal.
 
 ---
 
-### 📚 Referensi Terkait
-- `TM-ADR-0014`: *Enforce Zero Automatic Remediation for Diagnostic Service*
-- `TM-ADR-0016`: *Designate Diagnostic Service as the Canonical Incident Notification Authority*
-- `TM-ADR-0006`: *Use Deterministic Multi-Source Evidence for Diagnostic Assessment*
-- `TM-ADR-0008`: *Use a Restricted Host Event Collector with a Normalized Evidence Spool*
-- `RUNBOOK.md`: *Tomcat Monitoring Platform SRE Operational Runbook*
+### 📚 Referensi & Artikel Terkait
+- [Artikel: Mendeteksi Concurrency Saturation & GC Thrashing: Jangan Hanya Mengandalkan Metrik CPU & Memory Biasa]({{< relref "journals/mendeteksi-concurrency-saturation-dan-gc-thrashing" >}})
+- [Artikel: Deep-Dive Observability Apache Tomcat: Mengamankan JMX Exporter dengan TLS & Keystore]({{< relref "journals/deep-dive-observability-apache-tomcat-jmx-exporter-tls" >}})
+- [Google SRE Book: Addressing Cascading Failures](https://sre.google/sre-book/addressing-cascading-failures/)
+- [CNCF OpenTelemetry Specification](https://opentelemetry.io/docs/specs/otel/)

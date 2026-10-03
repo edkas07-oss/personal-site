@@ -2,7 +2,7 @@
 title = "Deep-Dive Observability Apache Tomcat: Mengamankan JMX Exporter dengan TLS & Keystore"
 date = "2026-09-20T20:00:00+07:00"
 draft = false
-summary = "Panduan mendalam mengamankan eksposur metrik internal JVM dan Tomcat MBeans di lingkungan produksi menggunakan Prometheus JMX Exporter Java Agent dengan enkripsi TLS/HTTPS Keystore, pemisahan isolasi konfigurasi runtime (TM-ADR-0002 & TM-ADR-0003), serta optimasi filter MBeans rendah overhead."
+summary = "Panduan mendalam mengamankan eksposur metrik internal JVM dan Tomcat MBeans di lingkungan produksi menggunakan Prometheus JMX Exporter Java Agent dengan enkripsi TLS/HTTPS Keystore, pemisahan isolasi konfigurasi runtime, serta optimasi filter MBeans rendah overhead."
 author = "Eddy Wiyatno"
 categories = ["Observability", "JVM"]
 tags = ["tomcat", "observability", "prometheus", "jmx", "security", "sre"]
@@ -20,8 +20,8 @@ Solusi arsitektur modern yang paling aman dan efisien adalah mengintegrasikan **
 
 Artikel teknis ini membedah secara menyeluruh:
 1. Mengapa Remote JMX/RMI tradisional adalah *anti-pattern* berbahaya di jaringan *production*.
-2. Pemisahan arsitektur antara *generic runtime image* dan konfigurasi monitoring berdasarkan [`TM-ADR-0002`](https://edkas07-oss.github.io/devops-handbook/adr/tomcat-monitoring/adr-records/TM-ADR-0002/).
-3. Manajemen *host-managed non-Git TLS material* dan injeksi rahasia tanpa kebocoran kode merujuk pada [`TM-ADR-0003`](https://edkas07-oss.github.io/devops-handbook/adr/tomcat-monitoring/adr-records/TM-ADR-0003/).
+2. Pemisahan arsitektur antara *generic runtime image* dan konfigurasi monitoring eksternal.
+3. Manajemen *host-managed non-Git TLS material* dan injeksi rahasia tanpa kebocoran kode.
 4. Strategi *whitelisting* pola MBeans untuk menjaga *scraping overhead* CPU tetap berada di bawah 1–2%.
 5. Analisis 4 metrik krusial JVM dan Tomcat (*Heap Memory*, *Metaspace Classloading*, *GC STW Latency*, dan *Connector Thread Saturation*).
 
@@ -104,11 +104,11 @@ flowchart LR
 
 ---
 
-## 🧱 Isolasi Konfigurasi vs Runtime Base Image (TM-ADR-0002)
+## 🧱 Isolasi Konfigurasi vs Runtime Base Image
 
 Salah satu kesalahan paling fatal dalam rekayasa container (*container engineering*) adalah membuat *fat image* yang menggabungkan binary runtime aplikasi bersama artefak konfigurasi monitoring spesifik lingkungan, kredensial, dan sertifikat TLS.
 
-Berdasarkan keputusan arsitektur resmi [`TM-ADR-0002: Separate Generic Runtime Images from Monitoring Integration Configuration`](https://edkas07-oss.github.io/devops-handbook/adr/tomcat-monitoring/adr-records/TM-ADR-0002/), kami memisahkan repositori dan artefak ke dalam dua domain yang memiliki *lifecycle* independen:
+Berdasarkan prinsip *Immutable Infrastructure*, kami memisahkan repositori dan artefak ke dalam dua domain yang memiliki *lifecycle* independen:
 
 | Dimensi | Generic Runtime Image | Monitoring Integration Configuration |
 | :--- | :--- | :--- |
@@ -192,9 +192,9 @@ exec "$@"
 
 ---
 
-## 🔒 Pengamanan Jalur Metrik dengan HTTPS/TLS Keystore (TM-ADR-0003)
+## 🔒 Pengamanan Jalur Metrik dengan HTTPS/TLS Keystore
 
-Setelah arsitektur container terisolasi, jalur transmisi telemetri wajib dilindungi dengan enkripsi TLS. Merujuk pada keputusan arsitektur [`TM-ADR-0003: Use Host-Managed Non-Git TLS Material for the Persistent Lab`](https://edkas07-oss.github.io/devops-handbook/adr/tomcat-monitoring/adr-records/TM-ADR-0003/), seluruh material sertifikat dikelola secara mandiri di host (*host-managed*) di luar pelacakan Git.
+Setelah arsitektur container terisolasi, jalur transmisi telemetri wajib dilindungi dengan enkripsi TLS. Seluruh material sertifikat dikelola secara mandiri di host (*host-managed*) di luar pelacakan Git demi menjaga keamanan rahasia sistem.
 
 ### 1. Hierarki Hak Akses & Isolasi Secret (*Least-Privilege File Permissions*)
 Material kriptografi disimpan pada direktori host rootless dengan pengaturan izin berkas yang sangat ketat:
@@ -331,8 +331,7 @@ Banyak engineer pemula panik saat melihat grafik memori Java meningkat tajam. Un
 (jvm_memory_bytes_used{area="heap"} / jvm_memory_bytes_max{area="heap"}) * 100
 ```
 
-> [!TIP]
-> Jangan membunyikan alarm hanya karena Used Heap mencapai 80%. Sinyal bahaya memori yang sesungguhnya terjadi apabila **Old Generation Pool Saturation $> 90\%$ bertahan persisten bahkan setelah siklus Full GC selesai dieksekusi** (merujuk pada [`TM-ADR-0022`](https://edkas07-oss.github.io/devops-handbook/adr/tomcat-monitoring/adr-records/TM-ADR-0022/)).
+> Jangan membunyikan alarm hanya karena Used Heap mencapai 80%. Sinyal bahaya memori yang sesungguhnya terjadi apabila **Old Generation Pool Saturation $> 90\%$ bertahan persisten bahkan setelah siklus Full GC selesai dieksekusi**.
 
 ---
 
@@ -494,22 +493,15 @@ scrape_configs:
 Mengamankan antarmuka observabilitas bukanlah sekadar langkah opsional, melainkan pilar fundamental dalam perlindungan infrastruktur enterprise. Dengan meninggalkan Remote JMX/RMI tradisional dan beralih ke Prometheus JMX Exporter berbasis Java Agent HTTPS:
 
 1. **Keamanan Maksimal:** Jalur telemetri terenkripsi secara penuh dengan TLS Keystore (PKCS12), menutup total celah eksploitasi deserialization RCE.
-2. **Kepatuhan Arsitektur:** Pemisahan *generic runtime base image* dari konfigurasi monitoring (`TM-ADR-0002`) serta pengelolaan material TLS di luar Git (`TM-ADR-0003`) menjamin *container immutability* dan integritas rahasia sistem.
+2. **Kepatuhan Arsitektur:** Pemisahan *generic runtime base image* dari konfigurasi monitoring serta pengelolaan material TLS di luar Git menjamin *container immutability* dan integritas rahasia sistem.
 3. **Efisiensi Sumber Daya:** Filter pola MBeans selektif mencegah *telemetry explosion*, mempertahankan overhead proses scraping tetap di bawah 1–2% CPU.
 4. **Sinyal Diagnostik Akurat:** Metrik berfokus pada saturasi beban nyata (*GC Golden Signals* dan *Thread Saturation*) mengeliminasi *alert fatigue* dan mempercepat investigasi insiden (*Mean Time to Diagnosis*).
 
 ---
 
-## 📚 Referensi Resmi & Sumber Pembacaan Lanjutan
+## 📚 Referensi & Panduan Terkait
 
-- **Arsitektur Pemisahan Runtime & Konfigurasi:**  
-  [TM-ADR-0002: Separate Generic Runtime Images from Monitoring Integration Configuration](https://edkas07-oss.github.io/devops-handbook/adr/tomcat-monitoring/adr-records/TM-ADR-0002/)
-- **Kebijakan Pengelolaan TLS & Keystore Non-Git:**  
-  [TM-ADR-0003: Use Host-Managed Non-Git TLS Material for the Persistent Lab](https://edkas07-oss.github.io/devops-handbook/adr/tomcat-monitoring/adr-records/TM-ADR-0003/)
-- **Keputusan Arsitektur Sinyal Emas GC & Saturasi Konkurensi:**  
-  [TM-ADR-0022: Adopt Workload Saturation Indicators for JVM and Concurrency Diagnostics](https://edkas07-oss.github.io/devops-handbook/adr/tomcat-monitoring/adr-records/TM-ADR-0022/)
-- **Standarisasi Multi-Engine Container Portability:**  
-  [TM-ADR-0026: Adopt Adaptive Multi-Engine Container Runtime Portability for Podman and Docker](https://edkas07-oss.github.io/devops-handbook/adr/tomcat-monitoring/adr-records/TM-ADR-0026/)
-- **Repositori & Dokumentasi Resmi:**  
-  - [Prometheus JMX Exporter Repository (GitHub)](https://github.com/prometheus/jmx_exporter)
-  - [Apache Tomcat Official Architecture Documentation](https://tomcat.apache.org/)
+- [Panduan Build Image Container Apache Tomcat + Prometheus JMX Exporter di Windows NanoServer]({{< relref "how-to/build-tomcat-jmx-nanoserver-image" >}})
+- [Panduan Deploy Kontainer Apache Tomcat Hardened di Windows Server]({{< relref "how-to/deploy-tomcat-container-windows-server-tcctl" >}})
+- [Prometheus JMX Exporter Repository (GitHub)](https://github.com/prometheus/jmx_exporter)
+- [Apache Tomcat Official Architecture Documentation](https://tomcat.apache.org/)

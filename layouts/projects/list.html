@@ -1,9 +1,4 @@
 {{ define "main" }}
-{{ if .Parent.IsHome }}
-
-{{/* ══════════════════════════════════════════════════════════════════════
-     1. ROOT PROJECTS SHOWCASE PAGE (/projects/)
-     ══════════════════════════════════════════════════════════════════════ */}}
 <div class="ew-projects-container max-w-full">
 
   {{/* ── Header ──────────────────────────────────────────────────────── */}}
@@ -14,336 +9,193 @@
     <div class="mt-4">
       <p class="ew-hero__eyebrow">Engineering Showcase</p>
       <h1 class="text-4xl font-extrabold tracking-tight text-neutral-900 dark:text-white sm:text-5xl">
-        {{ .Title }}
+        {{ .Title | default "Projects & Engineering Tools" }}
       </h1>
       <p class="mt-3 w-full max-w-none text-lg text-neutral-600 dark:text-neutral-300">
-        {{ .Description | default "Kumpulan project yang saya buat berdasarkan kebutuhan nyata di skala enterprise — mencakup platform buatan sendiri, modul atau komponen unik, sampai project-project lainnya." }}
+        {{ .Description | default "Koleksi perangkat lunak dan kakas operasional mandiri berbasis Go yang dibangun untuk standarisasi, keandalan, dan otomasi platform di lingkungan enterprise." }}
       </p>
     </div>
   </header>
 
-  {{/* ── Featured Platform Showcase 1: tcctl (Tomcat Super Module) ──── */}}
+  {{/* ── Platform Showcase 1: tcctl ─────────────────────────────────── */}}
   <div class="ew-project-showcase">
     <div class="ew-project-showcase__header">
       <div class="flex flex-wrap items-center gap-2 mb-3">
-        <span class="ew-tag ew-tag--cat">Flagship Platform</span>
-        <span class="ew-fs-badge ew-fs--blue">Platform Engineering &amp; GitOps</span>
+        <span class="ew-tag ew-tag--cat">Operator CLI</span>
+        <span class="ew-fs-badge ew-fs--blue">Platform Engineering</span>
         <span class="ew-fs-badge ew-fs--purple">Multi-OS (Windows &amp; Linux)</span>
-        <span class="ew-fs-badge ew-fs--green">CIS Benchmark &amp; Zero-Git</span>
+        <span class="ew-fs-badge ew-fs--green">CIS Hardening</span>
       </div>
       <h2 class="text-2xl sm:text-3xl font-bold text-white tracking-tight mb-2">
-        <a href="{{ "/projects/tcctl/" | relLangURL }}" class="hover:text-blue-400 transition-colors">
-          Apache Tomcat Enterprise Super Module (tcctl)
+        <a href="{{ "/packages/#tcctl" | relLangURL }}" class="hover:text-blue-400 transition-colors">
+          Apache Tomcat Enterprise Operator (tcctl)
         </a>
       </h2>
       <p class="text-blue-200 text-sm sm:text-base font-semibold mb-4">
-        Unified Operator CLI, Automated CIS Hardening, Zero-Git Pull Reconciler &amp; Staging Rollout Engine
+        Universal CLI for Rolling Updates, Automated CIS Audit &amp; Configuration Immutability
       </p>
       <p class="text-slate-300 text-sm sm:text-base leading-relaxed w-full max-w-none mb-6">
-        Platform operator terpadu (Super Module) berbasis Go untuk tata kelola siklus hidup, security hardening CIS Benchmark, audit kerentanan Trivy, GitOps otonom (<strong>Zero-Git</strong> via Gitea REST API), dynamic JVM tuning, dan zero-downtime temporary staging rollout Apache Tomcat di Windows Server dan Linux.
+        Kakas CLI mandiri berbasis bahasa Go untuk standarisasi tata kelola, validasi kepatuhan CIS Benchmark, mitigasi drift konfigurasi, dan proses rolling update minim downtime pada kontainer Apache Tomcat di Windows Server dan Linux.
       </p>
     </div>
 
-    {{/* ── 3 Core Modules Micro-Grid ─────────────────────────────────── */}}
+    {{/* ── 3 Core Capabilities ────────────────────────────────────────── */}}
     <div class="ew-module-grid">
       
-      {{/* Module 1: Staging Rollout */}}
-      <a href="{{ "/projects/tcctl/staging-rollout/" | relLangURL }}" class="ew-module-card group">
+      {{/* Capability 1 */}}
+      <div class="ew-module-card">
         <div class="flex items-center justify-between mb-2">
           <span class="text-lg">🚀</span>
-          <span class="text-xs font-bold text-blue-400 uppercase tracking-wider">Go Staging Rollout</span>
+          <span class="text-xs font-bold text-blue-400 uppercase tracking-wider">HIGH AVAILABILITY</span>
         </div>
-        <h3 class="text-base font-bold text-white group-hover:text-blue-300 transition-colors mb-1">
-          tcctl deploy
+        <h3 class="text-base font-bold text-white mb-1">
+          Rolling Update &amp; Staging
         </h3>
         <p class="text-xs text-slate-300 leading-relaxed">
-          Zero-downtime temporary staging rollout (:9080 &rarr; :8080), dynamic bin/setenv JVM memory tuning, dan safe rollback atomik.
+          Pergantian versi runtime bertahap dengan health check terverifikasi (:9080 &rarr; :8080) dan mekanisme safe rollback jika rilis gagal.
         </p>
-        <span class="mt-3 inline-block text-xs font-semibold text-blue-400 group-hover:underline">
-          Pelajari Modul →
-        </span>
-      </a>
+      </div>
 
-      {{/* Module 2: Hardening & VA */}}
-      <a href="{{ "/projects/tcctl/hardening-audit/" | relLangURL }}" class="ew-module-card group">
+      {{/* Capability 2 */}}
+      <div class="ew-module-card">
         <div class="flex items-center justify-between mb-2">
           <span class="text-lg">🛡️</span>
-          <span class="text-xs font-bold text-emerald-400 uppercase tracking-wider">CIS Benchmark &amp; VA</span>
+          <span class="text-xs font-bold text-emerald-400 uppercase tracking-wider">CIS &amp; AUDIT READY</span>
         </div>
-        <h3 class="text-base font-bold text-white group-hover:text-emerald-300 transition-colors mb-1">
-          tcctl hardening &amp; va
+        <h3 class="text-base font-bold text-white mb-1">
+          Hardening &amp; Audit
         </h3>
         <p class="text-xs text-slate-300 leading-relaxed">
-          Audit statis 9 aturan CIS Benchmark untuk XML Tomcat, penegakan non-root ContainerUser, dan scanner Trivy sebagai CI quality gate.
+          Validasi otomatis konfigurasi Tomcat sesuai standar CIS Benchmark dan penegakan hak akses non-root (ContainerUser).
         </p>
-        <span class="mt-3 inline-block text-xs font-semibold text-emerald-400 group-hover:underline">
-          Pelajari Modul →
-        </span>
-      </a>
+      </div>
 
-      {{/* Module 3: GitOps Reconciler */}}
-      <a href="{{ "/projects/tcctl/gitops-reconciler/" | relLangURL }}" class="ew-module-card group">
+      {{/* Capability 3 */}}
+      <div class="ew-module-card">
         <div class="flex items-center justify-between mb-2">
           <span class="text-lg">🔄</span>
-          <span class="text-xs font-bold text-purple-400 uppercase tracking-wider">Zero-Git Reconciler</span>
+          <span class="text-xs font-bold text-purple-400 uppercase tracking-wider">ZERO-DRIFT</span>
         </div>
-        <h3 class="text-base font-bold text-white group-hover:text-purple-300 transition-colors mb-1">
-          tcctl gitops
+        <h3 class="text-base font-bold text-white mb-1">
+          Proteksi Konfigurasi
         </h3>
         <p class="text-xs text-slate-300 leading-relaxed">
-          Rekonsiliator GitOps otonom berbasis REST API Gitea (Zero-Git dependency), deteksi drift atomik, dan eksekusi background daemon.
+          Mencegah perubahan konfigurasi manual tidak terlacak di server live melalui proteksi bind-mount read-only (conf:ro).
         </p>
-        <span class="mt-3 inline-block text-xs font-semibold text-purple-400 group-hover:underline">
-          Pelajari Modul →
-        </span>
-      </a>
+      </div>
 
     </div>
 
     {{/* ── Action Buttons ────────────────────────────────────────────── */}}
     <div class="mt-6 pt-5 border-t border-blue-900/60 flex flex-wrap items-center justify-between gap-4">
       <div class="flex flex-wrap gap-3">
-        <a href="{{ "/projects/tcctl/" | relLangURL }}" class="ew-btn ew-btn--primary">
-          📖 Buka Blueprint Super Module →
-        </a>
-        <a href="{{ "/packages/tcctl/" | relLangURL }}" class="ew-btn ew-btn--ghost text-slate-300 border-slate-600 hover:border-blue-400">
+        <a href="{{ "/packages/#tcctl" | relLangURL }}" class="ew-btn ew-btn--primary text-xs sm:text-sm py-2 px-4">
           📦 Unduh Biner di Packages →
+        </a>
+        <a href="{{ "/how-to/deploy-tomcat-container-windows-server-tcctl/" | relLangURL }}" class="ew-btn ew-btn--ghost text-xs sm:text-sm py-2 px-4 text-slate-300 border-slate-600 hover:border-blue-400">
+          📖 Panduan Deployment How-To →
+        </a>
+        <a href="https://github.com/edkas07-oss/tcctl" target="_blank" rel="noopener" class="ew-btn ew-btn--ghost text-xs sm:text-sm py-2 px-3 text-slate-300 border-slate-600 hover:border-blue-400">
+          🐙 GitHub ↗
         </a>
       </div>
       <div class="flex items-center gap-2 text-xs text-slate-400">
-        <span>Arsitektur Didukung:</span>
+        <span>Arsitektur:</span>
         <span class="text-slate-300 font-mono">Windows (Docker)</span> ·
         <span class="text-slate-300 font-mono">Linux (Podman)</span>
       </div>
     </div>
   </div>
 
-  {{/* ── Featured Platform Showcase 2: Tomcat Monitoring ─────────────── */}}
-  <div class="ew-project-showcase">
+  {{/* ── Platform Showcase 2: tmctl ─────────────────────────────────── */}}
+  <div class="ew-project-showcase mt-10">
     <div class="ew-project-showcase__header">
       <div class="flex flex-wrap items-center gap-2 mb-3">
-        <span class="ew-tag ew-tag--cat">Flagship Platform</span>
-        <span class="ew-fs-badge ew-fs--blue">SRE &amp; Observability</span>
+        <span class="ew-tag ew-tag--cat">Diagnostic Operator</span>
+        <span class="ew-fs-badge ew-fs--blue">Observability</span>
         <span class="ew-fs-badge ew-fs--purple">Multi-OS (Linux &amp; Windows)</span>
-        <span class="ew-fs-badge ew-fs--green">Zero Auto-Remediation</span>
+        <span class="ew-fs-badge ew-fs--green">Non-Destructive SRE</span>
       </div>
       <h2 class="text-2xl sm:text-3xl font-bold text-white tracking-tight mb-2">
-        <a href="{{ "/projects/tomcat-monitoring/" | relLangURL }}" class="hover:text-blue-400 transition-colors">
-          Tomcat Monitoring &amp; Autonomous Diagnostic Platform
+        <a href="{{ "/packages/#tmctl" | relLangURL }}" class="hover:text-blue-400 transition-colors">
+          Tomcat Monitoring Operator (tmctl)
         </a>
       </h2>
       <p class="text-blue-200 text-sm sm:text-base font-semibold mb-4">
-        Embedded Runtime Observability, Socket-Level Event Streaming &amp; Autonomous Incident Decision Authority
+        Unified Cross-Platform Operator for JVM Observability &amp; Incident Triage
       </p>
       <p class="text-slate-300 text-sm sm:text-base leading-relaxed w-full max-w-none mb-6">
-        Platform observabilitas dan penentu keputusan insiden otonom terintegrasi untuk Apache Tomcat di lingkungan Linux (Podman rootless) dan Windows Server (Docker). Menerapkan kebijakan <strong>Zero Destructive Auto-Remediation</strong> (TM-ADR-0014), korelasi bukti forensik deterministik multi-sumber, serta arsitektur storage two-tier tanpa memerlukan alokasi infrastruktur baru.
+        Operator CLI mandiri berbasis Go untuk mengorkestrasi stack monitoring (Prometheus, JMX Exporter, Alertmanager) via Socket API langsung, melacak degradasi performa JVM, dan mengumpulkan bukti forensik insiden.
       </p>
     </div>
 
-    {{/* ── 3 Core Modules Micro-Grid ─────────────────────────────────── */}}
+    {{/* ── 3 Core Capabilities ────────────────────────────────────────── */}}
     <div class="ew-module-grid">
       
-      {{/* Module 1: tmctl */}}
-      <a href="{{ "/projects/tomcat-monitoring/tmctl/" | relLangURL }}" class="ew-module-card group">
+      {{/* Capability 1 */}}
+      <div class="ew-module-card">
         <div class="flex items-center justify-between mb-2">
           <span class="text-lg">🛠️</span>
-          <span class="text-xs font-bold text-blue-400 uppercase tracking-wider">Go 1.23+ CLI</span>
+          <span class="text-xs font-bold text-blue-400 uppercase tracking-wider">OBSERVABILITY</span>
         </div>
-        <h3 class="text-base font-bold text-white group-hover:text-blue-300 transition-colors mb-1">
-          tmctl
+        <h3 class="text-base font-bold text-white mb-1">
+          Runtime Telemetry
         </h3>
         <p class="text-xs text-slate-300 leading-relaxed">
-          Cross-Platform Operator CLI dengan komunikasi direct socket API (Podman Unix Socket &amp; Windows Named Pipe), safe rollback, dan validasi kepatuhan.
+          Monitoring lifecycle kontainer dan metrik internal JVM secara real-time via direct socket API tanpa overhead agent pihak ketiga.
         </p>
-        <span class="mt-3 inline-block text-xs font-semibold text-blue-400 group-hover:underline">
-          Pelajari Modul →
-        </span>
-      </a>
+      </div>
 
-      {{/* Module 2: tm-agent */}}
-      <a href="{{ "/projects/tomcat-monitoring/tm-agent/" | relLangURL }}" class="ew-module-card group">
+      {{/* Capability 2 */}}
+      <div class="ew-module-card">
         <div class="flex items-center justify-between mb-2">
-          <span class="text-lg">📦</span>
-          <span class="text-xs font-bold text-emerald-400 uppercase tracking-wider">Go Daemon</span>
+          <span class="text-lg">⏱️</span>
+          <span class="text-xs font-bold text-emerald-400 uppercase tracking-wider">MTTR REDUCTION</span>
         </div>
-        <h3 class="text-base font-bold text-white group-hover:text-emerald-300 transition-colors mb-1">
-          tm-agent
+        <h3 class="text-base font-bold text-white mb-1">
+          Triage Insiden Cepat
         </h3>
         <p class="text-xs text-slate-300 leading-relaxed">
-          Event Collector Daemon untuk streaming lifecycle container secara real-time, deteksi OOM/crash instan (&lt;10ms), dan serialisasi bukti atomik.
+          Deteksi akar masalah JVM kritis (GC thrashing, thread deadlock, OOM) dan penyusunan bukti forensik terstruktur untuk tim on-call.
         </p>
-        <span class="mt-3 inline-block text-xs font-semibold text-emerald-400 group-hover:underline">
-          Pelajari Modul →
-        </span>
-      </a>
+      </div>
 
-      {{/* Module 3: diagnostic service */}}
-      <a href="{{ "/projects/tomcat-monitoring/diagnostic-service/" | relLangURL }}" class="ew-module-card group">
+      {{/* Capability 3 */}}
+      <div class="ew-module-card">
         <div class="flex items-center justify-between mb-2">
-          <span class="text-lg">🚀</span>
-          <span class="text-xs font-bold text-purple-400 uppercase tracking-wider">Node.js 24 LTS</span>
+          <span class="text-lg">🛡️</span>
+          <span class="text-xs font-bold text-purple-400 uppercase tracking-wider">SAFE REMEDIATION</span>
         </div>
-        <h3 class="text-base font-bold text-white group-hover:text-purple-300 transition-colors mb-1">
-          Diagnostic Service
+        <h3 class="text-base font-bold text-white mb-1">
+          Remediasi Non-Destruktif
         </h3>
         <p class="text-xs text-slate-300 leading-relaxed">
-          Autonomous Decision Authority dengan taksonomi 8 failure domain, korelasi bukti multi-sumber, dan distribusi laporan insiden 7-seksi kanonikal via SMTP.
+          Menghindari auto-restart gegabah di lingkungan produksi; memprioritaskan isolasi traffic dan investigasi bukti forensik terlebih dahulu.
         </p>
-        <span class="mt-3 inline-block text-xs font-semibold text-purple-400 group-hover:underline">
-          Pelajari Modul →
-        </span>
-      </a>
+      </div>
 
     </div>
 
     {{/* ── Action Buttons ────────────────────────────────────────────── */}}
     <div class="mt-6 pt-5 border-t border-blue-900/60 flex flex-wrap items-center justify-between gap-4">
       <div class="flex flex-wrap gap-3">
-        <a href="{{ "/projects/tomcat-monitoring/" | relLangURL }}" class="ew-btn ew-btn--primary">
-          📖 Buka Blueprint Arsitektur Platform →
+        <a href="{{ "/packages/#tmctl" | relLangURL }}" class="ew-btn ew-btn--primary text-xs sm:text-sm py-2 px-4">
+          📦 Unduh Biner di Packages →
+        </a>
+        <a href="{{ "/how-to/build-tomcat-jmx-nanoserver-image/" | relLangURL }}" class="ew-btn ew-btn--ghost text-xs sm:text-sm py-2 px-4 text-slate-300 border-slate-600 hover:border-blue-400">
+          📖 Panduan Build JMX How-To →
+        </a>
+        <a href="https://github.com/edkas07-oss/tmctl" target="_blank" rel="noopener" class="ew-btn ew-btn--ghost text-xs sm:text-sm py-2 px-3 text-slate-300 border-slate-600 hover:border-blue-400">
+          🐙 GitHub ↗
         </a>
       </div>
       <div class="flex items-center gap-2 text-xs text-slate-400">
-        <span>Arsitektur Didukung:</span>
+        <span>Arsitektur:</span>
         <span class="text-slate-300 font-mono">Linux (Podman)</span> ·
         <span class="text-slate-300 font-mono">Windows (Docker)</span>
       </div>
     </div>
   </div>
 
-  {{/* ── Future Projects Grid (auto-rendered when other projects are added) ── */}}
-  {{ $otherProjects := where .Pages "RelPermalink" "not in" (slice "/projects/tomcat-monitoring/" "/projects/tcctl/") }}
-  {{ if gt (len $otherProjects) 0 }}
-  <div class="mt-12 not-prose">
-    <div class="mb-6">
-      <p class="ew-hero__eyebrow">Platform Lainnya</p>
-      <h2 class="text-2xl font-bold text-neutral-900 dark:text-white">
-        Proyek &amp; Inisiatif Rekayasa
-      </h2>
-    </div>
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-      {{ range $otherProjects }}
-      <div class="ew-card">
-        <div class="ew-card__body">
-          <div class="flex items-center justify-between mb-2">
-            <span class="ew-tag ew-tag--cat">{{ index .Params.categories 0 | default "Project" }}</span>
-          </div>
-          <h3 class="text-base font-bold text-neutral-900 dark:text-white mb-2 leading-snug">
-            <a href="{{ .RelPermalink }}" class="hover:text-blue-500 transition-colors">{{ .Title }}</a>
-          </h3>
-          <p class="text-xs text-neutral-600 dark:text-neutral-300 leading-relaxed mb-4">
-            {{ .Params.summary | default .Summary }}
-          </p>
-          <div class="mt-auto pt-3 border-t border-neutral-100 dark:border-neutral-700/60 flex justify-end">
-            <a href="{{ .RelPermalink }}" class="ew-card__read">Pelajari Proyek →</a>
-          </div>
-        </div>
-      </div>
-      {{ end }}
-    </div>
-  </div>
-  {{ end }}
-
 </div>
-
-{{ else }}
-
-{{/* ══════════════════════════════════════════════════════════════════════
-     2. PROJECT BLUEPRINT PAGE (e.g. /projects/tcctl/ or /projects/tomcat-monitoring/)
-     ══════════════════════════════════════════════════════════════════════ */}}
-<article class="max-w-full">
-
-  {{/* ── Header ──────────────────────────────────────────────────────── */}}
-  <header id="single_header" class="mt-4 mb-6">
-    {{ if .Params.showBreadcrumbs | default (site.Params.article.showBreadcrumbs | default true) }}
-      {{ partial "breadcrumbs.html" . }}
-    {{ end }}
-    <div class="mt-3">
-      <div class="flex flex-wrap gap-2 mb-3">
-        {{ with .Params.categories }}
-          {{ range . }}
-          <span class="ew-tag ew-tag--cat">{{ . }}</span>
-          {{ end }}
-        {{ end }}
-      </div>
-      <h1 class="text-3xl font-extrabold tracking-tight text-neutral-900 dark:text-white sm:text-4xl">
-        {{ .Title | emojify }}
-      </h1>
-      <div class="mt-2 text-sm text-neutral-500 dark:text-neutral-400">
-        {{ .Date.Format "2 January 2006" }} · Author: {{ .Params.author | default site.Params.Author.name }}
-      </div>
-    </div>
-  </header>
-
-  {{/* ── Body: Wide Content + Sticky TOC ─────────────────────────────── */}}
-  <section class="flex flex-col max-w-full mt-0 prose dark:prose-invert lg:flex-row">
-    {{ $enableToc := site.Params.article.showTableOfContents | default true }}
-    {{ $enableToc = .Params.showTableOfContents | default $enableToc }}
-    {{ $showToc := and $enableToc (in .TableOfContents "<ul") }}
-    {{ $topClass := cond (hasPrefix site.Params.header.layout "fixed") "lg:top-[140px]" "lg:top-10" }}
-    
-    {{ if $showToc }}
-      <div class="order-first lg:ms-auto px-0 lg:order-last lg:ps-8 lg:max-w-2xs">
-        <div class="toc ps-5 print:hidden lg:sticky {{ $topClass }}">
-          {{ partial "toc.html" . }}
-        </div>
-      </div>
-    {{ end }}
-
-    <div class="min-w-0 min-h-0 max-w-fit w-full">
-      <div class="article-content max-w-none w-full mb-12">
-        {{ .Content }}
-      </div>
-
-      {{/* ── Modul Inti Platform Section ─────────────────────────────── */}}
-      {{ if gt .Pages 0 }}
-      <div class="not-prose mt-12 pt-8 border-t border-neutral-200 dark:border-neutral-700">
-        <div class="mb-6">
-          <p class="ew-hero__eyebrow">Pilar Teknologi</p>
-          <h2 class="text-2xl font-bold text-neutral-900 dark:text-white">
-            Modul Inti Platform
-          </h2>
-          <p class="text-sm text-neutral-500 dark:text-neutral-400 mt-1">
-            {{ with .Params.modules_subtitle }}
-              {{ . }}
-            {{ else }}
-              Modul perangkat lunak mandiri yang menopang kapabilitas dan operasional platform.
-            {{ end }}
-          </p>
-        </div>
-
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
-          {{ range .Pages }}
-          <div class="ew-card">
-            <div class="ew-card__body">
-              <div class="flex items-center justify-between mb-2">
-                <span class="ew-tag ew-tag--cat">{{ index .Params.categories 0 | default "Module" }}</span>
-                <span class="text-xs font-semibold text-neutral-400">{{ index .Params.tags 0 | default "" }}</span>
-              </div>
-              <h3 class="text-base font-bold text-neutral-900 dark:text-white mb-2 leading-snug">
-                <a href="{{ .RelPermalink }}" class="hover:text-blue-500 transition-colors">
-                  {{ .Title }}
-                </a>
-              </h3>
-              <p class="text-xs text-neutral-600 dark:text-neutral-300 leading-relaxed mb-4">
-                {{ .Params.summary | default .Summary }}
-              </p>
-              <div class="mt-auto pt-3 border-t border-neutral-100 dark:border-neutral-700/60 flex justify-end">
-                <a href="{{ .RelPermalink }}" class="ew-card__read">
-                  Pelajari Selengkapnya →
-                </a>
-              </div>
-            </div>
-          </div>
-          {{ end }}
-        </div>
-      </div>
-      {{ end }}
-
-    </div>
-  </section>
-
-</article>
-
-{{ end }}
 {{ end }}

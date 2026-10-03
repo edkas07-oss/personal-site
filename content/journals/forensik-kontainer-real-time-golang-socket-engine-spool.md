@@ -1,7 +1,7 @@
 +++
 title = "Forensik Kontainer Real-Time di Production: Menangkap Momen Crash Menggunakan Golang, Socket API, dan Atomic Spool"
 date = "2026-09-21T07:50:00+07:00"
-draft = false
+draft = true
 summary = "Membedah arsitektur forensik kontainer modern di production: mengapa interval scrape Prometheus gagal menangkap momen crash fatal OOMKilled atau segfault saat auto-restart aktif, bagaimana Golang dan Container Engine Socket API (Podman, Docker, Windows Named Pipes) menangkap point-in-time evidence milidetik terminasi, serta implementasi zero-dependency tooling melalui tm-agent dan tmctl."
 author = "Eddy Wiyatno"
 categories = ["DevOps", "Golang"]

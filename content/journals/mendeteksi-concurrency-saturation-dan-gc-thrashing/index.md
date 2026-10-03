@@ -18,7 +18,7 @@ Dalam praktik pemantauan sistem berbasis Java Virtual Machine (JVM) seperti Apac
 
 Sebaliknya, metrik agregat CPU dan memori biasa sering kali **gagal mendeteksi krisis mematikan**. CPU host mungkin hanya terlihat terpakai 40%, tetapi aplikasi telah membeku total selama 5 detik akibat *Stop-The-World (STW) GC pause*. Begitu pula sebaliknya: memori heap tampak berfluktuasi normal, tetapi thread pool Tomcat telah mengalami kejenuhan 100% (*thread starvation*) sehingga antrean request baru ditolak (*rejected execution*).
 
-Artikel ini mengulas mengapa arsitektur observabilitas kami secara resmi menolak ambang batas statis mentah melalui [`TM-ADR-0022`](https://edkas07-oss.github.io/devops-handbook/adr/tomcat-monitoring/adr-records/TM-ADR-0022/), bagaimana kami merancang **Sinyal Emas GC (*GC Golden Signals*)** dan **Indikator Kejenuhan Konkurensi (*Concurrency Saturation Indicators*)**, serta formula PromQL konkret siap pakai yang diadopsi dari operasional nyata platform Tomcat Monitoring.
+Artikel ini mengulas mengapa praktik observabilitas modern menolak ambang batas statis mentah, bagaimana merancang **Sinyal Emas GC (*GC Golden Signals*)** dan **Indikator Kejenuhan Konkurensi (*Concurrency Saturation Indicators*)**, serta formula PromQL konkret siap pakai yang terbukti andal dalam operasional sistem produksi.
 
 ---
 
@@ -48,7 +48,7 @@ flowchart TD
         M3["Active Threads > 80%"] --> F3["False Alarm saat Spike Trafik Singkat"]
     end
 
-    subgraph SATURATION["Pendekatan Saturation-Based (TM-ADR-0022)"]
+    subgraph SATURATION["Pendekatan Berbasis Saturasi"]
         S1["GC STW Latency > 1.5s"] --> D1["Deteksi Freeze Nyata Pengguna"]
         S2["GC Overhead CPU > 15%"] --> D2["Deteksi Thrashing & CPU Terbuang"]
         S3["Old Gen Retention > 90% (Post-GC)"] --> D3["Deteksi Kebocoran Memori Nyata (Leak)"]
@@ -76,9 +76,9 @@ Jika alert dikonfigurasikan dengan `tomcat_threads_busy > 80%` tanpa jeda durasi
 
 ---
 
-## 🏛️ Solusi & Desain Arsitektur: Sinyal Kejenuhan Beban Nyata (TM-ADR-0022)
+## 🏛️ Solusi & Desain Arsitektur: Sinyal Kejenuhan Beban Nyata
 
-Melalui keputusan arsitektur [`TM-ADR-0022`](https://edkas07-oss.github.io/devops-handbook/adr/tomcat-monitoring/adr-records/TM-ADR-0022/), platform pemantauan kami meninggalkan ambang batas statis dan mengadopsi model **Workload Saturation Signals**. 
+Berdasarkan prinsip observabilitas performa, sistem pemantauan modern meninggalkan ambang batas statis dan mengadopsi model **Workload Saturation Signals**. 
 
 {{< mermaid >}}
 flowchart LR
@@ -192,7 +192,7 @@ Jangan gunakan metrik JMX untuk menguji apakah aplikasi Tomcat hidup atau mati.
 - **Internal Workload Health:** Gunakan JMX Exporter murni untuk melacak degradasi laten (GC thrashing, memory leak, pool saturation).
 
 ### 2. Jangan Terburu-buru Me-Restart Saat Thread Pool Jenuh
-Mengacu pada kebijakan Zero Destructive Auto-Remediation ([`TM-ADR-0014`](https://edkas07-oss.github.io/devops-handbook/adr/tomcat-monitoring/adr-records/TM-ADR-0014/)), me-restart Tomcat seketika saat thread jenuh adalah kesalahan fatal:
+Mengacu pada prinsip *Non-Destructive Incident Remediation*, me-restart Tomcat seketika saat thread jenuh adalah langkah yang berisiko:
 - **Ambil Thread Dump Segera:** Sebelum proses dimatikan, jalankan perintah diagnostik untuk melihat apa yang sedang ditunggu oleh ratusan thread:
   ```bash
   # Ambil 3 kali thread dump dengan jeda 5 detik untuk analisis deadlock
@@ -217,16 +217,15 @@ Beralih dari metrik kapasitas statis mentah menuju **sinyal kejenuhan beban nyat
   Apakah `tomcat_threads_busy_threads` kembali turun setelah burst lalu lintas selesai, ataukah tertahan di 100% selama lebih dari 5 menit?
 - [ ] **3. Periksa Post-GC Heap Baseline:**  
   Amati grafik memori Old Gen *setelah* siklus GC selesai. Jika garis bawah (*trough*) terus merangkak naik secara linier, siapkan investigasi *heap dump* untuk kebocoran memori.
-- [ ] **4. Ambil Thread Dump Sebelum Restart Manual:**  
+- [ ] **4. Ambil Thread Dump Sebelum Tindakan Manual:**  
   Jika thread pool mengalami kebuntuan (*deadlock*), abadikan status thread dengan `jcmd <PID> Thread.print` sebelum mengambil tindakan mitigasi manual.
-- [ ] **5. Tinjau Log Diagnostik Terpusat:**  
-  Periksa laporan notifikasi 7-seksi dari Diagnostic Service ([`TM-ADR-0016`](https://edkas07-oss.github.io/devops-handbook/adr/tomcat-monitoring/adr-records/TM-ADR-0016/)) untuk melihat klasifikasi *root cause* otomatis (`GC-01` .. `GC-04` atau `TH-01` .. `TH-03`).
+- [ ] **5. Tinjau Ringkasan Forensik:**  
+  Periksa ringkasan bukti telemetri untuk memastikan klasifikasi akar masalah (*root cause*) sebelum mengambil tindakan korektif.
 
 ---
 
-### 📚 Referensi Terkait
-- [TM-ADR-0022: Adopt JVM Garbage Collection and Concurrency Saturation Signals over Static Raw Thresholds](https://edkas07-oss.github.io/devops-handbook/adr/tomcat-monitoring/adr-records/TM-ADR-0022/)
-- [TM-ADR-0014: Enforce Zero Automatic Remediation for Diagnostic Service](https://edkas07-oss.github.io/devops-handbook/adr/tomcat-monitoring/adr-records/TM-ADR-0014/)
-- [TM-ADR-0016: Designate Diagnostic Service as the Canonical Incident Notification Authority](https://edkas07-oss.github.io/devops-handbook/adr/tomcat-monitoring/adr-records/TM-ADR-0016/)
-- [DevOps Engineering Handbook Online](https://edkas07-oss.github.io/devops-handbook/)
-- [Tomcat Monitoring Platform SRE Operational Runbook](file:///home/eddywiyatno/git/tomcat-monitoring/RUNBOOK.md)
+### 📚 Referensi & Artikel Terkait
+- [Artikel: Deep-Dive Observability Apache Tomcat: Mengamankan JMX Exporter dengan TLS & Keystore]({{< relref "journals/deep-dive-observability-apache-tomcat-jmx-exporter-tls" >}})
+- [Artikel: Mengapa Auto-Restart di Production Berbahaya: Pendekatan Non-Destruktif untuk Remediasi Insiden]({{< relref "journals/mengapa-auto-restart-di-production-berbahaya" >}})
+- [Prometheus Official Documentation: Querying Basics](https://prometheus.io/docs/prometheus/latest/querying/basics/)
+- [Java Platform, Standard Edition Troubleshooting Guide (Oracle)](https://docs.oracle.com/en/java/javase/)
