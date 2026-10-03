@@ -1,26 +1,31 @@
 [[main]]
   name = "Articles"
   pageRef = "journals"
+  url = "/journals/"
   weight = 10
 
 [[main]]
   name = "Projects"
   pageRef = "projects"
+  url = "/projects/"
   weight = 12
 
 [[main]]
   name = "How-To"
   pageRef = "how-to"
+  url = "/how-to/"
   weight = 15
 
 [[main]]
   name = "Download"
   pageRef = "packages"
+  url = "/packages/"
   weight = 18
 
 [[main]]
   name = "Contact"
   pageRef = "contact"
+  url = "/contact/"
   weight = 25
 
 [[main]]
@@ -32,24 +37,29 @@
 [[footer]]
   name = "Articles"
   pageRef = "journals"
+  url = "/journals/"
   weight = 10
 
 [[footer]]
   name = "Projects"
   pageRef = "projects"
+  url = "/projects/"
   weight = 12
 
 [[footer]]
   name = "How-To"
   pageRef = "how-to"
+  url = "/how-to/"
   weight = 15
 
 [[footer]]
   name = "Download"
   pageRef = "packages"
+  url = "/packages/"
   weight = 18
 
 [[footer]]
   name = "Contact"
   pageRef = "contact"
+  url = "/contact/"
   weight = 25
