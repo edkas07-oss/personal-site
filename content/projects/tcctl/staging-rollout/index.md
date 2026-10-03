@@ -1,7 +1,7 @@
 +++
 title = "tcctl deploy — Zero-Downtime Temporary Staging Rollout & Dynamic JVM Engine"
 date = "2026-09-25T23:50:00+07:00"
-draft = false
+draft = true
 summary = "Bedah arsitektur modul deploy tcctl: orkestrasi temporary staging container pada port penampung sementara (:9080), verifikasi health probe barrier, swap instan ke port kanonikal (:8080), dynamic setenv JVM memory tuning, dan stateful automated rollback tanpa downtime."
 author = "Eddy Wiyatno"
 categories = ["Platform Engineering", "Middleware", "DevOps"]

@@ -28,18 +28,18 @@
       {{/* Dynamic random article highlight — rendered by JS on each page load */}}
       <div class="ew-spotlight" id="ew-spotlight" style="display:none;" aria-live="polite">
         <div class="ew-spotlight__header">
-          <span class="ew-spotlight__label">📖 Rekomendasi Jurnal</span>
-          <button class="ew-spotlight__shuffle" id="ew-spotlight-shuffle" title="Pilih jurnal lain" aria-label="Shuffle jurnal">↻</button>
+          <span class="ew-spotlight__label">📖 CATATAN TEKNIS PILIHAN</span>
+          <button class="ew-spotlight__shuffle" id="ew-spotlight-shuffle" title="Pilih catatan lain" aria-label="Shuffle catatan">↻</button>
         </div>
         <a class="ew-spotlight__link" id="ew-spotlight-link" href="#"></a>
       </div>
 
       <div class="ew-hero__cta">
         <a href="{{ "/journals/" | relLangURL }}" id="ew-cta-read" class="ew-btn ew-btn--primary">
-          Baca Jurnal →
+          Baca Catatan Teknis →
         </a>
-        <a href="{{ "/journals/" | relLangURL }}" class="ew-btn ew-btn--ghost">
-          Semua Jurnal
+        <a href="{{ "/packages/" | relLangURL }}" class="ew-btn ew-btn--ghost">
+          🛠️ Explore Tools
         </a>
         <a href="https://github.com/edkas07-oss" target="_blank" rel="noopener" class="ew-btn ew-btn--ghost">
           GitHub
@@ -115,10 +115,10 @@
     var a = articles[idx];
     link.href        = a.url;
     link.textContent = a.title;
-    /* Sync tombol CTA utama ke jurnal spotlight */
+    /* Sync tombol CTA utama ke catatan spotlight */
     if (ctaBtn) {
       ctaBtn.href        = a.url;
-      ctaBtn.textContent = 'Baca Jurnal →';
+      ctaBtn.textContent = 'Baca Catatan Teknis →';
     }
   }
 
@@ -143,11 +143,11 @@
   <div class="ew-featured-section__header ew-reveal">
     <div class="flex items-center justify-between gap-4 flex-wrap">
       <div>
-        <p class="ew-hero__eyebrow mb-1">Produk &amp; Modul Karya Mandiri</p>
+        <p class="ew-hero__eyebrow mb-1">Karya &amp; Platform Mandiri</p>
         <h2 class="ew-articles__title">Platform &amp; Komponen Unggulan</h2>
       </div>
-      <a href="{{ "/projects/" | relLangURL }}" class="ew-articles__more">
-        Semua Proyek &amp; Platform →
+      <a href="{{ "/packages/" | relLangURL }}" class="ew-articles__more">
+        Semua Tools &amp; Packages →
       </a>
     </div>
     <p class="text-sm sm:text-base text-neutral-600 dark:text-neutral-400 mt-2 max-w-none w-full">
@@ -155,89 +155,87 @@
     </p>
   </div>
 
-  <div class="flex flex-col gap-8">
+  <div class="flex flex-col gap-14 sm:gap-16">
     {{/* ── Banner 1: Apache Tomcat Enterprise Super Module (tcctl) ── */}}
     <div class="ew-featured-banner ew-reveal ew-reveal-delay-1">
       <div class="ew-featured-banner__content">
         <div class="flex flex-wrap items-center gap-2 mb-3">
-          <span class="ew-tag ew-tag--cat">Flagship Platform</span>
-          <span class="ew-fs-badge ew-fs--blue">Platform Engineering &amp; GitOps</span>
+          <span class="ew-tag ew-tag--cat">Flagship Tool</span>
+          <span class="ew-fs-badge ew-fs--blue">Platform Engineering</span>
           <span class="ew-fs-badge ew-fs--purple">Multi-OS</span>
-          <span class="ew-fs-badge ew-fs--green">CIS Benchmark &amp; Zero-Git</span>
+          <span class="ew-fs-badge ew-fs--green">CIS Benchmark &amp; GitOps</span>
         </div>
 
         <h3 class="text-xl sm:text-2xl font-bold text-white mb-2 tracking-tight">
-          <a href="{{ "/projects/tcctl/" | relLangURL }}" class="hover:text-blue-400 transition-colors">
-            Apache Tomcat Enterprise Super Module (tcctl)
-          </a>
+          Apache Tomcat Enterprise Operator (tcctl)
         </h3>
 
         <p class="text-slate-300 text-xs sm:text-sm leading-relaxed mb-6 max-w-none w-full">
-          Platform operator terpadu (Super Module) berbasis Go untuk tata kelola siklus hidup, security hardening CIS Benchmark, audit kerentanan Trivy, GitOps otonom (<strong>Zero-Git</strong> via Gitea REST API), dynamic JVM tuning, dan zero-downtime temporary staging rollout Apache Tomcat di Windows Server dan Linux.
+          Tool CLI mandiri berbasis Go untuk otomasi deployment zero-downtime, audit keamanan standar CIS Benchmark, scan kerentanan, tuning memori JVM dinamis, dan sinkronisasi GitOps di Windows Server maupun Linux.
         </p>
 
-        {{/* 3 Modules Grid */}}
+        {{/* 3 Modules Grid — Interactive Modal Triggers */}}
         <div class="ew-featured-modules-grid">
           
-          <a href="{{ "/projects/tcctl/staging-rollout/" | relLangURL }}" class="ew-feat-module-card ew-reveal-pop ew-reveal-delay-2 group">
+          <div class="ew-feat-module-card ew-reveal-pop ew-reveal-delay-2 group cursor-pointer" onclick="openModuleModal('tcctl-deploy')" role="button" tabindex="0" title="Klik untuk melihat contoh command CLI">
             <div class="flex items-center justify-between mb-2">
               <span class="text-xl">🚀</span>
-              <span class="text-[11px] font-bold text-blue-400 uppercase tracking-wider font-mono">Go Staging Rollout</span>
+              <span class="text-[11px] font-bold text-blue-400 uppercase tracking-wider font-mono">HIGH AVAILABILITY</span>
             </div>
             <h4 class="text-sm font-bold text-white group-hover:text-blue-300 transition-colors mb-1">
-              tcctl deploy
+              Rolling Update &amp; Staging
             </h4>
             <p class="text-xs text-slate-300 leading-relaxed line-clamp-2">
-              Zero-downtime temporary staging rollout (:9080 &rarr; :8080), dynamic bin/setenv JVM memory tuning, dan safe rollback atomik.
+              Pergantian versi runtime bertahap dengan health check terverifikasi (:9080 &rarr; :8080) dan mekanisme safe rollback jika rilis gagal.
             </p>
             <span class="mt-2 inline-flex items-center gap-1 text-xs font-semibold text-blue-400 group-hover:underline">
-              Detail Modul →
+              Contoh Command &amp; CLI →
             </span>
-          </a>
+          </div>
 
-          <a href="{{ "/projects/tcctl/hardening-audit/" | relLangURL }}" class="ew-feat-module-card ew-reveal-pop ew-reveal-delay-3 group">
+          <div class="ew-feat-module-card ew-reveal-pop ew-reveal-delay-3 group cursor-pointer" onclick="openModuleModal('tcctl-audit')" role="button" tabindex="0" title="Klik untuk melihat contoh command CLI">
             <div class="flex items-center justify-between mb-2">
               <span class="text-xl">🛡️</span>
-              <span class="text-[11px] font-bold text-emerald-400 uppercase tracking-wider font-mono">CIS Benchmark &amp; VA</span>
+              <span class="text-[11px] font-bold text-emerald-400 uppercase tracking-wider font-mono">CIS BENCHMARK &amp; AUDIT</span>
             </div>
             <h4 class="text-sm font-bold text-white group-hover:text-emerald-300 transition-colors mb-1">
-              tcctl hardening &amp; va
+              Hardening &amp; Siap Audit
             </h4>
             <p class="text-xs text-slate-300 leading-relaxed line-clamp-2">
-              Audit statis 9 aturan CIS Benchmark untuk XML Tomcat, penegakan non-root ContainerUser, dan scanner Trivy sebagai CI quality gate.
+              Validasi otomatis konfigurasi Tomcat sesuai standar CIS, penegakan hak akses non-root (ContainerUser), dan pemindaian Trivy.
             </p>
             <span class="mt-2 inline-flex items-center gap-1 text-xs font-semibold text-emerald-400 group-hover:underline">
-              Detail Modul →
+              Contoh Command &amp; CLI →
             </span>
-          </a>
+          </div>
 
-          <a href="{{ "/projects/tcctl/gitops-reconciler/" | relLangURL }}" class="ew-feat-module-card ew-reveal-pop ew-reveal-delay-4 group">
+          <div class="ew-feat-module-card ew-reveal-pop ew-reveal-delay-4 group cursor-pointer" onclick="openModuleModal('tcctl-gitops')" role="button" tabindex="0" title="Klik untuk melihat contoh command CLI">
             <div class="flex items-center justify-between mb-2">
               <span class="text-xl">🔄</span>
-              <span class="text-[11px] font-bold text-purple-400 uppercase tracking-wider font-mono">Zero-Git Reconciler</span>
+              <span class="text-[11px] font-bold text-purple-400 uppercase tracking-wider font-mono">ZERO-DRIFT</span>
             </div>
             <h4 class="text-sm font-bold text-white group-hover:text-purple-300 transition-colors mb-1">
-              tcctl gitops
+              Proteksi Konfigurasi
             </h4>
             <p class="text-xs text-slate-300 leading-relaxed line-clamp-2">
-              Rekonsiliator GitOps otonom berbasis REST API Gitea (Zero-Git dependency), deteksi drift atomik, dan eksekusi background daemon.
+              Mencegah perubahan konfigurasi liar di server live melalui proteksi bind-mount read-only dan rekonsiliasi sinkronisasi otomatis.
             </p>
             <span class="mt-2 inline-flex items-center gap-1 text-xs font-semibold text-purple-400 group-hover:underline">
-              Detail Modul →
+              Contoh Command &amp; CLI →
             </span>
-          </a>
+          </div>
 
         </div>
 
         {{/* Action Link */}}
         <div class="mt-6 pt-4 border-t border-blue-900/60 flex flex-wrap items-center justify-between gap-4">
           <div class="flex flex-wrap gap-3">
-            <a href="{{ "/projects/tcctl/" | relLangURL }}" class="ew-btn ew-btn--primary text-xs sm:text-sm py-2 px-4">
-              📖 Buka Blueprint Super Module →
+            <a href="{{ "/packages/#tcctl" | relLangURL }}" class="ew-btn ew-btn--primary text-xs sm:text-sm py-2 px-4">
+              📦 Explore Packages (v1.0.0) →
             </a>
-            <a href="{{ "/packages/tcctl/" | relLangURL }}" class="ew-btn ew-btn--ghost text-xs sm:text-sm py-2 px-3 text-slate-300 border-slate-600 hover:border-blue-400">
-              📦 Unduh Biner di Packages →
-            </a>
+            <button type="button" onclick="openModuleModal('tcctl-deploy')" class="ew-btn ew-btn--ghost text-xs sm:text-sm py-2 px-3 text-slate-300 border-slate-600 hover:border-blue-400">
+              ⚡ Panduan Lab &amp; CLI →
+            </button>
           </div>
           <div class="flex items-center gap-2 text-xs text-slate-400">
             <span>Runtime:</span>
@@ -255,77 +253,80 @@
           <span class="ew-tag ew-tag--cat">Flagship Platform</span>
           <span class="ew-fs-badge ew-fs--blue">SRE &amp; Observability</span>
           <span class="ew-fs-badge ew-fs--purple">Multi-OS</span>
-          <span class="ew-fs-badge ew-fs--green">Zero Auto-Remediation</span>
+          <span class="ew-fs-badge ew-fs--green">Safe Remediation</span>
         </div>
 
         <h3 class="text-xl sm:text-2xl font-bold text-white mb-2 tracking-tight">
-          <a href="{{ "/projects/tomcat-monitoring/" | relLangURL }}" class="hover:text-blue-400 transition-colors">
-            Tomcat Monitoring &amp; Autonomous Diagnostic Platform
-          </a>
+          Tomcat Monitoring &amp; Diagnostic Platform
         </h3>
 
         <p class="text-slate-300 text-xs sm:text-sm leading-relaxed mb-6 max-w-none w-full">
-          Platform observabilitas dan penentu keputusan insiden otonom untuk runtime Apache Tomcat di lingkungan Linux (Podman rootless) dan Windows Server (Docker). Menerapkan kebijakan <strong>Zero Destructive Auto-Remediation</strong> (TM-ADR-0014) dan korelasi bukti forensik multi-sumber.
+          Platform monitoring dan diagnostik insiden untuk workload Tomcat di Linux (Podman rootless) dan Windows Server (Docker). Dilengkapi triage insiden otomatis dengan prinsip safe-remediation tanpa tindakan destruktif ke container live.
         </p>
 
-        {{/* 3 Modules Grid */}}
+        {{/* 3 Modules Grid — Interactive Modal Triggers */}}
         <div class="ew-featured-modules-grid">
           
-          <a href="{{ "/projects/tomcat-monitoring/tmctl/" | relLangURL }}" class="ew-feat-module-card ew-reveal-pop ew-reveal-delay-2 group">
+          <div class="ew-feat-module-card ew-reveal-pop ew-reveal-delay-2 group cursor-pointer" onclick="openModuleModal('tmctl-telemetry')" role="button" tabindex="0" title="Klik untuk melihat contoh command CLI">
             <div class="flex items-center justify-between mb-2">
               <span class="text-xl">🛠️</span>
-              <span class="text-[11px] font-bold text-blue-400 uppercase tracking-wider font-mono">Go CLI</span>
+              <span class="text-[11px] font-bold text-blue-400 uppercase tracking-wider font-mono">OBSERVABILITY</span>
             </div>
             <h4 class="text-sm font-bold text-white group-hover:text-blue-300 transition-colors mb-1">
-              tmctl
+              Runtime Telemetry
             </h4>
             <p class="text-xs text-slate-300 leading-relaxed line-clamp-2">
-              Operator CLI via direct socket API (Podman Unix Socket &amp; Windows Named Pipe) dengan safe rollback.
+              Monitoring lifecycle kontainer dan metrik internal JVM secara real-time via direct socket API tanpa overhead agent pihak ketiga.
             </p>
             <span class="mt-2 inline-flex items-center gap-1 text-xs font-semibold text-blue-400 group-hover:underline">
-              Detail Modul →
+              Contoh Command &amp; CLI →
             </span>
-          </a>
+          </div>
 
-          <a href="{{ "/projects/tomcat-monitoring/tm-agent/" | relLangURL }}" class="ew-feat-module-card ew-reveal-pop ew-reveal-delay-3 group">
+          <div class="ew-feat-module-card ew-reveal-pop ew-reveal-delay-3 group cursor-pointer" onclick="openModuleModal('tmctl-triage')" role="button" tabindex="0" title="Klik untuk melihat contoh command CLI">
             <div class="flex items-center justify-between mb-2">
-              <span class="text-xl">📦</span>
-              <span class="text-[11px] font-bold text-emerald-400 uppercase tracking-wider font-mono">Go Daemon</span>
+              <span class="text-xl">⏱️</span>
+              <span class="text-[11px] font-bold text-emerald-400 uppercase tracking-wider font-mono">MTTR REDUCTION</span>
             </div>
             <h4 class="text-sm font-bold text-white group-hover:text-emerald-300 transition-colors mb-1">
-              tm-agent
+              Triage Insiden Cepat
             </h4>
             <p class="text-xs text-slate-300 leading-relaxed line-clamp-2">
-              Streaming event lifecycle container real-time, deteksi OOM instan (&lt;10ms), dan spool atomik.
+              Deteksi akar masalah JVM kritis (GC thrashing, thread deadlock, OOM) dan penyusunan bukti forensik terstruktur untuk tim on-call.
             </p>
             <span class="mt-2 inline-flex items-center gap-1 text-xs font-semibold text-emerald-400 group-hover:underline">
-              Detail Modul →
+              Contoh Command &amp; CLI →
             </span>
-          </a>
+          </div>
 
-          <a href="{{ "/projects/tomcat-monitoring/diagnostic-service/" | relLangURL }}" class="ew-feat-module-card ew-reveal-pop ew-reveal-delay-4 group">
+          <div class="ew-feat-module-card ew-reveal-pop ew-reveal-delay-4 group cursor-pointer" onclick="openModuleModal('tmctl-remediation')" role="button" tabindex="0" title="Klik untuk melihat contoh command CLI">
             <div class="flex items-center justify-between mb-2">
-              <span class="text-xl">🚀</span>
-              <span class="text-[11px] font-bold text-purple-400 uppercase tracking-wider font-mono">Node.js 24</span>
+              <span class="text-xl">🛡️</span>
+              <span class="text-[11px] font-bold text-purple-400 uppercase tracking-wider font-mono">SAFE REMEDIATION</span>
             </div>
             <h4 class="text-sm font-bold text-white group-hover:text-purple-300 transition-colors mb-1">
-              Diagnostic Service
+              Remediasi Non-Destruktif
             </h4>
             <p class="text-xs text-slate-300 leading-relaxed line-clamp-2">
-              Otoritas diagnosa otonom dengan taksonomi 8 failure domain dan pelaporan insiden 7-seksi via SMTP.
+              Menghindari auto-restart gegabah di lingkungan produksi; memprioritaskan isolasi traffic dan investigasi bukti forensik terlebih dahulu.
             </p>
             <span class="mt-2 inline-flex items-center gap-1 text-xs font-semibold text-purple-400 group-hover:underline">
-              Detail Modul →
+              Contoh Command &amp; CLI →
             </span>
-          </a>
+          </div>
 
         </div>
 
         {{/* Action Link */}}
         <div class="mt-6 pt-4 border-t border-blue-900/60 flex flex-wrap items-center justify-between gap-4">
-          <a href="{{ "/projects/tomcat-monitoring/" | relLangURL }}" class="ew-btn ew-btn--primary text-xs sm:text-sm py-2 px-4">
-            📖 Buka Blueprint Arsitektur Platform →
-          </a>
+          <div class="flex flex-wrap gap-3">
+            <a href="{{ "/packages/#tmctl" | relLangURL }}" class="ew-btn ew-btn--primary text-xs sm:text-sm py-2 px-4">
+              📦 Explore Packages (v1.0.0) →
+            </a>
+            <button type="button" onclick="openModuleModal('tmctl-telemetry')" class="ew-btn ew-btn--ghost text-xs sm:text-sm py-2 px-3 text-slate-300 border-slate-600 hover:border-blue-400">
+              ⚡ Panduan Lab &amp; CLI →
+            </button>
+          </div>
           <div class="flex items-center gap-2 text-xs text-slate-400">
             <span>Orkestrasi:</span>
             <span class="text-slate-300 font-mono">Podman</span> ·
@@ -390,48 +391,167 @@
   </div>
 </section>
 
-{{/* ── 3. SCROLL REVEAL INTERSECTION OBSERVER ───────────────────────── */}}
+{{/* ── 3. INTERACTIVE MODULE CLI MODAL ───────────────────────────────── */}}
+<div id="ew-modal-backdrop" class="ew-modal-backdrop" onclick="handleBackdropClick(event)" aria-modal="true" role="dialog" style="display:none;">
+  <div class="ew-modal-card" id="ew-modal-box">
+    <button type="button" class="ew-modal-close" onclick="closeModuleModal()" aria-label="Tutup modal">✕</button>
+    
+    <div class="ew-modal-header">
+      <span id="ew-modal-icon" class="text-2xl">🚀</span>
+      <span id="ew-modal-tag" class="ew-modal-tag">CATEGORY</span>
+    </div>
+    
+    <h3 id="ew-modal-title" class="ew-modal-title">Judul Modul</h3>
+    <p id="ew-modal-desc" class="ew-modal-desc">Penjelasan modul operasional.</p>
+    
+    <div class="mb-2">
+      <div class="text-[11px] font-mono text-slate-400 mb-1.5 flex items-center justify-between">
+        <span>Contoh Command CLI (Lab / Terminal):</span>
+        <span class="text-slate-500 font-mono">Bash / PowerShell</span>
+      </div>
+      <div class="ew-modal-cmd-box">
+        <code id="ew-modal-code" class="ew-modal-cmd-code">tcctl command ...</code>
+        <button type="button" class="ew-modal-copy-btn" onclick="copyModalCode(this)" title="Salin perintah">📋 Salin</button>
+      </div>
+    </div>
+    
+    <div class="ew-modal-footer">
+      <a id="ew-modal-pkg-link" href="/packages/" class="text-xs font-semibold text-blue-400 hover:underline">
+        📦 Buka Halaman Unduhan Packages →
+      </a>
+      <button type="button" class="ew-btn ew-btn--ghost text-xs py-1.5 px-4" onclick="closeModuleModal()">
+        Tutup
+      </button>
+    </div>
+  </div>
+</div>
+
+{{/* ── 4. SCRIPTS (MODAL & SCROLL REVEAL OBSERVER) ────────────────────── */}}
 <script>
 (function () {
-  var section = document.querySelector('.ew-featured-section');
-  if (!section) return;
-
-  var items = section.querySelectorAll('.ew-reveal, .ew-reveal-pop');
-
-  if (!('IntersectionObserver' in window)) {
-    items.forEach(function (el) { el.classList.add('is-visible'); });
-    return;
-  }
-
-  var observer = new IntersectionObserver(function (entries) {
-    entries.forEach(function (entry) {
-      if (entry.isIntersecting) {
-        items.forEach(function (el) {
-          el.classList.add('is-visible');
+  /* Scroll Reveal Observer */
+  var allReveals = document.querySelectorAll('.ew-reveal, .ew-reveal-pop');
+  if (allReveals.length) {
+    if (!('IntersectionObserver' in window)) {
+      allReveals.forEach(function (el) { el.classList.add('is-visible'); });
+    } else {
+      var observer = new IntersectionObserver(function (entries) {
+        entries.forEach(function (entry) {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('is-visible');
+            observer.unobserve(entry.target);
+          }
         });
-        observer.unobserve(section);
-      }
-    });
-  }, {
-    threshold: 0.12,
-    rootMargin: '0px 0px -80px 0px'
-  });
-
-  observer.observe(section);
-
-  /* Also observe recent articles header */
-  var artHeader = document.querySelector('.ew-articles__header');
-  if (artHeader) {
-    var artObserver = new IntersectionObserver(function (entries) {
-      entries.forEach(function (entry) {
-        if (entry.isIntersecting) {
-          artHeader.classList.add('is-visible');
-          artObserver.unobserve(artHeader);
-        }
+      }, {
+        threshold: 0.08,
+        rootMargin: '0px 0px -40px 0px'
       });
-    }, { threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
-    artObserver.observe(artHeader);
+      allReveals.forEach(function (el) { observer.observe(el); });
+    }
   }
+
+  /* Modal Data Store */
+  window.MODAL_DATA = {
+    'tcctl-deploy': {
+      icon: '🚀',
+      tag: 'HIGH AVAILABILITY',
+      title: 'Rolling Update & Staging',
+      desc: 'Menjalankan instance baru pada port sementara (:9080), memvalidasi health probe, dan melakukan cutover port secara otomatis ke port produksi (:8080) dengan safe rollback.',
+      code: 'tcctl deploy --image tomcat:10-jdk17 --staging-port 9080 --live-port 8080',
+      pkg: '{{ "/packages/#tcctl" | relLangURL }}'
+    },
+    'tcctl-audit': {
+      icon: '🛡️',
+      tag: 'CIS BENCHMARK & AUDIT',
+      title: 'Hardening & Siap Audit',
+      desc: 'Memeriksa 9 aturan konfigurasi server.xml dan web.xml terhadap standar CIS Benchmark serta memverifikasi permission user non-root (ContainerUser).',
+      code: 'tcctl va audit --conf /opt/tomcat/conf',
+      pkg: '{{ "/packages/#tcctl" | relLangURL }}'
+    },
+    'tcctl-gitops': {
+      icon: '🔄',
+      tag: 'ZERO-DRIFT',
+      title: 'Proteksi Konfigurasi (Zero-Drift)',
+      desc: 'Mengunci file direktori conf/ dalam mode read-only (:ro) dan menyinkronkan baseline konfigurasi secara berkala untuk mencegah drift manual.',
+      code: 'tcctl gitops sync --repo https://git.internal/tomcat-baseline --interval 5m',
+      pkg: '{{ "/packages/#tcctl" | relLangURL }}'
+    },
+    'tmctl-telemetry': {
+      icon: '🛠️',
+      tag: 'OBSERVABILITY',
+      title: 'Runtime Telemetry',
+      desc: 'Memeriksa metrik internal JVM dan status kontainer Tomcat secara real-time langsung melalui socket API (Unix Socket / Windows Named Pipe) tanpa agent pihak ketiga.',
+      code: 'tmctl status --target tomcat-prod-01 --metrics jvm,threads,gc',
+      pkg: '{{ "/packages/#tmctl" | relLangURL }}'
+    },
+    'tmctl-triage': {
+      icon: '⏱️',
+      tag: 'MTTR REDUCTION',
+      title: 'Triage Insiden Cepat',
+      desc: 'Menganalisis anomali heap memory, thread deadlock, dan GC thrashing secara otomatis, lalu menghasilkan laporan ringkasan investigasi untuk tim on-call.',
+      code: 'tmctl triage --container tomcat-prod-01 --export-report',
+      pkg: '{{ "/packages/#tmctl" | relLangURL }}'
+    },
+    'tmctl-remediation': {
+      icon: '🛡️',
+      tag: 'SAFE REMEDIATION',
+      title: 'Remediasi Non-Destruktif',
+      desc: 'Mengisolasi traffic dari instance yang bermasalah untuk pengumpulan bukti forensik dan heap dump tanpa memicu restart buta di produksi.',
+      code: 'tmctl isolate --container tomcat-prod-01 --drain-traffic --capture-dump',
+      pkg: '{{ "/packages/#tmctl" | relLangURL }}'
+    }
+  };
+
+  window.openModuleModal = function (key) {
+    var data = window.MODAL_DATA[key];
+    if (!data) return;
+    
+    document.getElementById('ew-modal-icon').textContent = data.icon;
+    document.getElementById('ew-modal-tag').textContent = data.tag;
+    document.getElementById('ew-modal-title').textContent = data.title;
+    document.getElementById('ew-modal-desc').textContent = data.desc;
+    document.getElementById('ew-modal-code').textContent = data.code;
+    document.getElementById('ew-modal-pkg-link').href = data.pkg;
+
+    var backdrop = document.getElementById('ew-modal-backdrop');
+    backdrop.style.display = 'flex';
+    requestAnimationFrame(function () {
+      backdrop.classList.add('is-open');
+    });
+    document.body.style.overflow = 'hidden';
+  };
+
+  window.closeModuleModal = function () {
+    var backdrop = document.getElementById('ew-modal-backdrop');
+    if (!backdrop) return;
+    backdrop.classList.remove('is-open');
+    setTimeout(function () {
+      backdrop.style.display = 'none';
+      document.body.style.overflow = '';
+    }, 200);
+  };
+
+  window.handleBackdropClick = function (e) {
+    if (e.target.id === 'ew-modal-backdrop') {
+      window.closeModuleModal();
+    }
+  };
+
+  window.copyModalCode = function (btn) {
+    var code = document.getElementById('ew-modal-code').textContent;
+    navigator.clipboard.writeText(code).then(function () {
+      var original = btn.textContent;
+      btn.textContent = '✓ Tersalin!';
+      setTimeout(function () {
+        btn.textContent = original;
+      }, 1800);
+    });
+  };
+
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape') {
+      window.closeModuleModal();
+    }
+  });
 })();
 </script>
-

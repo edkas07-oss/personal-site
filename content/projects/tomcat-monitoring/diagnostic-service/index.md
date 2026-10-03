@@ -1,7 +1,7 @@
 +++
 title = "Tomcat Diagnostic Service — Autonomous Decision Authority & Multi-Domain Triage"
 date = "2026-09-20T21:00:00+07:00"
-draft = false
+draft = true
 summary = "Bedah arsitektur Tomcat Diagnostic Service: mesin diagnosa otonom berbasis Node.js 24 LTS yang mengorelasikan bukti forensik multi-sumber, mengklasifikasi kegagalan dalam 8 Failure Domain, dan mendistribusikan laporan insiden kanonikal 7-seksi via SMTP."
 author = "Eddy Wiyatno"
 categories = ["SRE", "Observability", "Architecture"]

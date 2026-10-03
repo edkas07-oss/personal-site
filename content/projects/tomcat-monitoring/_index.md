@@ -1,7 +1,7 @@
 +++
 title = "Tomcat Monitoring & Autonomous Diagnostic Platform"
 date = "2026-09-20T21:00:00+07:00"
-draft = false
+draft = true
 summary = "Platform pemantauan dan diagnosa insiden otonom untuk Apache Tomcat di lingkungan multi-OS (Linux & Windows) dengan kebijakan Zero Destructive Auto-Remediation, korelasi bukti forensik deterministik, dan tiga modul terpadu: tmctl, tm-agent, dan diagnostic service."
 author = "Eddy Wiyatno"
 categories = ["SRE", "Observability", "Platform Engineering"]

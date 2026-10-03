@@ -1,7 +1,7 @@
 +++
 title = "tm-agent — Unified Cross-Platform Event Collector Daemon"
 date = "2026-09-20T21:00:00+07:00"
-draft = false
+draft = true
 summary = "Bedah arsitektur tm-agent: daemon background berbasis Go untuk streaming event lifecycle container secara real-time langsung dari engine socket API, deteksi OOM/crash instan (<10ms), dan serialisasi bukti atomik."
 author = "Eddy Wiyatno"
 categories = ["DevOps", "Observability", "Go"]
