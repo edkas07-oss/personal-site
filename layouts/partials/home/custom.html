@@ -347,119 +347,119 @@
   <div class="ew-featured-banner">
     <div class="ew-featured-banner__content">
       <div class="flex flex-wrap items-center gap-2 mb-3">
-        <span class="ew-tag ew-tag--cat">Enterprise Value</span>
-        <span class="ew-fs-badge ew-fs--green">99.99% Availability</span>
-        <span class="ew-fs-badge ew-fs--blue">Regulatory Audit Ready</span>
-        <span class="ew-fs-badge ew-fs--purple">Zero Outage Risk</span>
+        <span class="ew-tag ew-tag--cat">PRODUCTION READY</span>
+        <span class="ew-fs-badge ew-fs--green">HIGH AVAILABILITY</span>
+        <span class="ew-fs-badge ew-fs--blue">COMPLIANCE VERIFIED</span>
+        <span class="ew-fs-badge ew-fs--purple">AUDIT READY</span>
       </div>
 
       <h3 class="text-xl sm:text-2xl font-bold text-white mb-2 tracking-tight">
-        Nilai Strategis untuk Kebutuhan Skala Enterprise
+        Arsitektur &amp; Standar Kesiapan Produksi
       </h3>
 
       <p style="color: rgb(203 213 225); font-size: 0.88rem; line-height: 1.6; margin-bottom: 1.5rem;">
-        Dirancang khusus untuk memitigasi risiko kegagalan operasional di perbankan &amp; industri teregulasi: keandalan transaksi finansial 24/7 tanpa downtime, kepatuhan audit regulasi ketat (OJK, BI, PCI-DSS), dan efisiensi resource armada ratusan kontainer.
+        Dirancang berdasarkan pola arsitektur sistem misi-kritis: minim downtime, konfigurasi immutable, dan siap audit kepatuhan regulasi (OJK, BI, PCI-DSS).
       </p>
 
       {{/* 6 Cards Grid */}}
       <div class="ew-value-grid">
         
-        {{/* Card 1 */}}
+        {{/* Card 1: Regulatory Compliance */}}
         <div class="ew-value-card">
           <div class="ew-value-card__header">
             <span class="text-xl">🛡️</span>
-            <span class="ew-value-card__tag" style="color: rgb(52 211 153);">Kepatuhan Regulasi</span>
+            <span class="ew-value-card__tag" style="color: rgb(52 211 153);">REGULATORY COMPLIANCE</span>
           </div>
           <h4 class="ew-value-card__title">
-            Kesiapan Audit Regulasi Instan
+            Baseline Audit &amp; Kepatuhan Instan
           </h4>
           <p class="ew-value-card__desc">
-            Otomasi pre-flight CIS Hardening 9-aturan, isolasi non-root <code>ContainerUser</code>, dan ekspor kepatuhan terstruktur siap serah ke auditor OJK, BI, &amp; PCI-DSS.
+            Otomasi validasi CIS benchmark, penegakan hak akses non-root (<code>ContainerUser</code>), dan ekspor data kepatuhan yang siap diserahkan saat audit OJK, BI, maupun PCI-DSS.
           </p>
           <div class="ew-value-card__footer" style="color: rgb(52 211 153);">
-            ✓ Zero Audit Findings
+            ✓ Verified CIS Baseline
           </div>
         </div>
 
-        {{/* Card 2 */}}
+        {{/* Card 2: High Availability */}}
         <div class="ew-value-card">
           <div class="ew-value-card__header">
             <span class="text-xl">⚡</span>
-            <span class="ew-value-card__tag" style="color: rgb(96 165 250);">Zero-Downtime</span>
+            <span class="ew-value-card__tag" style="color: rgb(96 165 250);">HIGH AVAILABILITY</span>
           </div>
           <h4 class="ew-value-card__title">
-            Nol Detik Gangguan Transaksi
+            Rolling Update Minim Downtime
           </h4>
           <p class="ew-value-card__desc">
-            Pembaruan aplikasi dan patching runtime menggunakan arsitektur <code>:9080 &rarr; :8080</code> dengan barrier health probe sintetis. Transaksi nasabah tidak pernah putus.
+            Mekanisme deployment dan runtime patching berbasis health probe bertahap untuk menjaga ketersediaan layanan dan transaksi saat proses rilis berlangsung.
           </p>
           <div class="ew-value-card__footer" style="color: rgb(96 165 250);">
-            ✓ 99.99% Availability SLA
+            ✓ 99.99% Availability Focus
           </div>
         </div>
 
-        {{/* Card 3 */}}
+        {{/* Card 3: MTTR Reduction */}}
         <div class="ew-value-card">
           <div class="ew-value-card__header">
             <span class="text-xl">⏱️</span>
-            <span class="ew-value-card__tag" style="color: rgb(192 132 252);">Otonom &lt;10ms</span>
+            <span class="ew-value-card__tag" style="color: rgb(192 132 252);">MTTR REDUCTION</span>
           </div>
           <h4 class="ew-value-card__title">
-            Pangkas MTTR dari Jam ke Detik
+            Pangkas MTTR Saat Insiden Kritis
           </h4>
           <p class="ew-value-card__desc">
-            Triage insiden JVM kritis (GC Thrashing, Memory Leak, Thread Deadlock) dianalisis otomatis dengan laporan forensik 7-seksi instan untuk tim on-call.
+            Deteksi cepat bottleneck JVM (GC thrashing, memory leak, thread deadlock) dan hasilkan ringkasan forensik instan untuk mempercepat investigasi tim on-call.
           </p>
           <div class="ew-value-card__footer" style="color: rgb(192 132 252);">
-            ✓ Fast Incident Triage
+            ✓ Rapid Incident Triage
           </div>
         </div>
 
-        {{/* Card 4 */}}
+        {{/* Card 4: Anti-Drift */}}
         <div class="ew-value-card">
           <div class="ew-value-card__header">
             <span class="text-xl">🔒</span>
-            <span class="ew-value-card__tag" style="color: rgb(251 191 36);">Anti-Drift</span>
+            <span class="ew-value-card__tag" style="color: rgb(251 191 36);">ANTI-DRIFT</span>
           </div>
           <h4 class="ew-value-card__title">
-            Meniadakan Drift &amp; Human Error
+            Proteksi Konfigurasi (Anti-Drift)
           </h4>
           <p class="ew-value-card__desc">
-            Proteksi Host Bind-Mount Read-Only (<code>conf:ro</code>) dan reconciler GitOps otonom (Zero-Git) menolak perubahan liar langsung di server live.
+            File konfigurasi dikunci secara read-only (<code>conf:ro</code>) dan tersinkronisasi teratur untuk mencegah perubahan manual tidak terlacak langsung di server live.
           </p>
           <div class="ew-value-card__footer" style="color: rgb(251 191 36);">
-            ✓ 100% Immutable Baseline
+            ✓ Immutable Baseline
           </div>
         </div>
 
-        {{/* Card 5 */}}
+        {{/* Card 5: Resource Efficiency */}}
         <div class="ew-value-card">
           <div class="ew-value-card__header">
             <span class="text-xl">💡</span>
-            <span class="ew-value-card__tag" style="color: rgb(34 211 238);">High Density</span>
+            <span class="ew-value-card__tag" style="color: rgb(34 211 238);">RESOURCE EFFICIENCY</span>
           </div>
           <h4 class="ew-value-card__title">
-            Hemat Resource &amp; Biaya Lisensi
+            Ringan &amp; Hemat Resource
           </h4>
           <p class="ew-value-card__desc">
-            Biner statis Go mandiri (&lt;25MB RAM, 0% CPU idle) tanpa JVM overhead tambahan. Mampu mengelola ratusan kontainer per host tanpa biaya lisensi vendor pihak ketiga.
+            Biner Go statis (&lt;25MB RAM, tanpa overhead JVM runtime) yang mampu mengelola puluhan kontainer per host tanpa memerlukan instalasi agent pihak ketiga.
           </p>
           <div class="ew-value-card__footer" style="color: rgb(34 211 238);">
-            ✓ Zero Third-Party Agent Bloat
+            ✓ Zero Agent Bloat
           </div>
         </div>
 
-        {{/* Card 6 */}}
+        {{/* Card 6: Unified Toolchain */}}
         <div class="ew-value-card">
           <div class="ew-value-card__header">
             <span class="text-xl">🌐</span>
-            <span class="ew-value-card__tag" style="color: rgb(129 140 248);">Multi-Platform</span>
+            <span class="ew-value-card__tag" style="color: rgb(129 140 248);">UNIFIED TOOLCHAIN</span>
           </div>
           <h4 class="ew-value-card__title">
-            Standardisasi Multi-OS Terpadu
+            Standarisasi Multi-Platform
           </h4>
           <p class="ew-value-card__desc">
-            Satu toolchain operator CLI tunggal yang berjalan simetris di Windows Server (Docker Named Pipe) dan Linux (Rootless Podman Socket) untuk standardisasi tim engineer.
+            Satu biner CLI konsisten yang berjalan simetris di Windows Server (Named Pipe) dan Linux (Podman rootless socket) untuk kemudahan standardisasi tim engineer.
           </p>
           <div class="ew-value-card__footer" style="color: rgb(129 140 248);">
             ✓ Linux &amp; Windows Unified

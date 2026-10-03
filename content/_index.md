@@ -33,20 +33,22 @@ Jurnal rekayasa, studi kasus sistem berskala enterprise, dan dokumentasi arsitek
 
 ---
 
-### 🏛️ Nilai Strategis untuk Ekosistem Skala Enterprise
+### 🏛️ Arsitektur & Standar Kesiapan Produksi
 
-Menjawab tantangan terbesar perbankan dan industri finansial teregulasi:
+Dirancang berdasarkan pola arsitektur sistem misi-kritis: minim downtime, konfigurasi immutable, dan siap audit kepatuhan regulasi (OJK, BI, PCI-DSS):
 
-1. **🛡️ Kesiapan Audit Regulasi Instan (OJK, BI, PCI-DSS):**  
-   Mengeliminasi temuan audit berulang melalui *pre-flight CIS Hardening* 9-aturan, isolasi non-root `ContainerUser`, dan ekspor dokumen kepatuhan terstruktur.
-2. **⚡ Nol Detik Gangguan Transaksi Finansial (99.99% Availability):**  
-   Pembaruan aplikasi dan patching runtime menggunakan arsitektur *Temporary Staging Rollout* (`:9080` $\rightarrow$ `:8080`) dengan barrier *synthetic health probe*.
-3. **⏱️ Pangkas MTTR dari Jam ke Detik (<10ms Fast Triage):**  
-   Triage insiden JVM kritis (*GC Thrashing*, *Thread Deadlock*, *Memory Leak*) diselesaikan otomatis oleh AI Diagnostic Engine dengan format laporan forensik 7-seksi real-time.
-4. **🔒 Immutabilitas & Pencegahan Human Error:**  
-   Proteksi Host Bind-Mount Read-Only (`conf:ro`) dan reconciler GitOps otonom (*Zero-Git dependency*) menolak perubahan manual di server live.
-5. **💡 Efisiensi Biaya Lisensi & Densitas Tinggi:**  
-   Biner statis Go mandiri (<25MB RAM, 0% CPU idle) mampu mengelola armada ratusan kontainer tanpa lisensi agent proprietary pihak ketiga yang mahal.
+1. **🛡️ Baseline Audit & Kepatuhan Instan (REGULATORY COMPLIANCE):**  
+   Otomasi validasi CIS benchmark, penegakan hak akses non-root (`ContainerUser`), dan ekspor data kepatuhan yang siap diserahkan saat audit OJK, BI, maupun PCI-DSS.
+2. **⚡ Rolling Update Minim Downtime (HIGH AVAILABILITY):**  
+   Mekanisme deployment dan runtime patching berbasis health probe bertahap untuk menjaga ketersediaan layanan dan transaksi saat proses rilis berlangsung.
+3. **⏱️ Pangkas MTTR Saat Insiden Kritis (MTTR REDUCTION):**  
+   Deteksi cepat bottleneck JVM (GC thrashing, memory leak, thread deadlock) dan hasilkan ringkasan forensik instan untuk mempercepat investigasi tim on-call.
+4. **🔒 Proteksi Konfigurasi (ANTI-DRIFT):**  
+   File konfigurasi dikunci secara read-only (`conf:ro`) dan tersinkronisasi teratur untuk mencegah perubahan manual tidak terlacak langsung di server live.
+5. **💡 Ringan & Hemat Resource (RESOURCE EFFICIENCY):**  
+   Biner Go statis (<25MB RAM, tanpa overhead JVM runtime) yang mampu mengelola puluhan kontainer per host tanpa memerlukan instalasi agent pihak ketiga.
+6. **🌐 Standarisasi Multi-Platform (UNIFIED TOOLCHAIN):**  
+   Satu biner CLI konsisten yang berjalan simetris di Windows Server (Named Pipe) dan Linux (Podman rootless socket) untuk kemudahan standardisasi tim engineer.
 
 ---
 
