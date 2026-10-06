@@ -98,3 +98,62 @@
   <span class="ew-footer-bottom__sep">·</span>
   <span>Built with Hugo &amp; Blowfish</span>
 </div>
+
+{{/* ── GLOBAL MODAL CONTROLLER ── */}}
+<script>
+(function () {
+  function openModal(id) {
+    var modal = document.getElementById(id);
+    if (!modal) return;
+    modal.classList.add('is-active');
+    document.body.style.overflow = 'hidden';
+    var closeBtn = modal.querySelector('.ew-modal-close-btn');
+    if (closeBtn) closeBtn.focus();
+  }
+
+  function closeModal(modal) {
+    if (!modal) return;
+    modal.classList.remove('is-active');
+    if (!document.querySelector('.ew-modal-backdrop.is-active')) {
+      document.body.style.overflow = '';
+    }
+  }
+
+  document.addEventListener('click', function (e) {
+    var trigger = e.target.closest('[data-modal]');
+    if (trigger) {
+      e.preventDefault();
+      var targetId = trigger.getAttribute('data-modal');
+      openModal(targetId);
+      return;
+    }
+
+    var closeTrigger = e.target.closest('[data-close-modal]');
+    if (closeTrigger) {
+      e.preventDefault();
+      var parentModal = closeTrigger.closest('.ew-modal-backdrop');
+      if (parentModal) closeModal(parentModal);
+      return;
+    }
+
+    if (e.target.classList && e.target.classList.contains('ew-modal-backdrop')) {
+      closeModal(e.target);
+    }
+  });
+
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape') {
+      var activeModal = document.querySelector('.ew-modal-backdrop.is-active');
+      if (activeModal) closeModal(activeModal);
+    } else if (e.key === 'Enter' || e.key === ' ') {
+      var trigger = document.activeElement && document.activeElement.closest('[data-modal]');
+      if (trigger) {
+        e.preventDefault();
+        var targetId = trigger.getAttribute('data-modal');
+        openModal(targetId);
+      }
+    }
+  });
+})();
+</script>
+

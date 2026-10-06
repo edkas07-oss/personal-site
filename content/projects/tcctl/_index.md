@@ -383,54 +383,6 @@ showBreadcrumbs = true
 </div>
 </div>
 
-<script>
-(function () {
-  function openModal(id) {
-    var modal = document.getElementById(id);
-    if (!modal) return;
-    modal.classList.add('is-active');
-    document.body.style.overflow = 'hidden';
-    var closeBtn = modal.querySelector('.ew-modal-close-btn');
-    if (closeBtn) closeBtn.focus();
-  }
-
-  function closeModal(modal) {
-    if (!modal) return;
-    modal.classList.remove('is-active');
-    if (!document.querySelector('.ew-modal-backdrop.is-active')) {
-      document.body.style.overflow = '';
-    }
-  }
-
-  document.querySelectorAll('[data-modal]').forEach(function (btn) {
-    function handleTrigger(e) {
-      if (e.type === 'click' || e.key === 'Enter' || e.key === ' ') {
-        e.preventDefault();
-        var targetId = btn.getAttribute('data-modal');
-        openModal(targetId);
-      }
-    }
-    btn.addEventListener('click', handleTrigger);
-    btn.addEventListener('keydown', handleTrigger);
-  });
-
-  document.querySelectorAll('.ew-modal-backdrop').forEach(function (modal) {
-    modal.addEventListener('click', function (e) {
-      if (e.target === modal || e.target.closest('[data-close-modal]')) {
-        closeModal(modal);
-      }
-    });
-  });
-
-  document.addEventListener('keydown', function (e) {
-    if (e.key === 'Escape') {
-      var activeModal = document.querySelector('.ew-modal-backdrop.is-active');
-      if (activeModal) closeModal(activeModal);
-    }
-  });
-})();
-</script>
-
 <div class="ew-section">
 <div class="ew-section__head"><h2 class="ew-h2">Alur Penggunaan CLI</h2><p class="ew-lead">Perintah ringkas yang mudah dijalankan langsung maupun diintegrasikan ke dalam pipeline CI/CD.</p></div>
 <p class="ew-code-label">1. Rilis Aplikasi pada Port Staging dengan Validasi Otomatis</p>
