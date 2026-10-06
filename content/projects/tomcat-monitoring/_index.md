@@ -23,7 +23,7 @@ showBreadcrumbs = true
 <div class="ew-pagehero">
 <p class="ew-hero__eyebrow">Proyek Rekayasa · tmctl</p>
 <h1 class="ew-pagehero__title">tmctl: Monitoring &amp; Diagnostik Otonom Apache Tomcat</h1>
-<p class="ew-lead">Tool CLI observabilitas dan diagnostik otonom untuk runtime JVM Tomcat. Menyediakan visibilitas performa real-time, triase otomatis saat terjadi anomali, dan investigasi insiden tanpa beban agen tambahan.</p>
+<p class="ew-lead">Platform observabilitas dan diagnostik otonom untuk runtime JVM Tomcat. Menyediakan visibilitas performa real-time, triase otomatis saat terjadi anomali, dan investigasi insiden tanpa beban agen tambahan.</p>
 </div>
 
 <div class="ew-section">
@@ -384,7 +384,7 @@ showBreadcrumbs = true
 </div>
 
 <div class="ew-section">
-<div class="ew-section__head"><h2 class="ew-h2">Alur Penggunaan CLI</h2><p class="ew-lead">Perintah ringkas yang dirancang untuk kecepatan respons insiden teknis di level host.</p></div>
+<div class="ew-section__head"><h2 class="ew-h2">Alur Eksekusi &amp; Otomasi</h2><p class="ew-lead">Perintah ringkas yang dirancang untuk kecepatan respons insiden teknis di level host maupun integrasi platform.</p></div>
 <p class="ew-code-label">1. Pemeriksaan Status &amp; Metrik JVM Real-Time</p>
 <pre class="ew-code">tmctl status --target tomcat-prod-01 --metrics jvm,threads,gc</pre>
 <p class="ew-code-label">2. Diagnostik Otonom &amp; Ekspor Laporan Triase Insiden</p>

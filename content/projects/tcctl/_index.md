@@ -384,7 +384,7 @@ showBreadcrumbs = true
 </div>
 
 <div class="ew-section">
-<div class="ew-section__head"><h2 class="ew-h2">Alur Penggunaan CLI</h2><p class="ew-lead">Perintah ringkas yang mudah dijalankan langsung maupun diintegrasikan ke dalam pipeline CI/CD.</p></div>
+<div class="ew-section__head"><h2 class="ew-h2">Alur Eksekusi &amp; Otomasi</h2><p class="ew-lead">Perintah ringkas yang dapat dijalankan langsung, via REST API daemon / Web UI, maupun diintegrasikan ke dalam pipeline CI/CD.</p></div>
 <p class="ew-code-label">1. Rilis Aplikasi pada Port Staging dengan Validasi Otomatis</p>
 <pre class="ew-code">tcctl deploy --image tomcat:10-jdk17 --staging-port 9080 --live-port 8080</pre>
 <p class="ew-code-label">2. Audit Konfigurasi Terhadap Standar CIS Benchmark</p>
