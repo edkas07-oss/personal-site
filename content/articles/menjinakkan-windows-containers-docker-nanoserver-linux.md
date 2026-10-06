@@ -20,7 +20,7 @@ Pendekatan umum yang sering diambil tim infrastruktur biasanya terbagi menjadi d
 1. **Memaksakan emulasi Linux (WSL2 / Docker Desktop) di Windows Server produksi**, yang membawa ketidakstabilan kernel virtual, konsumsi memori tinggi, dan tidak didukung secara resmi untuk beban kerja *production*.
 2. **Melakukan *forking* basis kode (*dual-codebase antipattern*)**, membuat versi skrip monitoring khusus Windows yang berujung pada desinkronisasi logika deteksi dan beban pemeliharaan ganda (*maintenance nightmare*).
 
-Solusi rekayasa yang kami terapkan pada platform [`tomcat-monitoring`](https://github.com/edkas07-oss/tomcat-monitoring) adalah mewujudkan paradigma **True Dual-Symmetry**: menjalankan citra kontainer native di kedua sistem operasi (**Windows Docker NanoServer** dan **Linux Container Engine**) dengan kode aplikasi, kontrak telemetri, skema database, dan aturan diagnostik yang **100% identik tanpa perubahan logika aplikasi**.
+Solusi rekayasa modern untuk mengatasi dilema ini adalah mewujudkan paradigma **True Dual-Symmetry**: menjalankan citra kontainer native di kedua sistem operasi (**Windows Docker NanoServer** dan **Linux Container Engine**) dengan kode aplikasi, kontrak telemetri, skema database, dan aturan diagnostik yang **100% identik tanpa perubahan logika aplikasi**.
 
 Artikel mendalam ini membedah solusi teknis nyata dalam menaklukkan friksi container Windows di level produksi:
 - Menangani pembatasan mutlak **Kernel Matching Constraint** pada Windows Server LTSC (2019 vs 2022 vs 2025).
@@ -352,19 +352,19 @@ flowchart TB
         V4[("mailpit_data<br/>SMTP mail storage SQLite")]
     end
 
-    subgraph TIER2["Tier 2: Host Control Plane (tm_home Workspace)"]
+    subgraph TIER2["Tier 2: Host Control Plane (Workspace)"]
         direction TB
         H1["config/ (:ro bind)<br/>YAML, JSON declaration"]
         H2["secrets/ (:ro bind)<br/>Bearer tokens, Passwords (0400)"]
         H3["tls/ & jmx-tls/ (:ro bind)<br/>Certs, Keys, Keystore.p12"]
         H4["spool/ (:rw bind)<br/>Atomic event snapshot buffer (0700)"]
-        H5["bin/ & scripts/ (Host Only)<br/>tmctl CLI, verify test suites"]
+        H5["bin/ & scripts/ (Host Only)<br/>Operator CLI, verify test suites"]
     end
 
     subgraph RUNTIME["Multi-OS Workloads (NanoServer & Linux)"]
         PROM["Prometheus (:9090)"]
         DS["Diagnostic Service (:8443)"]
-        AGENT["tm-agent (Event Collector)"]
+        AGENT["Event Collector Daemon"]
     end
 
     V1 <== Native Block I/O ==> PROM
@@ -390,23 +390,23 @@ Namun, untuk beban kerja database spesifik (seperti Prometheus TSDB chunks dan S
 
 Dengan mempercayakan database ke *Container Engine Named Volumes*, engine kontainer mengontrol penuh alokasi blok penyimpanan secara native, menjamin performa maksimal dan integritas atomik ACID SQLite.
 
-### 2. Tier 2: Host Workspace Directory (`tm_home`)
-Tier ini adalah ruang kerja terstandarisasi di sisi host yang mengadopsi konvensi ekosistem Java/Tomcat (`CATALINA_HOME`, `JAVA_HOME`). Direktori default berada di:
-- **`C:\tm_home`** pada Windows Server.
-- **`/opt/tm_home`** pada Linux Server.
+### 2. Tier 2: Host Workspace Directory (`app_home`)
+Tier ini adalah ruang kerja terstandarisasi di sisi host yang mengadopsi konvensi hierarki terisolasi. Direktori default berada di:
+- **`C:\app_home`** pada Windows Server.
+- **`/opt/app_home`** pada Linux Server.
 
-Hierarki internal `tm_home` diatur secara ketat:
+Hierarki internal `app_home` diatur secara ketat:
 ```text
-tm_home/                                        # Root Home Workspace
+app_home/                                       # Root Home Workspace
 ├── config/                                     # [Bind-Mount ro] Konfigurasi deklaratif komponen
 │   ├── alertmanager/                           # alertmanager.yml & routes
 │   ├── diagnostic-service/                     # application.json, targets.json
 │   ├── prometheus/                             # prometheus.yml, alert rules
-│   └── rules/                                  # Rulepack catalog JSON (20 decision branches)
+│   └── rules/                                  # Rulepack catalog JSON
 ├── spool/                                      # [Bind-Mount rw] Inter-container event buffer (0700 / Modify)
 ├── tls/ & jmx-tls/                             # [Bind-Mount ro] X.509 Certs, Keys, Keystore PKCS12
 ├── secrets/                                    # [Bind-Mount ro] Kredensial & bearer tokens
-├── bin/                                        # [Host Only] Tooling operator (tmctl.exe / tmctl)
+├── bin/                                        # [Host Only] Tooling operator CLI
 └── scripts/                                    # [Host Only] Skrip operasional verifikasi & testing
 ```
 
@@ -452,13 +452,12 @@ Perhatikan bagaimana kedua Dockerfile di bawah mengeksekusi biner yang sama (`sr
 ```dockerfile
 # ==============================================================================
 # Linux Containerfile: docker/linux/diagnostic-service.Dockerfile
-# Architecture Reference: TM-ADR-0026 & TM-ADR-0031
 # ==============================================================================
 ARG BASE_IMAGE=docker.io/library/node:22-alpine
 FROM ${BASE_IMAGE}
 
 LABEL maintainer="Eddy Wiyatno" \
-      description="Linux Container for Tomcat Diagnostic Service"
+      description="Linux Container for Diagnostic Service"
 
 WORKDIR /app
 COPY package*.json /app/
@@ -469,24 +468,23 @@ COPY config /app/config
 COPY migrations /app/migrations
 
 # Inisialisasi direktori data dan jalankan sebagai unprivileged user (node:node)
-RUN mkdir -p /var/lib/tomcat-diagnostic && chown -R node:node /var/lib/tomcat-diagnostic /app
+RUN mkdir -p /var/lib/diagnostic && chown -R node:node /var/lib/diagnostic /app
 
 USER node
 EXPOSE 8443
 
-CMD ["node", "src/main.js", "--config", "/opt/tm_home/config/diagnostic-service/application.json"]
+CMD ["node", "src/main.js", "--config", "/opt/app_home/config/diagnostic-service/application.json"]
 ```
 <!-- slide -->
 ```dockerfile
 # ==============================================================================
 # Windows Dockerfile: docker/windows/diagnostic-service.Dockerfile
-# Architecture Reference: TM-ADR-0026, TM-ADR-0030 & TM-ADR-0031
 # ==============================================================================
 ARG BASE_IMAGE=mcr.microsoft.com/windows/nanoserver:ltsc2022
 FROM ${BASE_IMAGE}
 
 LABEL maintainer="Eddy Wiyatno" \
-      description="Windows Container for Tomcat Diagnostic Service"
+      description="Windows Container for Diagnostic Service"
 
 # Salin helper DLL yang dibutuhkan Go/Node networking di NanoServer
 COPY netapi32.dll C:/Windows/System32/
@@ -588,23 +586,23 @@ Ketika Ansible mengeksekusi task deployment pada node Windows Server, perintah `
 
 ---
 
-## 🛠️ Unifikasi Tooling: Operator CLI `tmctl`
+## 🛠️ Unifikasi Tooling Operasional Lintas Platform
 
 Bahkan jika kontainer dapat berjalan simetris di kedua OS, friksi operasional sering kali berpindah ke tim SRE: operator Linux terbiasa dengan skrip Bash (`deploy.sh`, `validate.sh`), sedangkan operator Windows harus menghafal perintah PowerShell (`deploy.ps1`, `validate.ps1`). Perbedaan sintaksis, penanganan *line endings* (`LF` vs `CRLF`), dan mekanisme subshell selalu menjadi sumber kegagalan otomasi CI/CD.
 
-Untuk mengeliminasi friksi ini, kami membangun satu biner terpadu berbasis Go yang mandiri: **`tmctl`**.
+Untuk mengeliminasi friksi ini, strategi terbaik adalah membangun kakas biner terpadu berbasis Go yang mandiri (*Single Static Go Binary*).
 
 {{< mermaid >}}
 flowchart LR
     subgraph SRE_TEAM["Operator / CI/CD Pipeline"]
         DEV["SRE on Linux Workstation"]
         WIN_OP["Operator on Windows Server"]
-        JENKINS["Jenkins Automation Runner"]
+        JENKINS["CI/CD Automation Runner"]
     end
 
     subgraph UNIFIED_BINARY["Unified Tooling (Single Static Go Binary)"]
-        TMCTL_LIN["tmctl (Linux ELF)"]
-        TMCTL_WIN["tmctl.exe (Windows PE)"]
+        CLI_LIN["Operator CLI (Linux ELF)"]
+        CLI_WIN["Operator CLI (Windows PE)"]
     end
 
     subgraph SOCKET_LAYER["Universal Container Socket API"]
@@ -616,33 +614,25 @@ flowchart LR
         C_FLEET["Tomcat, Prometheus, Diagnostic, Alertmanager"]
     end
 
-    DEV -->|tmctl stack deploy| TMCTL_LIN
-    WIN_OP -->|tmctl.exe stack deploy| TMCTL_WIN
-    JENKINS --> TMCTL_LIN
-    JENKINS --> TMCTL_WIN
+    DEV -->|stack deploy| CLI_LIN
+    WIN_OP -->|stack deploy| CLI_WIN
+    JENKINS --> CLI_LIN
+    JENKINS --> CLI_WIN
 
-    TMCTL_LIN ==> SOCK_UNIX
-    TMCTL_WIN ==> SOCK_PIPE
+    CLI_LIN ==> SOCK_UNIX
+    CLI_WIN ==> SOCK_PIPE
     SOCK_UNIX --> C_FLEET
     SOCK_PIPE --> C_FLEET
 {{< /mermaid >}}
 
 ### Mengapa Go dan Container Engine Socket API?
 1. **Single Static Binary Tanpa Ketergantungan Eksternal:** Biner Go tidak membutuhkan instalasi runtime Node.js, Python, atau interpreter Bash di server target. Ukuran memori saat eksekusi sangat kecil (< 15 MB RAM).
-2. **Abstraksi Soket Universal:** Alih-alih mengeksekusi perintah CLI `docker` atau `podman` lewat shell anak (*child process spawning*), `tmctl` berbicara langsung ke **Container Engine REST API**:
+2. **Abstraksi Soket Universal:** Alih-alih mengeksekusi perintah CLI `docker` atau `podman` lewat shell anak (*child process spawning*), kakas berbicara langsung ke **Container Engine REST API**:
    - Di Linux: Berkomunikasi via Unix Domain Socket (`/var/run/docker.sock` atau `/run/user/<uid>/podman/podman.sock`).
    - Di Windows: Berkomunikasi via Windows Named Pipe (`\\.\pipe\docker_engine`).
-3. **Penyatuan Pengalaman SRE (*Developer & SRE Experience*):** Operator di kedua sistem operasi menjalankan perintah yang 100% sama persis:
+3. **Penyatuan Pengalaman SRE (*Developer & SRE Experience*):** Operator di kedua sistem operasi menjalankan perintah yang 100% konsisten.
 
-```bash
-# Perintah seragam di Linux (Bash) dan Windows (PowerShell/CMD):
-tmctl stack deploy --env lab
-tmctl stack status
-tmctl rules ingest catalog/tomcat-oom-rules.json
-tmctl validate
-```
-
-Di samping `tmctl`, kami juga memodernisasi daemon penangkap event kontainer menjadi **`tm-agent`** (ditulis dalam bahasa Go). Agen ini berlangganan langsung ke *event stream* Docker socket (`GET /events`), mendeteksi siklus hidup kontainer Tomcat (`died`, `oom`, `restart`), memformat data snapshot sesuai skema kanonikal `event-record-v1.schema.json`, dan melakukan penulisan atomik (`.tmp` $\rightarrow$ `.json`) ke dalam direktori `tm_home/spool/` yang aman.
+Di samping CLI operator, daemon penangkap event kontainer berbasis Go juga dapat berlangganan langsung ke *event stream* Docker socket (`GET /events`), mendeteksi siklus hidup kontainer (`died`, `oom`, `restart`), dan melakukan penulisan atomik snapshot event ke direktori spool yang aman.
 
 ---
 
@@ -656,50 +646,10 @@ Sebelum meluncurkan Windows Containers ke lingkungan produksi enterprise, gunaka
 | **Isolation Mode** | Mode isolasi tervalidasi sebagai `Process Isolation`. | 🔴 Wajib Mutlak | Jalankan `docker run --isolation=process ...` dan pastikan tidak jatuh ke Hyper-V fallback. |
 | **Least Privilege** | Container dieksekusi di bawah akun `ContainerUser` (Bukan Administrator). | 🔴 Wajib Mutlak | Inspeksi `docker exec <id> whoami` $\rightarrow$ Wajib merespons `ContainerUser`. |
 | **NTFS DACL Audit** | Direktori named volumes `_data` memiliki ACE `BUILTIN\Users:(OI)(CI)(M)`. | 🔴 Wajib Mutlak | Jalankan `icacls "C:\ProgramData\docker\volumes\<name>\_data"` di PowerShell host. |
-| **DLL Dependencies** | File `netapi32.dll` telah diinjeksi ke dalam NanoServer base context. | 🟡 Kritis | Pastikan biner Go (`prometheus.exe`, `tm-agent.exe`) dapat boot tanpa DLL load error. |
-| **Storage Segregation** | Database Tier 1 berada di Named Volumes, `tm_home` berada di partisi data non-sistem (misal `D:\tm_home`). | 🟢 Rekomendasi | Periksa kapasitas disk drive via `Get-PSDrive`. |
+| **DLL Dependencies** | File `netapi32.dll` telah diinjeksi ke dalam NanoServer base context. | 🟡 Kritis | Pastikan biner Go (`prometheus.exe`, dll.) dapat boot tanpa DLL load error. |
+| **Storage Segregation** | Database Tier 1 berada di Named Volumes, workspace berada di partisi data non-sistem (misal `D:\app_home`). | 🟢 Rekomendasi | Periksa kapasitas disk drive via `Get-PSDrive`. |
 | **Zero `/tmp` Audit** | Tidak ada konfigurasi atau kode yang mereferensikan `/tmp` atau `C:\Windows\Temp`. | 🔴 Wajib Mutlak | Jalankan audit statis `grep -rn "/tmp" config/ src/`. |
 | **Readiness Probing** | Endpoint HTTP/HTTPS merespons status `UP` secara deterministik. | 🔴 Wajib Mutlak | Probe `https://127.0.0.1:8443/health/live` (200 OK) dan `http://127.0.0.1:9090/-/ready` (200 OK). |
-
----
-
-## 🚀 Bukti Verifikasi Lapangan (Live Multi-Node Fleet)
-
-Penerapan standar arsitektur di atas telah diuji dan divalidasi secara nyata pada klaster pengujian hybrid di AWS EC2 (*Amazon Linux 2023* dan *Windows Server 2022 Datacenter*):
-
-```text
-================================================================================
-MULTI-OS FLEET LIVE VERIFICATION REPORT
-Generated at: 2026-09-18T10:45:00Z
-================================================================================
-
-[+] TARGET NODE 1: Windows Server 2022 Datacenter (AWS EC2 / 184.194.25.77)
-    - OS Build: 10.0.20348 (LTSC 2022)
-    - Container Engine: Docker Engine 26.1.4 (OSType: windows, Isolation: process)
-    - Container User Identity: ContainerUser (Non-Admin / SID S-1-5-93-2-2)
-    - Storage Model: Two-Tier (C:\tm_home Workspace + Named Engine Volumes)
-    
-    Container Fleet Status:
-    ✔ diagnostic-service-win:latest    Up (0.0.0.0:8443->8443)   Health: 200 OK (https://172.22.229.173:8443/health/live)
-    ✔ prometheus-win:latest            Up (0.0.0.0:9090->9090)   Health: 200 OK (http://172.22.237.18:9090/-/ready)
-    ✔ mailpit-win:latest               Up (0.0.0.0:8025->8025)   Health: 200 OK (http://172.22.229.10:8025/api/v1/messages)
-    ✔ alertmanager-win:latest          Up (0.0.0.0:9093->9093)   Health: 200 OK
-    ✔ tm-agent-win:latest              Up (Event Stream Listening to \\.\pipe\docker_engine)
-
-[+] TARGET NODE 2: Amazon Linux 2023 (AWS EC2 / 3.82.132.6)
-    - OS Kernel: Linux 6.1.100-111.176.amzn2023.x86_64
-    - Container Engine: Podman 4.9.4-rhel (OSType: linux, Rootless Mode)
-    - Storage Model: Two-Tier (/opt/tm_home Workspace + Podman Named Volumes)
-    
-    Container Fleet Status:
-    ✔ tomcat-diagnostic-service:latest Up (0.0.0.0:8443->8443)   Health: 200 OK (https://127.0.0.1:8443/health/live)
-    ✔ prometheus:1.0.0                 Up (0.0.0.0:9090->9090)   Health: 200 OK (http://127.0.0.1:9090/-/ready)
-    ✔ alertmanager:1.0.0               Up (0.0.0.0:9093->9093)   Health: 200 OK
-    ✔ mailpit:v1.31.0                  Up (0.0.0.0:8025->8025)   Health: 200 OK
-    ✔ tomcat-jmx-exporter:1.0.0        Up (0.0.0.0:9404->9404)   Health: 200 OK (TLS Enabled)
-
-[RESULT]: 100% OPERATIONAL SYMMETRY ACHIEVED ACROSS BOTH OPERATING SYSTEMS.
-```
 
 ---
 
@@ -709,11 +659,11 @@ Menjalankan stack pemantauan modern di Windows Containers sering kali dianggap s
 
 1. **Abstraksikan Sistem Operasi di Level Packaging:** Pertahankan basis kode aplikasi Anda murni dan agnostik terhadap sistem operasi. Biarkan Dockerfile dan build matrix yang menyerap perbedaan pustaka sistem atau dependensi biner.
 2. **Kuasai NTFS Access Control Lists:** Jangan pernah menyerah pada godaan menjalankan container sebagai Administrator. Terapkan hak akses granular `BUILTIN\Users:(OI)(CI)(M)` pada direktori volume untuk menjamin kepatuhan *Least Privilege*.
-3. **Terapkan Two-Tier Storage & Singkirkan `/tmp`:** Pisahkan database ber-I/O tinggi ke dalam Named Volumes engine, dan standarisasikan seluruh kontrol plane konfigurasi ke dalam ruang kerja yang terstruktur (`tm_home`).
-4. **Unifikasi Pengalaman SRE dengan Go:** Gunakan kakas CLI berbasis Go seperti `tmctl` yang berinteraksi langsung ke Container Engine Socket API untuk menghapus disparitas antarmuka antara PowerShell dan Bash.
+3. **Terapkan Two-Tier Storage & Singkirkan `/tmp`:** Pisahkan database ber-I/O tinggi ke dalam Named Volumes engine, dan standarisasikan seluruh kontrol plane konfigurasi ke dalam ruang kerja yang terstruktur.
+4. **Unifikasi Pengalaman SRE dengan Go:** Gunakan kakas CLI berbasis Go yang berinteraksi langsung ke Container Engine Socket API untuk menghapus disparitas antarmuka antara PowerShell dan Bash.
 
 ### 📚 Panduan & Referensi Terkait:
 - [Panduan Praktis: Instalasi Docker Engine Community Edition di Windows Server]({{< relref "how-to/install-docker-engine-windows-containers" >}})
 - [Panduan Praktis: Build Image Container Apache Tomcat + Prometheus JMX Exporter di Windows NanoServer]({{< relref "how-to/build-tomcat-jmx-nanoserver-image" >}})
-- [Katalog Paket & Panduan Biner Operator tmctl]({{< relref "packages/tmctl" >}})
+- [Panduan Praktis: Build Stack Observabilitas di Windows NanoServer]({{< relref "how-to/build-monitoring-stack-windows-nanoserver-images" >}})
 - [Microsoft Official Windows Containers Documentation](https://learn.microsoft.com/en-us/virtualization/windowscontainers/)

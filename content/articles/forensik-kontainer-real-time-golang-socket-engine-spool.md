@@ -1,8 +1,8 @@
 +++
 title = "Forensik Kontainer Real-Time di Production: Menangkap Momen Crash Menggunakan Golang, Socket API, dan Atomic Spool"
 date = "2026-09-21T07:50:00+07:00"
-draft = true
-summary = "Membedah arsitektur forensik kontainer modern di production: mengapa interval scrape Prometheus gagal menangkap momen crash fatal OOMKilled atau segfault saat auto-restart aktif, bagaimana Golang dan Container Engine Socket API (Podman, Docker, Windows Named Pipes) menangkap point-in-time evidence milidetik terminasi, serta implementasi zero-dependency tooling melalui tm-agent dan tmctl."
+draft = false
+summary = "Membedah arsitektur forensik kontainer modern di production: mengapa interval scrape Prometheus gagal menangkap momen crash fatal OOMKilled atau segfault saat auto-restart aktif, bagaimana Golang dan Container Engine Socket API (Podman, Docker, Windows Named Pipes) menangkap point-in-time evidence milidetik terminasi, serta implementasi zero-dependency event listener dan atomic spooling."
 author = "Eddy Wiyatno"
 categories = ["DevOps", "Golang"]
 tags = ["golang", "devops", "docker", "podman", "sre", "observability", "systems-programming"]
@@ -18,10 +18,10 @@ Mengoperasikan beban kerja berbasis kontainer di lingkungan produksi skala enter
 
 Di sisi lain, mekanisme pemantauan berbasis tarikan terjadwal (*scheduled pull telemetry*) seperti **Prometheus scrape loop** (dengan interval standar 15 hingga 60 detik) memiliki *blind spot* temporal yang lebar. Jika sebuah kontainer mengalami lonjakan memori, terbunuh oleh Linux OOM Killer, lalu dihidupkan kembali oleh container runtime dalam rentang 3 detik, Prometheus scrape berikutnya hanya akan mencatat kontainer dalam status `UP` dengan PID baru. Bagi tim SRE, insiden ini tampak sebagai "gangguan misterius" (*ghost crash*) di mana keluhan pengguna masuk namun metrik telemetri terlihat normal.
 
-Untuk mengatasi dilema ini, saya merancang dan mengimplementasikan arsitektur pengumpul bukti forensik instan berbasis **Container Engine Socket API** dengan kakas sistem berbahasa **Go (Golang)**:
-1. **`tm-agent` (Passive Background Daemon):** Agen ber-footprint memori ultra-rendah (< 15 MB RAM) yang berlangganan langsung ke *event stream* soket container engine (Unix Socket Linux maupun Windows Named Pipes) secara non-blocking, menangkap snapshot status kontainer pada milidetik yang sama saat sinyal terminasi dipancarkan.
-2. **Normalized Evidence Spooling:** Mengisolasi data forensik ke direktori spool lokal dengan pengerasan izin ketat (`0700` untuk direktori, `0600` untuk berkas JSON) serta pola penulisan atomik (*two-stage atomic write rename*) untuk mengeliminasi *race condition* pembacaan oleh mesin analisis `diagnostic-service`.
-3. **`tmctl` (Unified Cross-Platform Operator CLI):** Kakas biner statis tunggal (*single static binary*) lintas OS yang menyamarkan disparitas Docker dan Podman, sekaligus mengubah skrip automasi Ansible menjadi *Thin Declarative Orchestrator*.
+Untuk mengatasi dilema ini, pendekatan rekayasa yang efektif adalah mengimplementasikan arsitektur pengumpul bukti forensik instan berbasis **Container Engine Socket API** dengan kakas sistem berbahasa **Go (Golang)**:
+1. **Passive Event Listener Daemon:** Agen ber-footprint memori ultra-rendah (< 15 MB RAM) yang berlangganan langsung ke *event stream* soket container engine (Unix Socket Linux maupun Windows Named Pipes) secara non-blocking, menangkap snapshot status kontainer pada milidetik yang sama saat sinyal terminasi dipancarkan.
+2. **Normalized Evidence Spooling:** Mengisolasi data forensik ke direktori spool lokal dengan pengerasan izin ketat (`0700` untuk direktori, `0600` untuk berkas JSON) serta pola penulisan atomik (*two-stage atomic write rename*) untuk mengeliminasi *race condition* pembacaan data parsial.
+3. **Unified Cross-Platform Operator CLI:** Kakas biner statis tunggal (*single static binary*) lintas OS yang menyamarkan disparitas Docker dan Podman, sekaligus mempermudah otomasi CI/CD.
 
 Artikel teknis ini membedah prinsip arsitektur, tantangan rekayasa sistem multi-OS, serta implementasi kode Go di balik sistem forensik kontainer real-time ini.
 
@@ -82,9 +82,9 @@ Sistem penangkap bukti harus:
 
 ---
 
-## ⚙️ Mengapa Memilih Golang untuk Tooling Operator & Agent: Analisis TM-ADR-0027
+## ⚙️ Mengapa Memilih Golang untuk Tooling Operator & Agent
 
-Keputusan arsitektur untuk membangun kakas operator terpadu (`tmctl`) dan daemon pengumpul event (`tm-agent`) dalam bahasa Go secara resmi didokumentasikan dalam [TM-ADR-0027](https://edkas07-oss.github.io/devops-handbook/adr/tomcat-monitoring/adr-records/TM-ADR-0027/) (*Adopt Container Engine Socket API and Unified Cross-Platform Tooling for Multi-OS Orchestration*).
+Keputusan arsitektur untuk membangun kakas operator terpadu dan daemon pengumpul event dalam bahasa Go didasarkan pada kebutuhan akan performa tinggi, efisiensi konsumsi memori, dan kemudahan eksekusi lintas OS tanpa dependensi runtime tambahan.
 
 {{< mermaid >}}
 flowchart LR
@@ -94,16 +94,16 @@ flowchart LR
         SYS["systemd --user coupling<br/>(Fails on Windows Server)"]
     end
 
-    subgraph MODERN["Modern Architecture: TM-ADR-0027 (Golang)"]
-        TMCTL["tmctl (Operator CLI)<br/>Single Static Binary"]
-        TMAGENT["tm-agent (Event Daemon)<br/>Cross-Platform Background Listener"]
+    subgraph MODERN["Modern Architecture (Golang)"]
+        TMCTL["Operator CLI<br/>Single Static Binary"]
+        TMAGENT["Event Daemon<br/>Cross-Platform Background Listener"]
         SOCKET["Direct Container Engine API<br/>Unix Socket & Windows Named Pipe"]
     end
 
     LEGACY -->|Refactored To| MODERN
 {{< /mermaid >}}
 
-Sebelum adopsi Go, platform pemantauan mengandalkan skrip Bash imperatif (`scripts/deploy-*.sh`, `src/collector.sh`) yang memanggil subshell `podman events` dan utilitas POSIX standar (`sed`, `awk`, `jq`). Pola warisan ini menimbulkan hambatan besar di lingkungan enterprise hybrid:
+Sebelum adopsi Go, platform pemantauan mengandalkan skrip Bash imperatif yang memanggil subshell `podman events` dan utilitas POSIX standar (`sed`, `awk`, `jq`). Pola warisan ini menimbulkan hambatan besar di lingkungan enterprise hybrid:
 1. **Linux & Systemd Lock-in:** Skrip Bash tidak dapat berjalan di Windows Server tanpa lapisan kompatibilitas berat seperti WSL2 atau Git Bash.
 2. **Kerapuhan String Parsing:** Mem-parsing keluaran teks terminal kontainer sangat rentan terhadap perubahan format antar versi container engine.
 3. **Ansible Script Wrapper Antipattern:** Role automasi Ansible terpaksa membungkus eksekusi skrip shell (`ansible.builtin.shell: bash scripts/deploy.sh`), menghancurkan idempotenitas dan portabilitas lintas OS.
@@ -114,17 +114,17 @@ Adopsi Golang memecahkan masalah ini melalui tiga keunggulan teknis fundamental:
 
 Target server produksi enterprise berada dalam pengawasan kepatuhan keamanan yang ketat (*hardening baseline*). Memasang interpreter seperti Python (bersama virtualenv dan modul C-extension), Node.js (bersama ribuan berkas `node_modules`), atau Java JRE pada setiap target host hanya untuk menjalankan skrip pemantauan adalah pelanggaran terhadap prinsip minimalitas permukaan serangan (*attack surface reduction*).
 
-Golang mengompilasi seluruh dependensi ke dalam **single static binary** (`CGO_ENABLED=0`). Biner `tmctl` dan `tm-agent` dapat langsung disalin (*drop-in binary*) ke direktori host (`~/.local/bin` atau `C:\Program Files\tmctl`) dan dieksekusi seketika tanpa memerlukan pustaka dinamis atau interpreter eksternal.
+Golang mengompilasi seluruh dependensi ke dalam **single static binary** (`CGO_ENABLED=0`). Biner dapat langsung disalin (*drop-in binary*) ke direktori host dan dieksekusi seketika tanpa memerlukan pustaka dinamis atau interpreter eksternal.
 
 ### 2. Kompilasi Silang Sejati (Linux ELF & Windows Standalone `.exe`)
 
 Dukungan *cross-compilation* kelas satu pada toolchain Go memungkinkan pembangunan biner Linux (ELF 64-bit) dan Windows Server (`.exe`) dari lingkungan CI/CD manapun:
 ```bash
 # Kompilasi Linux AMD64 static binary
-CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -ldflags="-s -w" -o bin/linux_amd64/tm-agent ./cmd/tm-agent
+CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -ldflags="-s -w" -o bin/linux_amd64/event-collector ./cmd/collector
 
 # Kompilasi Windows AMD64 native executable
-CGO_ENABLED=0 GOOS=windows GOARCH=amd64 go build -ldflags="-s -w" -o bin/windows_amd64/tm-agent.exe ./cmd/tm-agent
+CGO_ENABLED=0 GOOS=windows GOARCH=amd64 go build -ldflags="-s -w" -o bin/windows_amd64/event-collector.exe ./cmd/collector
 ```
 Biner hasil kompilasi memiliki efisiensi sumber daya yang ekstrem:
 - **Ukuran Biner:** Kurang dari 12 MB (termasuk seluruh pustaka JSON schema validator dan HTTP client).
@@ -142,7 +142,7 @@ Memantau *event stream* soket memerlukan operasi I/O asinkron yang tidak boleh m
 
 ## 🔌 Multi-Engine Socket Abstraction (Podman, Docker & Windows Named Pipes)
 
-Salah satu tantangan rekayasa terbesar dalam mengelola infrastruktur kontainer enterprise adalah heterogenitas mesin eksekusi. Sebagaimana dirumuskan dalam [TM-ADR-0026](https://edkas07-oss.github.io/devops-handbook/adr/tomcat-monitoring/adr-records/TM-ADR-0026/) (*Adopt Adaptive Multi-Engine Container Runtime Portability for Podman and Docker Environments*), platform harus mampu berjalan tanpa gesekan di atas berbagai varian container runtime:
+Salah satu tantangan rekayasa terbesar dalam mengelola infrastruktur kontainer enterprise adalah heterogenitas mesin eksekusi. Platform harus mampu berjalan tanpa gesekan di atas berbagai varian container runtime:
 
 | Sistem Operasi | Container Engine | Antarmuka Transport | Karakteristik Jalur Soket |
 | :--- | :--- | :--- | :--- |
@@ -151,12 +151,11 @@ Salah satu tantangan rekayasa terbesar dalam mengelola infrastruktur kontainer e
 | **Linux (Containerd / Rootless)**| Rootless Docker | Unix Domain Socket | `/run/user/<UID>/docker.sock` |
 | **Windows Server 2022/2025** | Docker Engine | Windows Named Pipe | `\\.\pipe\docker_engine` (IPC Windows Native) |
 
-### 1. Deteksi Runtime Adaptif di `tm-agent`
+### 1. Deteksi Runtime Adaptif di Event Daemon
 
-Alih-alih memaksa operator menyetel konfigurasi jalur soket secara manual di setiap host, `tm-agent` mengimplementasikan algoritma deteksi adaptif berbasis probing filesystem dan UID sesi pengguna:
+Alih-alih memaksa operator menyetel konfigurasi jalur soket secara manual di setiap host, daemon pengumpul mengimplementasikan algoritma deteksi adaptif berbasis probing filesystem dan UID sesi pengguna:
 
 ```go
-// Cuplikan dari: tm-agent/internal/engine/client.go
 func DetectSocket(preferredEngine, explicitPath string) (engineType, socketPath string, err error) {
 	if explicitPath != "" {
 		if preferredEngine == "" {
@@ -283,9 +282,9 @@ Mesin kontainer merespons dengan HTTP chunked stream tanpa batas waktu (*infinit
 
 ---
 
-## 🔒 Keamanan Spool Forensik: Atomic Write & Hardening (TM-ADR-0008)
+## 🔒 Keamanan Spool Forensik: Atomic Write & Hardening
 
-Dalam sistem yang memproses data diagnostik insiden, arsitektur penyimpanan bukti (*evidence storage*) harus memenuhi dua kriteria kritis: **integritas konsumsi data** dan **keamanan hak akses**. Keputusan arsitektur ini ditetapkan dalam [TM-ADR-0008](https://edkas07-oss.github.io/devops-handbook/adr/tomcat-monitoring/adr-records/TM-ADR-0008/) (*Restricted Host Event Collector with Normalized Evidence Spool*).
+Dalam sistem yang memproses data diagnostik insiden, arsitektur penyimpanan bukti (*evidence storage*) harus memenuhi dua kriteria kritis: **integritas konsumsi data** dan **keamanan hak akses**.
 
 {{< mermaid >}}
 flowchart TD
@@ -296,10 +295,10 @@ flowchart TD
         HOST_SOCK -.->|Privilege Escalation!| PWN["Potensi Root Host Takeover"]
     end
 
-    subgraph SECURE["Pola Aman: TM-ADR-0008 (One-Way Boundary)"]
-        AGENT["tm-agent (Host Process / Daemon)"]
+    subgraph SECURE["Pola Aman: One-Way Boundary"]
+        AGENT["Event Daemon (Host Process)"]
         SPOOL[("Normalized Evidence Spool<br/>Dir: 0700 | File: 0600<br/>Atomic Write: tmp to json")]
-        DS["Diagnostic Service Container<br/>(Unprivileged User node:node)"]
+        DS["Diagnostic Service Container<br/>(Unprivileged User)"]
 
         AGENT -->|Writes JSON Evidence| SPOOL
         SPOOL -->|Mount Volume :ro,z (Read-Only)| DS
@@ -313,28 +312,28 @@ Sebuah antipattern yang sering ditemukan pada implementasi Docker pemula adalah 
 # ANTIPATTERN BERBAHAYA! JANGAN DILAKUKAN DI PRODUCTION!
 docker run -v /var/run/docker.sock:/var/run/docker.sock diagnostic-service
 ```
-Memberikan akses soket Docker ke dalam kontainer sama saja dengan memberikan hak akses administratif **root host tanpa batas**. Siapa pun yang berhasil mengeksploitasi celah keamanan aplikasi web di dalam `diagnostic-service` dapat mengirim perintah API ke soket untuk membuat kontainer privileged baru dengan bind mount `/` ke root filesystem host, membobol seluruh server dalam hitungan detik.
+Memberikan akses soket Docker ke dalam kontainer sama saja dengan memberikan hak akses administratif **root host tanpa batas**. Siapa pun yang berhasil mengeksploitasi celah keamanan aplikasi web di dalam kontainer analitik dapat mengirim perintah API ke soket untuk membuat kontainer privileged baru dengan bind mount `/` ke root filesystem host, membobol seluruh server dalam hitungan detik.
 
-Sebagai solusinya, [TM-ADR-0008](https://edkas07-oss.github.io/devops-handbook/adr/tomcat-monitoring/adr-records/TM-ADR-0008/) menetapkan prinsip **One-Way Communication Boundary**:
-- Hanya `tm-agent` (proses host non-root atau agen lokal berizin khusus) yang berhak berkomunikasi dengan soket engine.
-- Hasil pengamatan dinormalisasi menjadi berkas JSON skema kanonikal (`event-record-v1.schema.json`) dan diletakkan pada direktori *spool*.
-- Kontainer `diagnostic-service` **hanya membaca** berkas dari direktori spool tersebut melalui bind mount bertanda baca-saja (`--volume "${SPOOL_DIR}:/run/tomcat-diagnostic/spool:ro,z"`). Tidak ada jalur interaksi terbalik dari kontainer diagnostik ke host engine.
+Sebagai solusinya, kita menerapkan prinsip **One-Way Communication Boundary**:
+- Hanya daemon pengumpul (proses host non-root atau agen lokal berizin khusus) yang berhak berkomunikasi dengan soket engine.
+- Hasil pengamatan dinormalisasi menjadi berkas JSON skema kanonikal dan diletakkan pada direktori *spool*.
+- Kontainer mesin diagnostik **hanya membaca** berkas dari direktori spool tersebut melalui bind mount bertanda baca-saja (`--volume "${SPOOL_DIR}:/run/app-diagnostic/spool:ro,z"`). Tidak ada jalur interaksi terbalik dari kontainer diagnostik ke host engine.
 
 ### 2. Pengerasan Izin Berkas (*Permission Hardening*: `0700` & `0600`)
 
 Data forensik berisi informasi sensitif mengenai topologi infrastruktur, nama kontainer, argumen eksekusi, serta kode status proses. Untuk mencegah kebocoran informasi (*information disclosure*) ke pengguna unprivileged atau proses lain di server host:
-- **Direktori Spool diatur ke mode `0700` (`drwx------`):** Hanya pemilik proses `tm-agent` yang dapat membaca, menulis, atau menjelajahi direktori tersebut.
+- **Direktori Spool diatur ke mode `0700` (`drwx------`):** Hanya pemilik proses daemon pengumpul event yang dapat membaca, menulis, atau menjelajahi direktori tersebut.
 - **Berkas Bukti diatur ke mode `0600` (`-rw-------`):** Pengguna lain tidak memiliki izin baca terhadap rekaman bukti forensik.
 
 ### 3. Pola Penulisan Atomik (*Two-Stage Atomic Write Pattern*)
 
-Masalah klasik dalam komunikasi antar-proses berbasis berkas (*file-based IPC*) adalah **Race Condition**: apa yang terjadi jika `diagnostic-service` membaca berkas bukti saat `tm-agent` baru selesai menulis setengah bagian dari berkas JSON tersebut?
+Masalah klasik dalam komunikasi antar-proses berbasis berkas (*file-based IPC*) adalah **Race Condition**: apa yang terjadi jika mesin analisis membaca berkas bukti saat daemon pengumpul baru selesai menulis setengah bagian dari berkas JSON tersebut?
 Hasilnya adalah kegagalan *JSON syntax parsing* (`Unexpected end of JSON input`), yang dapat menggagalkan analisis insiden.
 
-Untuk menggaransi integritas data 100%, `tm-agent` menerapkan pola penulisan atomik:
+Untuk menggaransi integritas data 100%, daemon menerapkan pola penulisan atomik:
 
 ```go
-// Cuplikan dari: tm-agent/internal/spool/writer.go
+// Contoh implementasi writer atomik pada Go
 func WriteRecord(spoolDir string, record *schema.EventRecord, maxBytes int64) (string, error) {
 	if err := EnsureSpoolDir(spoolDir); err != nil {
 		return "", err
@@ -379,11 +378,11 @@ func WriteRecord(spoolDir string, record *schema.EventRecord, maxBytes int64) (s
 #### Mengapa `os.Rename` Bersifat Atomik?
 Pada level kernel sistem operasi (POSIX `rename()` syscall dan Win32 `MoveFileEx` dengan `MOVEFILE_REPLACE_EXISTING`), operasi *rename* pada sistem berkas yang sama (*same filesystem partition*) tidak memindahkan data blok pada disk. Kernel hanya memperbarui penunjuk direktori (*directory metadata inode pointer*). 
 
-Bagi proses pembaca (`diagnostic-service`), berkas berekstensi `.json` **tidak pernah tampak dalam kondisi setengah jadi**. Berkas hanya akan muncul di direktori saat seluruh isi data sudah ditulis lengkap dan aman pada disk.
+Bagi proses pembaca, berkas berekstensi `.json` **tidak pernah tampak dalam kondisi setengah jadi**. Berkas hanya akan muncul di direktori saat seluruh isi data sudah ditulis lengkap dan aman pada disk.
 
 ### 4. Tata Kelola Retensi & Pencegahan Kehabisan Inode (Bounded Spool)
 
-Jika sebuah kontainer mengalami siklus *crash flapping* ratusan kali dalam satu jam, direktori spool berisiko menghabiskan kuota *inode* atau kapasitas disk server. Untuk mencegah dampak operasional sekunder ini, `tm-agent` menegakkan aturan kuota ketat (*Capacity & Retention Governance*):
+Jika sebuah kontainer mengalami siklus *crash flapping* ratusan kali dalam satu jam, direktori spool berisiko menghabiskan kuota *inode* atau kapasitas disk server. Untuk mencegah dampak operasional sekunder ini, daemon pengumpul menegakkan aturan kuota ketat (*Capacity & Retention Governance*):
 
 | Parameter Retensi | Nilai Default | Logika Pembersihan (*Pruning Logic*) |
 | :--- | :---: | :--- |
@@ -392,11 +391,11 @@ Jika sebuah kontainer mengalami siklus *crash flapping* ratusan kali dalam satu 
 | **`STALE_TMP_AGE_MINUTES`** | `60` Menit | **Sanitasi File Yatim:** Berkas `.tmp` yang tertinggal lebih dari 60 menit (misal akibat crash host saat proses I/O) dibersihkan otomatis. |
 | **`MAX_RECORD_BYTES`** | `16384` Bytes (16 KiB) | Menolak pencatatan jika ukuran record melebihi 16 KiB demi mencegah kehabisan memori (*OOM defense*). |
 
-Selain itu, seluruh direktori spool wajib mengikuti kebijakan **Zero `/tmp`**: bukti disimpan pada jalur persisten `${HOME}/.local/share/tomcat-monitoring/spool` di Linux atau `C:\tm_home\spool` di Windows, menjamin data tidak terhapus oleh utilitas otomatis pembersih `/tmp` OS.
+Selain itu, seluruh direktori spool wajib mengikuti kebijakan **Zero `/tmp`**: bukti disimpan pada jalur persisten (misal `~/.local/share/app/spool` di Linux atau `C:\app_home\spool` di Windows), menjamin data tidak terhapus oleh utilitas pembersih otomatis OS.
 
 ---
 
-## 🤝 Sinergi `tm-agent` (Passive Listener) & `tmctl` (Active Operator CLI)
+## 🤝 Sinergi Passive Event Listener & Active Operator CLI
 
 Arsitektur platform membedakan secara tegas antara tugas pemantauan pasif dan eksekusi operasional aktif:
 
@@ -405,49 +404,40 @@ flowchart TD
     subgraph CONTROL["Control Plane & Operations"]
         SRE["SRE / DevOps Engineer"]
         ANSIBLE["Ansible Playbook / CI Runner"]
-        TMCTL["tmctl (Go CLI)<br/>Active Operator Tooling"]
+        OPERATOR_CLI["Operator CLI (Go)<br/>Active Tooling"]
 
-        SRE -->|CLI Commands| TMCTL
-        ANSIBLE -->|Idempotent Execution| TMCTL
+        SRE -->|CLI Commands| OPERATOR_CLI
+        ANSIBLE -->|Idempotent Execution| OPERATOR_CLI
     end
 
     subgraph RUNTIME_HOST["Target Host (Linux / Windows)"]
-        TMAGENT["tm-agent (Go Daemon)<br/>Passive Event Listener<br/>(systemd unit / Windows Service)"]
+        EVENT_DAEMON["Event Daemon (Go)<br/>Passive Event Listener<br/>(systemd unit / Windows Service)"]
         ENGINE["Container Engine Socket<br/>(Podman / Docker)"]
         SPOOL[("Spool Directory<br/>(0700 / 0600)")]
-        DS["diagnostic-service Container"]
+        DS["Diagnostic Service Container"]
 
-        TMCTL ==>|Deploy / Status / Clean| ENGINE
-        ENGINE -.->|Continuous Event Stream| TMAGENT
-        TMAGENT -->|Atomic Evidence Ingestion| SPOOL
+        OPERATOR_CLI ==>|Deploy / Status / Clean| ENGINE
+        ENGINE -.->|Continuous Event Stream| EVENT_DAEMON
+        EVENT_DAEMON -->|Atomic Evidence Ingestion| SPOOL
         SPOOL -.->|Correlate Incident| DS
     end
 {{< /mermaid >}}
 
 ### 1. Pembagian Peran Komponen
 
-- **`tm-agent` (Passive Listener):**
+- **Passive Event Listener Daemon:**
   - Berjalan sebagai layanan latar belakang (*background service*): dikelola oleh `systemd --user` di Linux atau didaftarkan sebagai Windows Service.
-  - Bersifat reaktif (*event-driven*): tidak menerima input dari terminal, tidak melayani permintaan HTTP masuk, hanya fokus mendengarkan socket container engine dan menuliskan bukti jika terjadi anomali siklus hidup.
-- **`tmctl` (Active Operator CLI):**
+  - Bersifat reaktif (*event-driven*): tidak menerima input interaktif terminal, hanya fokus mendengarkan socket container engine dan menuliskan bukti jika terjadi anomali siklus hidup.
+- **Active Operator CLI:**
   - Berjalan secara on-demand dipanggil oleh operator SRE atau runner CI/CD.
-  - Mengelola siklus hidup stack aplikasi melalui antarmuka perintah terpadu lintas OS:
-    - `tmctl stack deploy --target tomcat --env production`: Menerapkan konfigurasi kontainer secara deklaratif.
-    - `tmctl stack status`: Menampilkan tabel status kesehatan kontainer, port bindings, dan pemanfaatan memori.
-    - `tmctl stack clean --all`: Membersihkan kontainer dan named volume yang tidak digunakan.
-    - `tmctl rules ingest custom-rulepack.json`: Menyuntikkan aturan diagnostik baru ke Diagnostic Service.
-    - `tmctl validate`: Memvalidasi kepatuhan skema konfigurasi dan layout repositori.
+  - Mengelola siklus hidup stack aplikasi melalui antarmuka perintah terpadu lintas OS.
 
-### 2. Transformasi Ansible Menjadi *Thin Declarative Orchestrator*
+### 2. Transformasi Skrip Otomasi Menjadi *Thin Declarative Orchestrator*
 
-Sebelum adopsi `tmctl` dan `tm-agent`, playbook Ansible dipenuhi oleh ratusan baris logika imperatif dan pengecekan OS:
-```yaml
-# POLA LAMA YANG RAPUH (Ansible Script Wrapper Antipattern):
-- name: Deploy container stack
-  ansible.builtin.shell: bash scripts/deploy-tomcat.sh
-  when: ansible_os_family != "Windows"
-
-- name: Deploy container stack on Windows
+Pola otomasi yang rapi mendelegasikan perintah kompleks ke biner Go yang mandiri:
+1. Ansible/CI hanya bertanggung jawab mengantarkan biner statis ke host target.
+2. Mendaftarkan service unit daemon ke systemd (Linux) atau service manager (Windows).
+3. Memanggil perintah terpadu tanpa perlu memedulikan disparitas sintaks shell lokal host.
   ansible.windows.win_command: powershell.exe -File scripts/deploy-tomcat.ps1
   when: ansible_os_family == "Windows"
 ```
@@ -480,12 +470,12 @@ sequenceDiagram
     E->>E: Mark container state: OOMKilled=true, ExitCode=137
     
     Note over E,A: 2. Fase Event Streaming
-    E-->>A: HTTP Chunked Stream: Event oom (tomcat-jmx-exporter)
+    E-->>A: HTTP Chunked Stream: Event oom (app-container)
     E-->>A: HTTP Chunked Stream: Event died (ExitCode 137)
     
     Note over A,S: 3. Fase Snapshot & Atomic Spool
     activate A
-    A->>E: GET /containers/tomcat-jmx-exporter/json (Inspect)
+    A->>E: GET /containers/app-container/json (Inspect)
     E-->>A: Detailed State JSON (State, OOMKilled, FinishedAt)
     A->>S: Write temporary file: timestamp_runtime_oom.tmp (mode 0600)
     A->>S: Verify size <= 16 KiB and os.Rename to json
@@ -499,23 +489,22 @@ sequenceDiagram
     D->>D: Receive Webhook Alert from Alertmanager
     D->>S: ReadBoundedFile from Spool (ro,z mount)
     D->>D: Correlate Evidence: ExitCode 137 + OOMKilled true within Window
-    D->>N: Dispatch Incident Report: Tomcat Crash Confirmed (OOMKilled)
+    D->>N: Dispatch Incident Report: Container Crash Confirmed (OOMKilled)
 {{< /mermaid >}}
 
 ---
 
 ## 💻 Cuplikan Kode Arsitektur Inti (Go Implementation Deep Dive)
 
-Berikut adalah implementasi nyata dari komponen-komponen utama pada repositori [`tm-agent`](https://github.com/eddywiyatno/tm-agent):
+Berikut adalah contoh implementasi inti dari daemon pengumpul event kontainer berbasis Go:
 
 ### 1. Loop Event Stream Multiplexing & Auto-Reconnect (`collector.go`)
 
-Loop utama `tm-agent` mengelola siklus koneksi streaming, penanganan sinyal graceful shutdown, dan periodik housekeeping:
+Loop utama mengelola siklus koneksi streaming, penanganan sinyal graceful shutdown, dan periodik housekeeping:
 
 ```go
-// Cuplikan dari: tm-agent/internal/collector/collector.go
 func (c *Collector) Run(ctx context.Context) error {
-	termutil.PrintInfo("Starting tm-agent Event Collector Daemon")
+	log.Println("Starting Event Collector Daemon")
 	
 	// Inisialisasi direktori spool dengan izin aman 0700
 	if err := spool.EnsureSpoolDir(c.cfg.SpoolDir); err != nil {
@@ -529,7 +518,7 @@ func (c *Collector) Run(ctx context.Context) error {
 	for {
 		select {
 		case <-ctx.Done():
-			termutil.PrintInfo("tm-agent shutting down gracefully")
+			log.Println("Daemon shutting down gracefully")
 			return nil
 		default:
 		}
@@ -547,7 +536,7 @@ func (c *Collector) Run(ctx context.Context) error {
 				// Pembersihan berkas kadaluarsa dan kuota kapasitas
 				r, _ := spool.PruneSpool(c.cfg.SpoolDir, c.cfg.MaxSpoolAgeHours, c.cfg.MaxSpoolFiles, c.cfg.StaleTmpAgeMinutes)
 				if r != nil && (r.StaleTmpPruned > 0 || r.StaleJsonPruned > 0 || r.QuotaPruned > 0) {
-					termutil.PrintInfo("Housekeeping: %d tmp, %d expired json, %d quota pruned",
+					log.Printf("Housekeeping: %d tmp, %d expired json, %d quota pruned\n",
 						r.StaleTmpPruned, r.StaleJsonPruned, r.QuotaPruned)
 				}
 
@@ -561,18 +550,18 @@ func (c *Collector) Run(ctx context.Context) error {
 
 				// Filter target kontainer dan event siklus hidup yang relevan
 				if (containerName == "" || containerName == c.cfg.TargetContainer) && relevantActions[action] {
-					termutil.PrintInfo("Event received: container=%s action=%s -> capturing snapshot", c.cfg.TargetContainer, action)
+					log.Printf("Event received: container=%s action=%s -> capturing snapshot\n", c.cfg.TargetContainer, action)
 					wFiles, sErr := c.RecordSnapshot(ctx)
 					if sErr != nil {
-						termutil.PrintWarning("Failed to capture snapshot: %v", sErr)
+						log.Printf("Failed to capture snapshot: %v\n", sErr)
 					} else {
-						termutil.PrintSuccess("Evidence snapshot written: %d records", len(wFiles))
+						log.Printf("Evidence snapshot written: %d records\n", len(wFiles))
 					}
 				}
 
 			case sErr, ok := <-errCh:
 				if ok && sErr != nil {
-					termutil.PrintWarning("Event stream error: %v", sErr)
+					log.Printf("Event stream error: %v\n", sErr)
 				}
 				break streamLoop
 			}
@@ -583,18 +572,17 @@ func (c *Collector) Run(ctx context.Context) error {
 		case <-ctx.Done():
 			return nil
 		case <-time.After(3 * time.Second):
-			termutil.PrintInfo("Reconnecting to container engine socket...")
+			log.Println("Reconnecting to container engine socket...")
 		}
 	}
 }
 ```
 
-### 2. Pembacaan Spool Bounded di Sisi Konsumen (`collector-spool-adapter.js`)
+### 2. Pembacaan Spool Bounded di Sisi Konsumen
 
-Pada sisi `diagnostic-service`, pembacaan berkas spool dilakukan secara defensif untuk mencegah eksploitasi berkas raksasa:
+Pada sisi mesin analitik, pembacaan berkas spool dilakukan secara defensif untuk mencegah eksploitasi berkas raksasa:
 
 ```javascript
-// Cuplikan dari: tomcat-diagnostic-service/src/adapters/collector-spool-adapter.js
 import { readdirSync } from "node:fs";
 import { readBoundedFile } from "./bounded-file-reader.js";
 import { createEvidence, withinWindow } from "../domain/evidence.js";
@@ -653,15 +641,8 @@ Menggabungkan kecepatan pemulihan layanan (*High Availability*) dengan kedalaman
 1. **Jangan Pernah Mengandalkan Metrik Terjadwal untuk Mendiagnosis Crash Fatal:**
    Scrape interval 15 atau 30 detik dirancang untuk agregasi tren performa, bukan untuk forensik *real-time*. Gunakan *event-driven stream listener* untuk menangkap status terminasi kernel dan exit codes.
 2. **Terapkan Prinsip One-Way Boundary:**
-   Jangan pernah me-mount socket Docker/Podman langsung ke kontainer analitik aplikasi. Gunakan agen host berizin rendah (`tm-agent`) untuk memproses event dan mengeksposnya melalui berkas spool baca-saja (*read-only volume*).
+   Jangan pernah me-mount socket Docker/Podman langsung ke kontainer analitik aplikasi. Gunakan agen host berizin rendah untuk memproses event dan mengeksposnya melalui berkas spool baca-saja (*read-only volume*).
 3. **Wajibkan Pola Two-Stage Atomic Write:**
    Dalam arsitektur *file-based IPC*, hindari menulis langsung ke berkas tujuan akhir. Tuliskan data ke berkas `.tmp` terlebih dahulu, lalu panggil `rename` sistem berkas untuk mencegah *race condition* pembacaan data parsial.
 4. **Adopsi Single Static Binary untuk Host Tooling:**
-   Hilangkan ketergantungan pada runtime interpreter eksternal (Python, Node.js, atau skrip Bash yang rumit) di host produksi. Bangun kakas SRE Anda menggunakan bahasa terkompilasi seperti **Golang** demi konsumsi memori rendah, kecepatan eksekusi, dan kemudahan deployment multi-OS.
-
----
-
-### 📚 Referensi Resmi Arsitektur (DevOps Handbook):
-- [TM-ADR-0027: Adopt Container Engine Socket API and Unified Cross-Platform Tooling](https://edkas07-oss.github.io/devops-handbook/adr/tomcat-monitoring/adr-records/TM-ADR-0027/)
-- [TM-ADR-0008: Use a Restricted Host Event Collector with a Normalized Evidence Spool](https://edkas07-oss.github.io/devops-handbook/adr/tomcat-monitoring/adr-records/TM-ADR-0008/)
-- [TM-ADR-0026: Adopt Adaptive Multi-Engine Container Runtime Portability for Podman and Docker](https://edkas07-oss.github.io/devops-handbook/adr/tomcat-monitoring/adr-records/TM-ADR-0026/)
+   Hilangkan ketergantungan pada runtime interpreter eksternal di host produksi. Bangun kakas SRE Anda menggunakan bahasa terkompilasi seperti **Golang** demi konsumsi memori rendah, kecepatan eksekusi, dan kemudahan deployment multi-OS.

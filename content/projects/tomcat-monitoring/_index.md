@@ -1,145 +1,465 @@
 +++
-title = "Tomcat Monitoring & Autonomous Diagnostic Platform"
-date = "2026-09-20T21:00:00+07:00"
-draft = true
-summary = "Platform pemantauan dan diagnosa insiden otonom untuk Apache Tomcat di lingkungan multi-OS (Linux & Windows) dengan kebijakan Zero Destructive Auto-Remediation, korelasi bukti forensik deterministik, dan tiga modul terpadu: tmctl, tm-agent, dan diagnostic service."
-author = "Eddy Wiyatno"
-categories = ["SRE", "Observability", "Platform Engineering"]
-tags = ["tomcat", "sre", "observability", "golang", "nodejs", "podman", "docker", "prometheus", "alertmanager"]
-series = ["Tomcat Autonomous Diagnostic Platform"]
-toc = true
-showSummary = true
-modules_subtitle = "Tiga perangkat lunak mandiri yang menopang observabilitas dan diagnosa otonom Tomcat."
+title = "tmctl"
+description = "Monitoring dan diagnostik otonom Apache Tomcat: telemetri 0-agent, triase otomatis JVM, notifikasi berjenjang, dan pengamanan bukti forensik."
+layout = "landing"
+showDate = false
+showAuthor = false
+showReadingTime = false
+showWordCount = false
+showTableOfContents = false
+showPagination = false
+showBreadcrumbs = true
+[cascade]
+layout = "landing"
+showDate = false
+showAuthor = false
+showReadingTime = false
+showWordCount = false
+showTableOfContents = false
+showPagination = false
+showBreadcrumbs = true
 +++
 
-{{< lead >}}
-**Embedded, High-Availability Observability & Autonomous Incident Decision Authority**
+<div class="ew-pagehero">
+<p class="ew-hero__eyebrow">Proyek Rekayasa · tmctl</p>
+<h1 class="ew-pagehero__title">tmctl: Monitoring &amp; Diagnostik Otonom Apache Tomcat</h1>
+<p class="ew-lead">Tool CLI observabilitas dan diagnostik otonom untuk runtime JVM Tomcat. Menyediakan visibilitas performa real-time, triase otomatis saat terjadi anomali, dan investigasi insiden tanpa beban agen tambahan.</p>
+</div>
 
-Arsitektur pemantauan performa internal dan diagnosa insiden deterministik untuk Apache Tomcat di lingkungan hybrid enterprise (Linux Podman rootless & Windows Server Docker), dirancang dengan prinsip *Zero Destructive Auto-Remediation* dan korelasi forensik multi-sumber tanpa pengadaan infrastruktur tambahan.
-{{< /lead >}}
+<div class="ew-section">
+<div class="ew-section__head"><h2 class="ew-h2">Kemampuan Utama</h2><p class="ew-lead">Klik setiap kartu untuk melihat visualisasi alur perbandingan kendala operasional konvensional dan solusi rekayasa yang dihadirkan tmctl.</p></div>
+<div class="ew-grid-2">
+<div class="ew-panel ew-panel--interactive" role="button" tabindex="0" data-modal="modal-telemetry" aria-haspopup="dialog">
+<span class="ew-panel__tag">Observabilitas Tanpa Agen</span>
+<h3 class="ew-panel__title">Telemetri Real-Time Ringan (0 Agent Overhead)</h3>
+<p class="ew-panel__text">Mengambil metrik heap memory, thread pool, CPU, dan garbage collection secara langsung via soket runtime lokal tanpa membebani JVM dengan Java agent atau daemon pihak ketiga.</p>
+<span class="ew-panel__hint">Lihat Masalah &amp; Solusi →</span>
+</div>
 
----
+<div class="ew-panel ew-panel--interactive" role="button" tabindex="0" data-modal="modal-diagnostic" aria-haspopup="dialog">
+<span class="ew-panel__tag">Diagnostik Otonom</span>
+<h3 class="ew-panel__title">Deteksi Anomali &amp; Triase Insiden Otomatis</h3>
+<p class="ew-panel__text">Mendeteksi GC thrashing, thread deadlock, dan lonjakan memori OOM secara otomatis, serta menghasilkan laporan triase teknis instan tanpa perlu login manual ke server.</p>
+<span class="ew-panel__hint">Lihat Masalah &amp; Solusi →</span>
+</div>
 
-## 📌 Ringkasan Eksekutif & Value Proposition
+<div class="ew-panel ew-panel--interactive" role="button" tabindex="0" data-modal="modal-alerting" aria-haspopup="dialog">
+<span class="ew-panel__tag">Notifikasi Cerdas</span>
+<h3 class="ew-panel__title">Dual-Alert Strategy untuk Tim L1/L2 &amp; L3</h3>
+<p class="ew-panel__text">Menyampaikan ringkasan status operasional cepat untuk tim NOC / Helpdesk L1/L2, serta lampiran data forensik mendalam dan rekomendasi triase untuk tim SRE / Backend L3.</p>
+<span class="ew-panel__hint">Lihat Masalah &amp; Solusi →</span>
+</div>
 
-Dalam ekosistem aplikasi enterprise mission-critical, runtime Java Virtual Machine (JVM) dan Apache Tomcat kerap mengalami kegagalan operasional yang kompleks—mulai dari *Garbage Collection (GC) thrashing*, saturasi konektor thread HTTP, kebocoran memori (*memory leak* / OOM), hingga crash mendadak akibat kegagalan dependensi backend.
+<div class="ew-panel ew-panel--interactive" role="button" tabindex="0" data-modal="modal-remediation" aria-haspopup="dialog">
+<span class="ew-panel__tag">Remediasi Aman</span>
+<h3 class="ew-panel__title">Isolasi Traffic &amp; Pengamanan Bukti Forensik</h3>
+<p class="ew-panel__text">Mengisolasi aliran traffic dari kontainer bermasalah dan mengambil snapshot dump forensik (heap &amp; thread dump) secara aman sebelum restart dilakukan, menjaga bukti akar masalah.</p>
+<span class="ew-panel__hint">Lihat Masalah &amp; Solusi →</span>
+</div>
+</div>
+</div>
 
-Pemantauan tradisional sering kali menghadapi dua dilema ekstrem:
-1. **Alert Fatigue & Fragmentasi Bukti:** Tim on-call dibanjiri puluhan alert mentah dari Prometheus/Alertmanager tanpa konteks, memaksa operator melakukan SSH manual, memeriksa file log berukuran gigabyte, dan mengumpulkan data forensik secara reaktif.
-2. **Bahaya Blind Auto-Remediation:** Skrip *watchdog* atau auto-restart container yang tidak memiliki pemahaman konteks sering kali memperparah kerusakan (*reboot loops*, penghapusan artefak memori/heap dump, dan badai koneksi ke database).
+<!-- Modal 1: Telemetri Tanpa Agen -->
+<div id="modal-telemetry" class="ew-modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="title-telemetry">
+<div class="ew-modal-window">
+<button type="button" class="ew-modal-close-btn" aria-label="Tutup" data-close-modal>&times;</button>
+<div class="ew-modal-header">
+<span class="ew-modal-tag">Observabilitas Tanpa Agen</span>
+<h3 id="title-telemetry" class="ew-modal-title">Telemetri Real-Time Ringan (0 Agent Overhead)</h3>
+</div>
+<div class="ew-modal-body">
+<div class="ew-diag-wrap">
+  <div class="ew-diag-track ew-diag-track--bad">
+    <div class="ew-diag-badge ew-diag-badge--bad">🔴 Tanpa tmctl (Heavy Java Agent / APM)</div>
+    <div class="ew-diag-flow">
+      <div class="ew-diag-node">
+        <span class="ew-diag-node__icon">📦</span>
+        <span class="ew-diag-node__title">Heavy APM Agent</span>
+        <span class="ew-diag-node__desc">Bytecode injection</span>
+      </div>
+      <span class="ew-diag-arrow ew-diag-arrow--bad">→</span>
+      <div class="ew-diag-node ew-diag-node--alert">
+        <span class="ew-diag-node__icon">📈</span>
+        <span class="ew-diag-node__title">Resource Spike</span>
+        <span class="ew-diag-node__desc">+15-20% RAM/CPU</span>
+      </div>
+      <span class="ew-diag-arrow ew-diag-arrow--bad">→</span>
+      <div class="ew-diag-node ew-diag-node--alert">
+        <span class="ew-diag-node__icon">⚠️</span>
+        <span class="ew-diag-node__title">GC Pause Meningkat</span>
+        <span class="ew-diag-node__desc">Latensi aplikasi naik</span>
+      </div>
+      <span class="ew-diag-arrow ew-diag-arrow--bad">→</span>
+      <div class="ew-diag-node">
+        <span class="ew-diag-node__icon">💥</span>
+        <span class="ew-diag-node__title">Resiko Stabilitas</span>
+        <span class="ew-diag-node__desc">Overhead di produksi</span>
+      </div>
+    </div>
+    <div class="ew-diag-takeaway ew-diag-takeaway--bad">
+      <span>⚠️ Dampak: Monitoring justru membebani kapasitas server dan menambah latensi transaksi.</span>
+    </div>
+  </div>
 
-**Tomcat Monitoring & Autonomous Diagnostic Platform** hadir sebagai solusi terpadu yang dirancang dengan karakteristik:
-* **Cost-Efficient & Embedded Topology:** Berjalan berdampingan langsung di dalam kapasitas host server Tomcat tanpa memerlukan alokasi VM atau node monitoring terpisah.
-* **Autonomous Incident Decision Authority:** Mengubah alert mentah menjadi investigasi forensik deterministik yang berkorelasi dengan log aplikasi, event kernel/container, dan telemetri metrik.
-* **Human-in-the-Loop Governance:** Menolak tindakan destruktif buta; menyajikan laporan insiden kanonikal 7-seksi lengkap dengan Standard Operating Procedure (SOP) kurasi SRE siap eksekusi.
-* **Multi-OS Native Portability:** Beroperasi secara seragam pada Linux (Podman rootless) dan Windows Server (Docker) melalui abstraksi Socket API langsung.
+  <div class="ew-diag-track ew-diag-track--good">
+    <div class="ew-diag-badge ew-diag-badge--good">🟢 Dengan tmctl (Direct Local Socket Inspection)</div>
+    <div class="ew-diag-flow">
+      <div class="ew-diag-node">
+        <span class="ew-diag-node__icon">🔌</span>
+        <span class="ew-diag-node__title">Local Socket</span>
+        <span class="ew-diag-node__desc">IPC Unix / Named Pipe</span>
+      </div>
+      <span class="ew-diag-arrow ew-diag-arrow--good">→</span>
+      <div class="ew-diag-node ew-diag-node--success">
+        <span class="ew-diag-node__icon">⚡</span>
+        <span class="ew-diag-node__title">Direct Read</span>
+        <span class="ew-diag-node__desc">0 bytecode injection</span>
+      </div>
+      <span class="ew-diag-arrow ew-diag-arrow--good">→</span>
+      <div class="ew-diag-node ew-diag-node--success">
+        <span class="ew-diag-node__icon">🛡️</span>
+        <span class="ew-diag-node__title">Zero JVM Load</span>
+        <span class="ew-diag-node__desc">&lt;0.5% CPU overhead</span>
+      </div>
+      <span class="ew-diag-arrow ew-diag-arrow--good">→</span>
+      <div class="ew-diag-node ew-diag-node--success">
+        <span class="ew-diag-node__icon">📊</span>
+        <span class="ew-diag-node__title">Metrik Presisi</span>
+        <span class="ew-diag-node__desc">Real-time &amp; aman</span>
+      </div>
+    </div>
+    <div class="ew-diag-takeaway ew-diag-takeaway--good">
+      <span>✓ Manfaat: Visibilitas mendalam tanpa mengorbankan performa aplikasi maupun stabilitas runtime JVM.</span>
+    </div>
+  </div>
+</div>
+</div>
+<div class="ew-modal-footer">
+<button type="button" class="ew-btn ew-btn--ghost" data-close-modal>Tutup</button>
+</div>
+</div>
+</div>
 
----
+<!-- Modal 2: Diagnostik Otonom -->
+<div id="modal-diagnostic" class="ew-modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="title-diagnostic">
+<div class="ew-modal-window">
+<button type="button" class="ew-modal-close-btn" aria-label="Tutup" data-close-modal>&times;</button>
+<div class="ew-modal-header">
+<span class="ew-modal-tag">Diagnostik Otonom</span>
+<h3 id="title-diagnostic" class="ew-modal-title">Deteksi Anomali &amp; Triase Insiden Otomatis</h3>
+</div>
+<div class="ew-modal-body">
+<div class="ew-diag-wrap">
+  <div class="ew-diag-track ew-diag-track--bad">
+    <div class="ew-diag-badge ew-diag-badge--bad">🔴 Tanpa tmctl (Investigasi Manual di Host)</div>
+    <div class="ew-diag-flow">
+      <div class="ew-diag-node">
+        <span class="ew-diag-node__icon">🚨</span>
+        <span class="ew-diag-node__title">Aplikasi Hang</span>
+        <span class="ew-diag-node__desc">Alert umum / komplain</span>
+      </div>
+      <span class="ew-diag-arrow ew-diag-arrow--bad">→</span>
+      <div class="ew-diag-node ew-diag-node--alert">
+        <span class="ew-diag-node__icon">🔑</span>
+        <span class="ew-diag-node__title">SSH Manual</span>
+        <span class="ew-diag-node__desc">Akses server darurat</span>
+      </div>
+      <span class="ew-diag-arrow ew-diag-arrow--bad">→</span>
+      <div class="ew-diag-node ew-diag-node--alert">
+        <span class="ew-diag-node__icon">⌨️</span>
+        <span class="ew-diag-node__title">Perintah Jstack/Jcmd</span>
+        <span class="ew-diag-node__desc">Diagnosa manual rumit</span>
+      </div>
+      <span class="ew-diag-arrow ew-diag-arrow--bad">→</span>
+      <div class="ew-diag-node">
+        <span class="ew-diag-node__icon">⏳</span>
+        <span class="ew-diag-node__title">MTTR &gt; 60 Menit</span>
+        <span class="ew-diag-node__desc">Investigasi lambat</span>
+      </div>
+    </div>
+    <div class="ew-diag-takeaway ew-diag-takeaway--bad">
+      <span>⚠️ Dampak: Pemulihan insiden memakan waktu panjang dan rentan kesalahan analisis saat situasi darurat.</span>
+    </div>
+  </div>
 
-## 🏛️ Arsitektur Platform & Alur Data
+  <div class="ew-diag-track ew-diag-track--good">
+    <div class="ew-diag-badge ew-diag-badge--good">🟢 Dengan tmctl (Autonomous Triage Engine)</div>
+    <div class="ew-diag-flow">
+      <div class="ew-diag-node">
+        <span class="ew-diag-node__icon">🧠</span>
+        <span class="ew-diag-node__title">Deteksi Anomali</span>
+        <span class="ew-diag-node__desc">Deadlock / GC Thrash</span>
+      </div>
+      <span class="ew-diag-arrow ew-diag-arrow--good">→</span>
+      <div class="ew-diag-node ew-diag-node--success">
+        <span class="ew-diag-node__icon">📸</span>
+        <span class="ew-diag-node__title">Auto Capture</span>
+        <span class="ew-diag-node__desc">Snapshot stack trace</span>
+      </div>
+      <span class="ew-diag-arrow ew-diag-arrow--good">→</span>
+      <div class="ew-diag-node ew-diag-node--success">
+        <span class="ew-diag-node__icon">📋</span>
+        <span class="ew-diag-node__title">Analisis Otonom</span>
+        <span class="ew-diag-node__desc">Triase akar masalah</span>
+      </div>
+      <span class="ew-diag-arrow ew-diag-arrow--good">→</span>
+      <div class="ew-diag-node ew-diag-node--success">
+        <span class="ew-diag-node__icon">⚡</span>
+        <span class="ew-diag-node__title">Laporan Instan</span>
+        <span class="ew-diag-node__desc">MTTR turun drastis</span>
+      </div>
+    </div>
+    <div class="ew-diag-takeaway ew-diag-takeaway--good">
+      <span>✓ Manfaat: Tim engineering langsung menerima rangkuman penyebab insiden tanpa perlu investigasi manual dari nol.</span>
+    </div>
+  </div>
+</div>
+</div>
+<div class="ew-modal-footer">
+<button type="button" class="ew-btn ew-btn--ghost" data-close-modal>Tutup</button>
+</div>
+</div>
+</div>
 
-Diagram berikut mengilustrasikan interaksi menyeluruh antara runtime Tomcat, komponen pengumpul telemetri, modul streaming event, dan mesin diagnosa otonom:
+<!-- Modal 3: Notifikasi Cerdas -->
+<div id="modal-alerting" class="ew-modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="title-alerting">
+<div class="ew-modal-window">
+<button type="button" class="ew-modal-close-btn" aria-label="Tutup" data-close-modal>&times;</button>
+<div class="ew-modal-header">
+<span class="ew-modal-tag">Notifikasi Cerdas</span>
+<h3 id="title-alerting" class="ew-modal-title">Dual-Alert Strategy untuk Tim L1/L2 &amp; L3</h3>
+</div>
+<div class="ew-modal-body">
+<div class="ew-diag-wrap">
+  <div class="ew-diag-track ew-diag-track--bad">
+    <div class="ew-diag-badge ew-diag-badge--bad">🔴 Tanpa tmctl (Alert Flood &amp; Minim Konteks)</div>
+    <div class="ew-diag-flow">
+      <div class="ew-diag-node">
+        <span class="ew-diag-node__icon">📧</span>
+        <span class="ew-diag-node__title">Email Generik</span>
+        <span class="ew-diag-node__desc">"Server Down" saja</span>
+      </div>
+      <span class="ew-diag-arrow ew-diag-arrow--bad">→</span>
+      <div class="ew-diag-node ew-diag-node--alert">
+        <span class="ew-diag-node__icon">🌊</span>
+        <span class="ew-diag-node__title">Alert Fatigue</span>
+        <span class="ew-diag-node__desc">Ratusan spam email</span>
+      </div>
+      <span class="ew-diag-arrow ew-diag-arrow--bad">→</span>
+      <div class="ew-diag-node ew-diag-node--alert">
+        <span class="ew-diag-node__icon">❓</span>
+        <span class="ew-diag-node__title">Eskalasi Buta</span>
+        <span class="ew-diag-node__desc">L1 bingung tujuan</span>
+      </div>
+      <span class="ew-diag-arrow ew-diag-arrow--bad">→</span>
+      <div class="ew-diag-node">
+        <span class="ew-diag-node__icon">😫</span>
+        <span class="ew-diag-node__title">Respon Terhambat</span>
+        <span class="ew-diag-node__desc">Koordinasi lambat</span>
+      </div>
+    </div>
+    <div class="ew-diag-takeaway ew-diag-takeaway--bad">
+      <span>⚠️ Dampak: Notifikasi yang membingungkan memperlambat respons dan mengaburkan prioritas penanganan insiden.</span>
+    </div>
+  </div>
 
-{{< mermaid >}}
-flowchart TD
-    %% ── Color Palette Definitions ──
-    classDef runtime fill:#1e3a8a,stroke:#3b82f6,stroke-width:1.5px,color:#ffffff;
-    classDef telemetry fill:#064e3b,stroke:#10b981,stroke-width:1.5px,color:#ffffff;
-    classDef authority fill:#4c1d95,stroke:#8b5cf6,stroke-width:1.5px,color:#ffffff;
-    classDef cli fill:#0f172a,stroke:#38bdf8,stroke-width:2px,color:#38bdf8;
-    classDef external fill:#7c2d12,stroke:#f97316,stroke-width:1.5px,color:#ffffff;
-    classDef storage fill:#1e293b,stroke:#64748b,stroke-width:1.5px,color:#e2e8f0;
+  <div class="ew-diag-track ew-diag-track--good">
+    <div class="ew-diag-badge ew-diag-badge--good">🟢 Dengan tmctl (Dual-Tier Smart Alerting)</div>
+    <div class="ew-diag-flow">
+      <div class="ew-diag-node">
+        <span class="ew-diag-node__icon">🎯</span>
+        <span class="ew-diag-node__title">Filter Cerdas</span>
+        <span class="ew-diag-node__desc">Deteksi anomali nyata</span>
+      </div>
+      <span class="ew-diag-arrow ew-diag-arrow--good">→</span>
+      <div class="ew-diag-node ew-diag-node--success">
+        <span class="ew-diag-node__icon">📨</span>
+        <span class="ew-diag-node__title">L1/L2 Alert</span>
+        <span class="ew-diag-node__desc">Status &amp; dampak layanan</span>
+      </div>
+      <span class="ew-diag-arrow ew-diag-arrow--good">＋</span>
+      <div class="ew-diag-node ew-diag-node--success">
+        <span class="ew-diag-node__icon">🔬</span>
+        <span class="ew-diag-node__title">L3 Deep Report</span>
+        <span class="ew-diag-node__desc">Stack trace &amp; triase</span>
+      </div>
+      <span class="ew-diag-arrow ew-diag-arrow--good">→</span>
+      <div class="ew-diag-node ew-diag-node--success">
+        <span class="ew-diag-node__icon">🚀</span>
+        <span class="ew-diag-node__title">Aksi Cepat</span>
+        <span class="ew-diag-node__desc">Eskalasi tepat sasaran</span>
+      </div>
+    </div>
+    <div class="ew-diag-takeaway ew-diag-takeaway--good">
+      <span>✓ Manfaat: Setiap level tim menerima informasi proporsional sehingga mitigasi insiden berlangsung cepat dan terarah.</span>
+    </div>
+  </div>
+</div>
+</div>
+<div class="ew-modal-footer">
+<button type="button" class="ew-btn ew-btn--ghost" data-close-modal>Tutup</button>
+</div>
+</div>
+</div>
 
-    subgraph Host["Host Server (Linux / Windows Server)"]
-        subgraph TomcatRuntime["Apache Tomcat Runtime"]
-            TC["Tomcat Catalina Container"]:::runtime
-            JMX["Prometheus JMX Exporter<br/>(Java Agent :9404 TLS)"]:::runtime
-            LOGS["Application Logs<br/>(catalina.out / crash dumps)"]:::storage
-        end
+<!-- Modal 4: Remediasi Aman -->
+<div id="modal-remediation" class="ew-modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="title-remediation">
+<div class="ew-modal-window">
+<button type="button" class="ew-modal-close-btn" aria-label="Tutup" data-close-modal>&times;</button>
+<div class="ew-modal-header">
+<span class="ew-modal-tag">Remediasi Aman</span>
+<h3 id="title-remediation" class="ew-modal-title">Isolasi Traffic &amp; Pengamanan Bukti Forensik</h3>
+</div>
+<div class="ew-modal-body">
+<div class="ew-diag-wrap">
+  <div class="ew-diag-track ew-diag-track--bad">
+    <div class="ew-diag-badge ew-diag-badge--bad">🔴 Tanpa tmctl (Blind Restart / Hilang Bukti)</div>
+    <div class="ew-diag-flow">
+      <div class="ew-diag-node">
+        <span class="ew-diag-node__icon">⛔</span>
+        <span class="ew-diag-node__title">Tomcat Macet</span>
+        <span class="ew-diag-node__desc">Request gagal masuk</span>
+      </div>
+      <span class="ew-diag-arrow ew-diag-arrow--bad">→</span>
+      <div class="ew-diag-node ew-diag-node--alert">
+        <span class="ew-diag-node__icon">🔄</span>
+        <span class="ew-diag-node__title">Blind Restart</span>
+        <span class="ew-diag-node__desc">Restart paksa mendadak</span>
+      </div>
+      <span class="ew-diag-arrow ew-diag-arrow--bad">→</span>
+      <div class="ew-diag-node ew-diag-node--alert">
+        <span class="ew-diag-node__icon">💨</span>
+        <span class="ew-diag-node__title">Bukti Menguap</span>
+        <span class="ew-diag-node__desc">Dump memori hilang</span>
+      </div>
+      <span class="ew-diag-arrow ew-diag-arrow--bad">→</span>
+      <div class="ew-diag-node">
+        <span class="ew-diag-node__icon">💥</span>
+        <span class="ew-diag-node__title">Insiden Berulang</span>
+        <span class="ew-diag-node__desc">Akar masalah tak tuntas</span>
+      </div>
+    </div>
+    <div class="ew-diag-takeaway ew-diag-takeaway--bad">
+      <span>⚠️ Dampak: Masalah performa terus berulang di kemudian hari karena bukti analisis hilang saat restart darurat.</span>
+    </div>
+  </div>
 
-        subgraph IngestionStream["Event & Metric Ingestion"]
-            AGENT["📦 tm-agent<br/>(Go Socket Event Daemon)"]:::telemetry
-            PROM["Prometheus Server<br/>(Scrape JMX & OS Metrics)"]:::telemetry
-            AM["Alertmanager<br/>(Webhook Dispatcher)"]:::telemetry
-        end
+  <div class="ew-diag-track ew-diag-track--good">
+    <div class="ew-diag-badge ew-diag-badge--good">🟢 Dengan tmctl (Safe Drain &amp; Forensic Capture)</div>
+    <div class="ew-diag-flow">
+      <div class="ew-diag-node">
+        <span class="ew-diag-node__icon">🛡️</span>
+        <span class="ew-diag-node__title">Traffic Drain</span>
+        <span class="ew-diag-node__desc">Isolasi node aman</span>
+      </div>
+      <span class="ew-diag-arrow ew-diag-arrow--good">→</span>
+      <div class="ew-diag-node ew-diag-node--success">
+        <span class="ew-diag-node__icon">💾</span>
+        <span class="ew-diag-node__title">Forensic Snap</span>
+        <span class="ew-diag-node__desc">Dump heap &amp; threads</span>
+      </div>
+      <span class="ew-diag-arrow ew-diag-arrow--good">→</span>
+      <div class="ew-diag-node ew-diag-node--success">
+        <span class="ew-diag-node__icon">🔄</span>
+        <span class="ew-diag-node__title">Clean Restart</span>
+        <span class="ew-diag-node__desc">Layanan pulih lancar</span>
+      </div>
+      <span class="ew-diag-arrow ew-diag-arrow--good">→</span>
+      <div class="ew-diag-node ew-diag-node--success">
+        <span class="ew-diag-node__icon">🔍</span>
+        <span class="ew-diag-node__title">RCA Akurat</span>
+        <span class="ew-diag-node__desc">Perbaikan permanen</span>
+      </div>
+    </div>
+    <div class="ew-diag-takeaway ew-diag-takeaway--good">
+      <span>✓ Manfaat: Layanan kembali normal dengan cepat sementara tim pengembang memiliki data lengkap untuk perbaikan menyeluruh.</span>
+    </div>
+  </div>
+</div>
+</div>
+<div class="ew-modal-footer">
+<button type="button" class="ew-btn ew-btn--ghost" data-close-modal>Tutup</button>
+</div>
+</div>
+</div>
 
-        subgraph CoreEngine["Diagnostic Authority & Orchestration"]
-            DS["🚀 Tomcat Diagnostic Service<br/>(Node.js 24 LTS / Rulepack Engine)"]:::authority
-            SQLITE[("Embedded SQLite<br/>Incident Ledger")]:::storage
-            TMCTL["🛠️ tmctl CLI<br/>(Go Socket Operator Tool)"]:::cli
-        end
-    end
+<script>
+(function () {
+  function openModal(id) {
+    var modal = document.getElementById(id);
+    if (!modal) return;
+    modal.classList.add('is-active');
+    document.body.style.overflow = 'hidden';
+    var closeBtn = modal.querySelector('.ew-modal-close-btn');
+    if (closeBtn) closeBtn.focus();
+  }
 
-    subgraph External["External Notification & On-Call"]
-        SMTP["Mail Server (Postfix / SMTP)"]:::external
-        ONCALL["👨‍💻 SRE / DevOps On-Call Team<br/>(Human-in-the-Loop)"]:::external
-    end
+  function closeModal(modal) {
+    if (!modal) return;
+    modal.classList.remove('is-active');
+    if (!document.querySelector('.ew-modal-backdrop.is-active')) {
+      document.body.style.overflow = '';
+    }
+  }
 
-    TC -- "Container Socket Stream" --> AGENT
-    AGENT -- "Atomic Spool (.json)" --> DS
-    JMX -- "Scrape :9404 (HTTPS)" --> PROM
-    PROM -- "Alert Threshold Firing" --> AM
-    AM -- "Webhook Ingestion" --> DS
-    LOGS -- "Forensic Evidence Read" --> DS
+  document.querySelectorAll('[data-modal]').forEach(function (btn) {
+    function handleTrigger(e) {
+      if (e.type === 'click' || e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        var targetId = btn.getAttribute('data-modal');
+        openModal(targetId);
+      }
+    }
+    btn.addEventListener('click', handleTrigger);
+    btn.addEventListener('keydown', handleTrigger);
+  });
 
-    DS -- "Evaluate Rulepacks & Correlate" --> SQLITE
-    DS -- "Dispatch 7-Section Report" --> SMTP
-    SMTP --> ONCALL
+  document.querySelectorAll('.ew-modal-backdrop').forEach(function (modal) {
+    modal.addEventListener('click', function (e) {
+      if (e.target === modal || e.target.closest('[data-close-modal]')) {
+        closeModal(modal);
+      }
+    });
+  });
 
-    ONCALL -- "Verified Remediation via" --> TMCTL
-    TMCTL -- "Direct Socket Orchestration" --> TC
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape') {
+      var activeModal = document.querySelector('.ew-modal-backdrop.is-active');
+      if (activeModal) closeModal(activeModal);
+    }
+  });
+})();
+</script>
 
-    %% Subgraph Styling
-    style Host fill:#070d1e,stroke:#1e3a8a,stroke-width:1.5px,stroke-dasharray: 4 4,color:#93c5fd
-    style TomcatRuntime fill:#0b1329,stroke:#1e293b,stroke-width:1px,color:#cbd5e1
-    style IngestionStream fill:#0b1329,stroke:#1e293b,stroke-width:1px,color:#cbd5e1
-    style CoreEngine fill:#0b1329,stroke:#1e293b,stroke-width:1px,color:#cbd5e1
-    style External fill:#0b1329,stroke:#1e293b,stroke-width:1px,color:#cbd5e1
-{{< /mermaid >}}
+<div class="ew-section">
+<div class="ew-section__head"><h2 class="ew-h2">Alur Penggunaan CLI</h2><p class="ew-lead">Perintah ringkas yang dirancang untuk kecepatan respons insiden teknis di level host.</p></div>
+<p class="ew-code-label">1. Pemeriksaan Status &amp; Metrik JVM Real-Time</p>
+<pre class="ew-code">tmctl status --target tomcat-prod-01 --metrics jvm,threads,gc</pre>
+<p class="ew-code-label">2. Diagnostik Otonom &amp; Ekspor Laporan Triase Insiden</p>
+<pre class="ew-code">tmctl triage --container tomcat-prod-01 --export-report</pre>
+<p class="ew-code-label">3. Isolasi Traffic Masuk &amp; Pengambilan Bukti Forensik</p>
+<pre class="ew-code">tmctl isolate --container tomcat-prod-01 --drain-traffic --capture-dump</pre>
+</div>
 
----
+<div class="ew-section">
+<div class="ew-section__head"><h2 class="ew-h2">Skenario Implementasi</h2></div>
+<div class="ew-grid-2">
+<div class="ew-panel"><h3 class="ew-panel__title">Investigasi Penurunan Performa Tanpa Error Log</h3><p class="ew-panel__text">Saat aplikasi mengalami lonjakan latensi tanpa pesan error jelas, tmctl membantu tim on-call memastikan apakah penyebabnya saturasi thread pool atau pause time GC yang tinggi sebelum mengambil tindakan mitigasi.</p></div>
+<div class="ew-panel"><h3 class="ew-panel__title">Post-Mortem &amp; Analisis Akar Masalah (RCA)</h3><p class="ew-panel__text">Menghilangkan kebiasaan restart buta yang memusnahkan bukti forensik. Dump memori dan histori metrik diamankan secara otomatis untuk analisis pasca-insiden oleh tim engineering.</p></div>
+</div>
+</div>
 
-## 🛡️ Invarian & Prinsip Desain Utama
+<div class="ew-section">
+<div class="ew-section__head"><h2 class="ew-h2">Arsitektur Diagnostik</h2></div>
+<div class="ew-steps">
+<div class="ew-step"><p class="ew-step__title">Eksekusi Mandiri</p><p class="ew-step__text">Dijalankan langsung di server host tanpa memerlukan runtime Java tambahan di tingkat sistem operasi.</p></div>
+<div class="ew-step"><p class="ew-step__title">Koneksi IPC Langsung</p><p class="ew-step__text">Membaca status runtime kontainer dan telemetri JVM melalui soket lokal (Unix Socket / Windows Named Pipe).</p></div>
+<div class="ew-step"><p class="ew-step__title">Laporan &amp; Bukti Terisolasi</p><p class="ew-step__text">Laporan triase instan dan berkas snapshot dump disimpan di lokasi terisolasi untuk evaluasi tim engineering.</p></div>
+</div>
+</div>
 
-Arsitektur platform ini dikunci oleh seperangkat keputusan arsitektur resmi (*Architectural Decision Records / ADR*):
-
-| Invarian Arsitektur | Landasan ADR | Deskripsi Teknis |
-| :--- | :--- | :--- |
-| **Zero Destructive Auto-Remediation** | [`TM-ADR-0014`](https://edkas07-oss.github.io/devops-handbook/adr/tomcat-monitoring/adr-records/TM-ADR-0014/) | Sistem diagnosa beroperasi secara *read-only*. Dilarang mengeksekusi restart container otomatis secara buta untuk menjaga integritas artefak forensik (*heap dumps*, *hs_err_pid.log*). |
-| **Canonical Incident Notification Authority** | [`TM-ADR-0016`](https://edkas07-oss.github.io/devops-handbook/adr/tomcat-monitoring/adr-records/TM-ADR-0016/) | Seluruh alert eksternal di-routing eksklusif melalui Diagnostic Service untuk menghasilkan laporan insiden kanonikal 7-seksi yang seragam dan actionable. |
-| **Direct Socket API Portability** | [`TM-ADR-0027`](https://edkas07-oss.github.io/devops-handbook/adr/tomcat-monitoring/adr-records/TM-ADR-0027/) | Mengeliminasi ketergantungan pada subshell Bash atau binary CLI mentah. Tooling berinteraksi langsung dengan Unix Socket Podman atau Windows Named Pipes. |
-| **Two-Tier Storage Architecture** | [`TM-ADR-0030`](https://edkas07-oss.github.io/devops-handbook/adr/tomcat-monitoring/adr-records/TM-ADR-0030/) | Standarisasi direktori kerja `tm_home` dengan pemisahan izin ketat antara *ephemeral spool evidence* (`0700`) dan *immutable configuration/rulepacks* (`0400`). |
-
----
-
-## 📦 Tiga Modul Kunci Platform
-
-Platform ini ditopang oleh 3 pilar perangkat lunak mandiri yang saling berkolaborasi:
-
-### 1. [tmctl — Unified Cross-Platform Operator CLI]({{< ref "projects/tomcat-monitoring/tmctl" >}})
-* **Bahasa & Arsitektur:** Go 1.23+ (Single Static Binary, Zero Dependency).
-* **Fokus Rekayasa:** Pengganti skrip imperatif shell. Mengorkestrasi container lifecycle, validasi kepatuhan platform (*compliance checks*), sinkronisasi aturan diagnosa (*rulepacks*), dan mekanisme *stateful rollback* saat health probe gagal.
-* **Keunggulan:** Komunikasi socket native (Podman Unix Socket & Windows Named Pipe `\\.\pipe\docker_engine`), response JSON terstruktur tanpa text scraping (`grep`/`awk`).
-* [👉 Pelajari Arsitektur & Perintah `tmctl` →]({{< ref "projects/tomcat-monitoring/tmctl" >}})
-
-### 2. [tm-agent — High-Throughput Event Collector Daemon]({{< ref "projects/tomcat-monitoring/tm-agent" >}})
-* **Bahasa & Arsitektur:** Go 1.23+ (Lightweight Background Daemon).
-* **Fokus Rekayasa:** Mengonsumsi event stream lifecycle container secara real-time langsung dari engine socket.
-* **Keunggulan:** Deteksi instan (<10ms) untuk kejadian *OOM-Killed*, exit code 137, dan kematian proses mendadak. Menggunakan teknik *atomic file write* (`.tmp` $\rightarrow$ `.json` rename) pada direktori spool berizin `0700` untuk mencegah *race condition* saat dibaca oleh Diagnostic Service.
-* [👉 Pelajari Pipeline Event `tm-agent` →]({{< ref "projects/tomcat-monitoring/tm-agent" >}})
-
-### 3. [Tomcat Diagnostic Service — Autonomous Decision Authority]({{< ref "projects/tomcat-monitoring/diagnostic-service" >}})
-* **Bahasa & Arsitektur:** Node.js 24 LTS (Deterministic Multi-Domain Rulepack Engine).
-* **Fokus Rekayasa:** Otak analisis insiden. Menerima webhook Alertmanager, mengorelasikan telemetri metrik Prometheus dengan log Tomcat dan event spool `tm-agent`.
-* **Keunggulan:** Mengklasifikasikan insiden ke dalam **8 Failure Domain Taxonomy**, mencatat histori insiden ke SQLite lokal, dan mendistribusikan laporan insiden kanonikal 7-seksi dengan rekomendasi SOP SRE via email SMTP.
-* [👉 Pelajari Mesin Diagnosa & Taksonomi Insiden →]({{< ref "projects/tomcat-monitoring/diagnostic-service" >}})
-
----
-
-## 📚 Studi Kasus & Jurnal Rekayasa Terkait
-
-Untuk pemahaman mendalam mengenai tantangan operasional dan implementasi teknis di balik platform ini, simak publikasi jurnal rekayasa berikut:
-
-* [Mengapa Auto-Restart di Production Berbahaya: Menerapkan Kebijakan Zero Destructive Auto-Remediation]({{< ref "articles/mengapa-auto-restart-di-production-berbahaya" >}})
-* [Deep-Dive Observability Apache Tomcat: Mengamankan JMX Exporter dengan TLS & Keystore]({{< ref "articles/deep-dive-observability-apache-tomcat-jmx-exporter-tls" >}})
-* [Mendeteksi Concurrency Saturation dan GC Thrashing pada Workload Enterprise]({{< ref "articles/mendeteksi-concurrency-saturation-dan-gc-thrashing" >}})
+<div class="ew-section">
+<div class="ew-section__head"><h2 class="ew-h2">Dukungan Platform</h2></div>
+<div class="ew-platform-strip"><span class="ew-fs-badge ew-fs--blue">Windows Server (Docker Engine)</span><span class="ew-fs-badge ew-fs--blue">Enterprise Linux (Podman / Docker)</span><span class="ew-fs-badge ew-fs--slate">Tanpa Dependensi Runtime</span></div>
+<p class="ew-lead" style="margin-top:1rem;">Dirancang khusus untuk sistem rekayasa observabilitas multi-OS yang mengedepankan isolasi non-destruktif dan penegakan keandalan performa JVM jangka panjang.</p>
+</div>

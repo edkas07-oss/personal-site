@@ -140,8 +140,6 @@
           <em>Belum ada jurnal yang terdaftar di sini.</em>
         {{ else if eq .Section "how-to" }}
           <em>Belum ada panduan yang terdaftar di sini.</em>
-        {{ else if eq .Section "packages" }}
-          <em>Belum ada paket yang terdaftar di sini.</em>
         {{ else }}
           <em>{{ i18n "list.no_articles" | default "Belum ada konten yang terdaftar di sini." | emojify }}</em>
         {{ end }}

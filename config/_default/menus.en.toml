@@ -8,19 +8,13 @@
   name = "Projects"
   pageRef = "projects"
   url = "/projects/"
-  weight = 12
+  weight = 15
 
 [[main]]
   name = "How-To"
   pageRef = "how-to"
   url = "/how-to/"
-  weight = 15
-
-[[main]]
-  name = "Download"
-  pageRef = "packages"
-  url = "/packages/"
-  weight = 18
+  weight = 20
 
 [[main]]
   name = "Contact"
@@ -44,19 +38,13 @@
   name = "Projects"
   pageRef = "projects"
   url = "/projects/"
-  weight = 12
+  weight = 15
 
 [[footer]]
   name = "How-To"
   pageRef = "how-to"
   url = "/how-to/"
-  weight = 15
-
-[[footer]]
-  name = "Download"
-  pageRef = "packages"
-  url = "/packages/"
-  weight = 18
+  weight = 20
 
 [[footer]]
   name = "Contact"

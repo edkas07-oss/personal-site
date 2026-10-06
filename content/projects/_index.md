@@ -1,5 +1,5 @@
 +++
 title = "Engineering Projects & Platforms"
-description = "Kumpulan project yang saya buat berdasarkan kebutuhan nyata di skala enterprise — mencakup platform buatan sendiri, modul atau komponen unik, sampai project-project lainnya."
+description = "Koleksi studi kasus dan sistem rekayasa yang saya bangun untuk menjawab tantangan tata kelola, observabilitas mendalam, dan otomasi infrastruktur skala enterprise."
 cascade = { showDate = false, showAuthor = false }
 +++

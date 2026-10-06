@@ -408,24 +408,21 @@ rules:
 Set-Content -Path "C:\tomcats\tomcat-lab\conf\jmx-config.yaml" -Value $customJmx -Encoding ASCII
 ```
 
-#### 3. Terapkan Konfigurasi Baru (Cukup Restart atau Rollout)
-Karena direktori host `conf/` terhubung ke kontainer melalui bind mount (`conf:ro`), kontainer cukup di-restart atau di-rollout tanpa perlu membuang image atau melakukan build ulang:
+#### 3. Terapkan Konfigurasi Baru (Cukup Restart)
+Karena direktori host `conf/` terhubung ke kontainer melalui bind mount (`conf:ro`), kontainer cukup di-restart tanpa perlu membuang image atau melakukan build ulang:
 
-- **Jika Menggunakan Operator `tcctl`:**
-  ```powershell
-  # Opsi A: Restart cepat
-  docker restart tomcat-lab
+```powershell
+docker restart tomcat-lab
+```
 
-  # Opsi B: Zero-Downtime Rollout (Rekomendasi Staging/Production)
-  tcctl deploy rollout --name tomcat-lab --port 8080 --staging-port 9080 --jmx --base-dir C:/tomcats
-  ```
-- **Jika Menggunakan Docker CLI Standar:**
-  ```powershell
-  docker run -d --name tomcat-lab `
-    -p 8080:8080 -p 9404:9404 `
-    -v "C:\tomcats\tomcat-lab\conf:C:\usr\local\tomcat\conf:ro" `
-    tomcat:9.0-jdk17
-  ```
+Atau saat menjalankan kontainer baru:
+
+```powershell
+docker run -d --name tomcat-lab `
+  -p 8080:8080 -p 9404:9404 `
+  -v "C:\tomcats\tomcat-lab\conf:C:\usr\local\tomcat\conf:ro" `
+  tomcat:9.0-jdk17
+```
 
 Saat Tomcat melakukan *bootstrap*, skrip `setenv.bat` otomatis mendeteksi:
 ```cmd
@@ -482,21 +479,14 @@ Dalam ekosistem Windows Containers, terdapat dua aturan penting terkait bind mou
 
 **Solusi Zero-Rebuild saat Ingin Menambah Metrik Baru:**
 - **Kasus A (Auto-Discovery MBean Baru):** Image ini telah dilengkapi aturan wildcard `pattern: '.*'`. Jika aplikasi menambahkan *connection pool* baru (misal HikariCP, DBCP), metrik Spring Boot, atau custom Java MXBean, metrik tersebut **otomatis terdeteksi dan muncul di port 9404** tanpa perlu ubah konfigurasi apa pun.
-- **Kasus B (Kustomisasi Format / Filter Aturan Khusus):** Anda **tidak perlu me-rebuild image**. Berkat arsitektur *Hierarchy Fallback*, cukup letakkan berkas kustom Anda di dalam direktori host `conf\` (misal `C:\tomcats\<instance>\conf\jmx-config.yaml` yang di-mount secara aman via `conf:ro`). Skrip `setenv.bat` akan otomatis memprioritaskan berkas tersebut dibandingkan konfigurasi bawaan image (panduan langkah-demi-langkah tersedia pada **[Langkah 6: Praktik Kustomisasi & Menambah Metrik JMX Baru](#langkah-6-praktik-kustomisasi--menambah-metrik-jmx-baru-tanpa-rebuild-citra-zero-rebuild-override)**).
-
-### 6. Sinergi dengan Operator tcctl & Mekanisme setenv.bat di Host (TC-ADR-0010)
-Jika Anda menggunakan operator CLI enterprise [**`tcctl`**]({{< relref "how-to/deploy-tomcat-container-windows-server-tcctl" >}}):
-- **Otomasi JMX Port & Probing:** Cukup jalankan perintah `tcctl deploy run --jmx`, maka port 9404 otomatis dipublikasikan dan diverifikasi oleh health-probe bawaan `tcctl`.
-- **Mengapa Host `bin/` Di-mount ke `bin/custom:ro`?** `tcctl` me-mount folder `bin` host ke `C:\usr\local\tomcat\bin\custom:ro` (bukan ke `bin/`) agar biner inti Tomcat di dalam image (`catalina.bat`, `bootstrap.jar`, `setenv.bat`) tidak tertimpa (*directory shadowing*).
-- **Injeksi Dinamis `CATALINA_OPTS`:** `tcctl` membaca parameter memori JVM dari `setenv.bat` di host dan menyuntikkannya ke container via flag `-e CATALINA_OPTS="..."`. Skrip `setenv.bat` internal di dalam image NanoServer kemudian menggabungkan (*append*) opsi memori tersebut dengan argumen Java Agent JMX secara harmonis.
+- **Kasus B (Kustomisasi Format / Filter Aturan Khusus):** Anda **tidak perlu me-rebuild image**. Berkat arsitektur *Hierarchy Fallback*, cukup letakkan berkas kustom Anda di dalam direktori host `conf\` (misal `C:\tomcats\<instance>\conf\jmx-config.yaml` yang di-mount secara aman via `conf:ro`). Skrip `setenv.bat` akan otomatis memprioritaskan berkas tersebut dibandingkan konfigurasi bawaan image.
 
 ---
 
 ## 📚 Referensi Terkait
 
-- [Panduan Praktis: Implementasi Pure Pull-Based GitOps dan Otomasi CI Promotion Apache Tomcat di Windows Server]({{< relref "how-to/implement-pure-pull-based-gitops-and-ci-promotion-tomcat" >}})
-- [Panduan Praktis: Deploy Kontainer Apache Tomcat di Windows Server Menggunakan tcctl]({{< relref "how-to/deploy-tomcat-container-windows-server-tcctl" >}})
 - [Panduan Praktis: Instalasi Docker Engine Community Edition (CE) v27+ di Windows Server]({{< relref "how-to/install-docker-engine-windows-containers" >}})
+- [Panduan Praktis: Build Monitoring Stack di Windows NanoServer]({{< relref "how-to/build-monitoring-stack-windows-nanoserver-images" >}})
 - [Microsoft Windows Container Base Images Documentation](https://learn.microsoft.com/en-us/virtualization/windows-containers/manage-images/container-base-images)
 - [Eclipse Temurin Official Container Images (Docker Hub)](https://hub.docker.com/_/eclipse-temurin)
 - [Prometheus JMX Exporter Official Repository](https://github.com/prometheus/jmx_exporter)

@@ -1,197 +1,91 @@
 {{ define "main" }}
-<div class="ew-projects-container max-w-full">
-
-  {{/* ── Header ──────────────────────────────────────────────────────── */}}
-  <header class="mb-8 mt-4">
+<div class="ew-page">
+  <div class="ew-pagehero">
     {{ if .Params.showBreadcrumbs | default (site.Params.list.showBreadcrumbs | default true) }}
       {{ partial "breadcrumbs.html" . }}
     {{ end }}
-    <div class="mt-4">
-      <p class="ew-hero__eyebrow">Engineering Showcase</p>
-      <h1 class="text-4xl font-extrabold tracking-tight text-neutral-900 dark:text-white sm:text-5xl">
-        {{ .Title | default "Projects & Engineering Tools" }}
-      </h1>
-      <p class="mt-3 w-full max-w-none text-lg text-neutral-600 dark:text-neutral-300">
-        {{ .Description | default "Koleksi perangkat lunak dan kakas operasional mandiri berbasis Go yang dibangun untuk standarisasi, keandalan, dan otomasi platform di lingkungan enterprise." }}
-      </p>
-    </div>
-  </header>
+    <p class="ew-hero__eyebrow" style="margin-top: 1rem;">Proyek &amp; Sistem</p>
+    <h1 class="ew-pagehero__title">
+      {{ .Title | default "Dua Solusi Terpadu, Satu Standar Keandalan Tomcat Enterprise" }}
+    </h1>
+    <p class="ew-lead">
+      {{ .Description | default "Memadukan otomasi rilis zero-downtime dan kepatuhan keamanan dengan observabilitas runtime JVM yang mendalam. Keduanya dapat digunakan secara mandiri maupun bersamaan sebagai biner Go ringan tanpa beban daemon tambahan—siap beroperasi di Windows Server dan Linux." }}
+    </p>
+  </div>
 
-  {{/* ── Platform Showcase 1: tcctl ─────────────────────────────────── */}}
-  <div class="ew-project-showcase mb-14 sm:mb-16">
-    <div class="ew-project-showcase__header">
-      <div class="flex flex-wrap items-center gap-2.5 mb-2.5">
-        <span class="ew-tag ew-tag--cat">⚡ Operator CLI</span>
-        <span class="ew-fs-badge ew-fs--blue">Platform Engineering</span>
-        <span class="ew-fs-badge ew-fs--purple">Multi-OS (Windows &amp; Linux)</span>
+  {{/* ── DUA KARTU PROYEK (PERSIS SEPERTI CARD PRODUCT DI COMMERCIAL-SITE) ── */}}
+  <div class="ew-grid-2" style="margin-top: 2.5rem; margin-bottom: 3.5rem;">
+    {{/* tcctl card */}}
+    <article class="ew-panel">
+      <div class="ew-panel__top">
+        <span class="ew-tag ew-tag--cat">tcctl</span>
+        <span class="ew-fs-badge ew-fs--blue">Otomasi Rilis &amp; Keamanan</span>
       </div>
-      <h2 class="text-2xl sm:text-3xl font-bold text-white tracking-tight mb-1">
-        <a href="{{ "/packages/#tcctl" | relLangURL }}" class="hover:text-blue-400 transition-colors">
-          Apache Tomcat Enterprise Operator (tcctl)
-        </a>
-      </h2>
-      <p class="text-blue-300 text-xs sm:text-sm font-medium mb-3 font-mono">
-        Automated Rolling Updates, CIS Hardening &amp; GitOps Immutability
-      </p>
-      <p class="text-slate-300 text-sm leading-relaxed w-full max-w-none mb-6">
-        Kakas CLI mandiri berbasis bahasa Go untuk standarisasi tata kelola, validasi kepatuhan CIS Benchmark, mitigasi drift konfigurasi, dan proses rolling update minim downtime pada kontainer Apache Tomcat di Windows Server dan Linux.
-      </p>
-    </div>
-
-    {{/* ── 3 Core Capabilities ────────────────────────────────────────── */}}
-    <div class="ew-module-grid">
+      <h2 class="ew-panel__title">Apache Tomcat Enterprise Deployment CLI</h2>
+      <p class="ew-panel__text">CLI mandiri untuk otomasi deployment Tomcat modern. Memastikan proses rilis aplikasi berjalan mulus tanpa downtime, konfigurasi terkunci aman dari perubahan manual, dan siap diaudit kapan saja.</p>
       
-      {{/* Capability 1 */}}
-      <div class="ew-module-card">
-        <div class="ew-feat-module-card__header">
-          <span class="text-xl">🚀</span>
-          <span class="ew-feat-module-card__tag text-blue-400">HIGH AVAILABILITY</span>
-        </div>
-        <h3 class="ew-feat-module-card__title">
-          Rolling Update &amp; Staging
-        </h3>
-        <p class="ew-feat-module-card__body">
-          Pergantian versi runtime bertahap dengan health check terverifikasi (:9080 &rarr; :8080) dan mekanisme safe rollback jika rilis gagal.
-        </p>
-      </div>
+      <ul class="ew-checklist">
+        <li><strong>Zero Downtime Multi-Deploy Strategy:</strong> Rilis update aplikasi tanpa downtime melalui strategi staging dan rolling update, dilengkapi proteksi <em>instant rollback</em> otomatis jika update bermasalah.</li>
+        <li><strong>Dukungan Modern GitOps &amp; CI/CD:</strong> Terintegrasi mulus dengan pipeline CI/CD modern dan repository Git—mengunci konfigurasi agar selalu sinkron dan bebas deviasi liar (<em>zero drift</em>).</li>
+        <li><strong>Keamanan &amp; Kepatuhan Standar Enterprise:</strong> Memastikan kontainer selalu patuh standar keamanan CIS Benchmark, penegakan non-root, dan pemindaian kerentanan CVE via Trivy.</li>
+        <li><strong>Dynamic JVM Tuning &amp; Multi-OS Parity:</strong> Penyetelan alokasi memori heap dan parameter GC secara dinamis tanpa restart manual, dengan kompatibilitas penuh di Windows Server dan Linux.</li>
+      </ul>
 
-      {{/* Capability 2 */}}
-      <div class="ew-module-card">
-        <div class="ew-feat-module-card__header">
-          <span class="text-xl">🛡️</span>
-          <span class="ew-feat-module-card__tag text-emerald-400">CIS &amp; AUDIT READY</span>
-        </div>
-        <h3 class="ew-feat-module-card__title">
-          Hardening &amp; Audit
-        </h3>
-        <p class="ew-feat-module-card__body">
-          Validasi otomatis konfigurasi Tomcat sesuai standar CIS Benchmark dan penegakan hak akses non-root (ContainerUser).
-        </p>
+      <div class="ew-panel__foot">
+        <a href="{{ "/projects/tcctl/" | relLangURL }}" class="ew-btn ew-btn--primary">Pelajari tcctl →</a>
       </div>
+    </article>
 
-      {{/* Capability 3 */}}
-      <div class="ew-module-card">
-        <div class="ew-feat-module-card__header">
-          <span class="text-xl">🔄</span>
-          <span class="ew-feat-module-card__tag text-purple-400">ZERO-DRIFT</span>
-        </div>
-        <h3 class="ew-feat-module-card__title">
-          Proteksi Konfigurasi
-        </h3>
-        <p class="ew-feat-module-card__body">
-          Mencegah perubahan konfigurasi manual tidak terlacak di server live melalui proteksi bind-mount read-only (conf:ro).
-        </p>
+    {{/* tmctl card */}}
+    <article class="ew-panel">
+      <div class="ew-panel__top">
+        <span class="ew-tag ew-tag--cat">tmctl</span>
+        <span class="ew-fs-badge ew-fs--green">Observabilitas &amp; Diagnostik Insiden</span>
       </div>
+      <h2 class="ew-panel__title">Tomcat Monitoring &amp; Diagnostic CLI</h2>
+      <p class="ew-panel__text">CLI observabilitas dan investigasi mendalam untuk runtime JVM Tomcat. Memberikan visibilitas performa menyeluruh tanpa membebani aplikasi, mendeteksi masalah secara otomatis, dan mempercepat pemulihan insiden.</p>
+      
+      <ul class="ew-checklist">
+        <li><strong>Self-Instrumented (Zero Agent Overhead):</strong> Observabilitas runtime instan tanpa instalasi Java agent atau daemon pihak ketiga—bebas risiko beban memori tambahan pada aplikasi.</li>
+        <li><strong>Autonomous Diagnostic &amp; Evidence Collection:</strong> Otomatisasi proses diagnosa anomali kritis (<em>GC thrashing</em>, <em>thread deadlock</em>, saturasi OOM)—tim IT mendapatkan data bukti (<em>evidence</em>) dan laporan triase instan tanpa perlu login manual ke dalam server.</li>
+        <li><strong>Dual-Alert Email Strategy (Monitoring vs SRE):</strong> Notifikasi email cerdas bertingkat—ringkasan cepat untuk tim monitoring L1/L2 dan laporan teknis mendalam beserta rekomendasi triase untuk tim SRE.</li>
+        <li><strong>Remediasi Non-Destruktif &amp; Forensic Dump:</strong> Isolasi traffic kontainer bermasalah dan ambil <em>forensic dump</em> (heap/thread) otomatis untuk investigasi tanpa <em>blind restart</em> yang menghilangkan bukti.</li>
+      </ul>
 
+      <div class="ew-panel__foot">
+        <a href="{{ "/projects/tomcat-monitoring/" | relLangURL }}" class="ew-btn ew-btn--primary">Pelajari tmctl →</a>
+      </div>
+    </article>
+  </div>
+
+  {{/* ── FAKTA TEKNIS ── */}}
+  <div class="ew-section" style="padding-top: 0; margin-bottom: 3.5rem;">
+    <div class="ew-section__head">
+      <p class="ew-hero__eyebrow">Fakta Teknis</p>
+      <h2 class="ew-h2">Ringan dipasang, jelas batas kerjanya</h2>
     </div>
-
-    {{/* ── Action Buttons ────────────────────────────────────────────── */}}
-    <div class="mt-6 pt-5 border-t border-blue-900/60 flex flex-wrap items-center justify-between gap-4">
-      <div class="flex flex-wrap gap-3">
-        <a href="{{ "/packages/#tcctl" | relLangURL }}" class="ew-btn ew-btn--primary text-xs sm:text-sm py-2 px-4">
-          📦 Unduh Biner di Packages →
-        </a>
-        <a href="{{ "/how-to/deploy-tomcat-container-windows-server-tcctl/" | relLangURL }}" class="ew-btn ew-btn--ghost text-xs sm:text-sm py-2 px-4 text-slate-300 border-slate-600 hover:border-blue-400">
-          📖 Panduan Deployment How-To →
-        </a>
-        <a href="https://github.com/edkas07-oss/tcctl" target="_blank" rel="noopener" class="ew-btn ew-btn--ghost text-xs sm:text-sm py-2 px-3 text-slate-300 border-slate-600 hover:border-blue-400">
-          🐙 GitHub ↗
-        </a>
-      </div>
-      <div class="flex items-center gap-2 text-xs text-slate-400">
-        <span>Arsitektur:</span>
-        <span class="text-slate-300 font-mono">Windows (Docker)</span> ·
-        <span class="text-slate-300 font-mono">Linux (Podman)</span>
-      </div>
+    <div class="ew-metrics">
+      <div class="ew-metric"><span class="ew-metric__value">9</span><span class="ew-metric__label">Aturan CIS Benchmark diverifikasi otomatis pada server.xml dan web.xml</span></div>
+      <div class="ew-metric"><span class="ew-metric__value">~3 MB</span><span class="ew-metric__label">Biner Go statis tunggal per tool tanpa ketergantungan runtime tambahan</span></div>
+      <div class="ew-metric"><span class="ew-metric__value">0 Agent</span><span class="ew-metric__label">Komunikasi soket langsung; tanpa daemon latar belakang atau Java agent tambahan</span></div>
+      <div class="ew-metric"><span class="ew-metric__value">2 OS</span><span class="ew-metric__label">Dukungan penuh di Windows Server (Docker) dan Enterprise Linux (Podman)</span></div>
     </div>
   </div>
 
-  {{/* ── Platform Showcase 2: tmctl ─────────────────────────────────── */}}
-  <div class="ew-project-showcase">
-    <div class="ew-project-showcase__header">
-      <div class="flex flex-wrap items-center gap-2.5 mb-2.5">
-        <span class="ew-tag ew-tag--cat">🔬 Diagnostic Operator</span>
-        <span class="ew-fs-badge ew-fs--blue">Observability &amp; SRE</span>
-        <span class="ew-fs-badge ew-fs--purple">Multi-OS (Linux &amp; Windows)</span>
-      </div>
-      <h2 class="text-2xl sm:text-3xl font-bold text-white tracking-tight mb-1">
-        <a href="{{ "/packages/#tmctl" | relLangURL }}" class="hover:text-blue-400 transition-colors">
-          Tomcat Monitoring Operator (tmctl)
-        </a>
-      </h2>
-      <p class="text-blue-300 text-xs sm:text-sm font-medium mb-3 font-mono">
-        Unified Telemetry, Low-Latency Socket API &amp; Safe Incident Triage
-      </p>
-      <p class="text-slate-300 text-sm leading-relaxed w-full max-w-none mb-6">
-        Operator CLI mandiri berbasis Go untuk mengorkestrasi stack monitoring (Prometheus, JMX Exporter, Alertmanager) via Socket API langsung, melacak degradasi performa JVM, dan mengumpulkan bukti forensik insiden.
-      </p>
+  {{/* ── MATRIKS DUKUNGAN PLATFORM ── */}}
+  <div class="ew-section" style="padding-top: 0;">
+    <div class="ew-section__head">
+      <h2 class="ew-h2">Matriks Dukungan Platform</h2>
+      <p class="ew-lead">Kedua sistem rekayasa dikompilasi sebagai biner statis mandiri (Go) tanpa dependensi interpreter runtime.</p>
     </div>
-
-    {{/* ── 3 Core Capabilities ────────────────────────────────────────── */}}
-    <div class="ew-module-grid">
-      
-      {{/* Capability 1 */}}
-      <div class="ew-module-card">
-        <div class="ew-feat-module-card__header">
-          <span class="text-xl">🛠️</span>
-          <span class="ew-feat-module-card__tag text-blue-400">OBSERVABILITY</span>
-        </div>
-        <h3 class="ew-feat-module-card__title">
-          Runtime Telemetry
-        </h3>
-        <p class="ew-feat-module-card__body">
-          Monitoring lifecycle kontainer dan metrik internal JVM secara real-time via direct socket API tanpa overhead agent pihak ketiga.
-        </p>
-      </div>
-
-      {{/* Capability 2 */}}
-      <div class="ew-module-card">
-        <div class="ew-feat-module-card__header">
-          <span class="text-xl">⏱️</span>
-          <span class="ew-feat-module-card__tag text-emerald-400">MTTR REDUCTION</span>
-        </div>
-        <h3 class="ew-feat-module-card__title">
-          Triage Insiden Cepat
-        </h3>
-        <p class="ew-feat-module-card__body">
-          Deteksi akar masalah JVM kritis (GC thrashing, thread deadlock, OOM) dan penyusunan bukti forensik terstruktur untuk tim on-call.
-        </p>
-      </div>
-
-      {{/* Capability 3 */}}
-      <div class="ew-module-card">
-        <div class="ew-feat-module-card__header">
-          <span class="text-xl">🛡️</span>
-          <span class="ew-feat-module-card__tag text-purple-400">SAFE REMEDIATION</span>
-        </div>
-        <h3 class="ew-feat-module-card__title">
-          Remediasi Non-Destruktif
-        </h3>
-        <p class="ew-feat-module-card__body">
-          Menghindari auto-restart gegabah di lingkungan produksi; memprioritaskan isolasi traffic dan investigasi bukti forensik terlebih dahulu.
-        </p>
-      </div>
-
-    </div>
-
-    {{/* ── Action Buttons ────────────────────────────────────────────── */}}
-    <div class="mt-6 pt-5 border-t border-blue-900/60 flex flex-wrap items-center justify-between gap-4">
-      <div class="flex flex-wrap gap-3">
-        <a href="{{ "/packages/#tmctl" | relLangURL }}" class="ew-btn ew-btn--primary text-xs sm:text-sm py-2 px-4">
-          📦 Unduh Biner di Packages →
-        </a>
-        <a href="{{ "/how-to/build-tomcat-jmx-nanoserver-image/" | relLangURL }}" class="ew-btn ew-btn--ghost text-xs sm:text-sm py-2 px-4 text-slate-300 border-slate-600 hover:border-blue-400">
-          📖 Panduan Build JMX How-To →
-        </a>
-        <a href="https://github.com/edkas07-oss/tmctl" target="_blank" rel="noopener" class="ew-btn ew-btn--ghost text-xs sm:text-sm py-2 px-3 text-slate-300 border-slate-600 hover:border-blue-400">
-          🐙 GitHub ↗
-        </a>
-      </div>
-      <div class="flex items-center gap-2 text-xs text-slate-400">
-        <span>Arsitektur:</span>
-        <span class="text-slate-300 font-mono">Linux (Podman)</span> ·
-        <span class="text-slate-300 font-mono">Windows (Docker)</span>
-      </div>
+    <div class="ew-compare-wrap">
+      <table class="ew-compare">
+        <thead><tr><th>Sistem Operasi</th><th>Runtime Kontainer</th><th>Catatan Kompatibilitas</th></tr></thead>
+        <tbody>
+          <tr><td>Windows Server 2019 / 2022</td><td>Docker Engine (Windows Containers)</td><td>Mendukung image NanoServer &amp; ServerCore, eksekusi non-root ContainerUser</td></tr>
+          <tr><td>Enterprise Linux (RHEL, Rocky, Debian, Ubuntu)</td><td>Podman (Rootless / Rootful) &amp; Docker</td><td>Mendukung isolasi cgroups v2, socket runtime systemd, dan tarball statis</td></tr>
+        </tbody>
+      </table>
     </div>
   </div>
 

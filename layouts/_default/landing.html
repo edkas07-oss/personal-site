@@ -1,0 +1,6 @@
+{{ define "main" }}
+<div class="ew-page max-w-full">
+  {{ if .Params.showBreadcrumbs | default false }}{{ partial "breadcrumbs.html" . }}{{ end }}
+  {{ .Content }}
+</div>
+{{ end }}

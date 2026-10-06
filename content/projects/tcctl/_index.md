@@ -1,220 +1,465 @@
 +++
-title = "Apache Tomcat Enterprise Super Module (tcctl)"
-date = "2026-09-25T23:45:00+07:00"
-draft = true
-summary = "Platform operator terpadu (Super Module) berbasis Go untuk tata kelola siklus hidup, security hardening CIS Benchmark, audit kerentanan Trivy, GitOps otonom (Zero-Git), dynamic JVM tuning, dan zero-downtime staging rollout Apache Tomcat di Windows Server dan Linux."
-author = "Eddy Wiyatno"
-categories = ["Platform Engineering", "Middleware", "DevOps", "Security"]
-tags = ["tcctl", "tomcat", "windows-server", "linux", "gitops", "docker", "podman", "cis-benchmark", "golang", "sre"]
-series = ["Apache Tomcat Enterprise Platform"]
-toc = true
-showSummary = true
-modules_subtitle = "Tiga subsistem inti yang mengotomasi siklus hidup, kepatuhan keamanan, dan rekonsiliasi GitOps Tomcat enterprise."
-aliases = ["/projects/tomcat-super-module/"]
+title = "tcctl"
+description = "Otomasi rilis dan deployment Apache Tomcat: update zero-downtime, audit kepatuhan CIS Benchmark, dan proteksi konfigurasi GitOps."
+layout = "landing"
+showDate = false
+showAuthor = false
+showReadingTime = false
+showWordCount = false
+showTableOfContents = false
+showPagination = false
+showBreadcrumbs = true
+[cascade]
+layout = "landing"
+showDate = false
+showAuthor = false
+showReadingTime = false
+showWordCount = false
+showTableOfContents = false
+showPagination = false
+showBreadcrumbs = true
 +++
 
-{{< lead >}}
-**Single Static Binary Operator for Enterprise Apache Tomcat Workloads**
+<div class="ew-pagehero">
+<p class="ew-hero__eyebrow">Proyek Rekayasa · tcctl</p>
+<h1 class="ew-pagehero__title">tcctl: Otomasi Rilis &amp; Deployment Apache Tomcat</h1>
+<p class="ew-lead">Otomasi rilis aplikasi tanpa downtime, penegakan standar keamanan CIS Benchmark, dan perlindungan konfigurasi Tomcat dari perubahan manual di Windows Server dan Linux.</p>
+</div>
 
-`tcctl` (*Tomcat Control CLI*) adalah perangkat lunak operator terpadu (*Super Module*) berbasis bahasa Go yang dirancang khusus untuk standarisasi tata kelola, kepatuhan keamanan (*CIS Benchmark*), dan orkestrasi kontainer Apache Tomcat enterprise di lingkungan multi-OS (Windows Server Docker Engine dan Linux Podman rootless).
-{{< /lead >}}
+<div class="ew-section">
+<div class="ew-section__head"><h2 class="ew-h2">Kemampuan Utama</h2><p class="ew-lead">Klik setiap kartu untuk melihat visualisasi alur perbandingan kendala operasional konvensional dan solusi rekayasa yang dihadirkan tcctl.</p></div>
+<div class="ew-grid-2">
+<div class="ew-panel ew-panel--interactive" role="button" tabindex="0" data-modal="modal-staging" aria-haspopup="dialog">
+<span class="ew-panel__tag">Zero-Downtime</span>
+<h3 class="ew-panel__title">Rilis Staging &amp; Rolling Update Aman</h3>
+<p class="ew-panel__text">Rilis aplikasi melalui port staging untuk memastikan sistem siap melayani traffic sebelum dialihkan ke port produksi, dilengkapi rollback otomatis jika aplikasi gagal start.</p>
+<span class="ew-panel__hint">Lihat Masalah &amp; Solusi →</span>
+</div>
 
----
+<div class="ew-panel ew-panel--interactive" role="button" tabindex="0" data-modal="modal-gitops" aria-haspopup="dialog">
+<span class="ew-panel__tag">Tata Kelola GitOps</span>
+<h3 class="ew-panel__title">Sinkronisasi Konfigurasi &amp; Proteksi Drift</h3>
+<p class="ew-panel__text">Menjaga konsistensi konfigurasi server dengan repositori Git serta mengunci file konfigurasi (<code>conf:ro</code>) agar tidak dapat diubah sembarangan di server produksi.</p>
+<span class="ew-panel__hint">Lihat Masalah &amp; Solusi →</span>
+</div>
 
-## 📌 Ringkasan Eksekutif & Value Proposition
+<div class="ew-panel ew-panel--interactive" role="button" tabindex="0" data-modal="modal-security" aria-haspopup="dialog">
+<span class="ew-panel__tag">Keamanan &amp; Audit</span>
+<h3 class="ew-panel__title">Kepatuhan CIS Benchmark &amp; Pemindaian CVE</h3>
+<p class="ew-panel__text">Memastikan konfigurasi kontainer memenuhi 9 aturan standar keamanan CIS Benchmark, berjalan dengan user non-root, serta terintegrasi pemindaian kerentanan image.</p>
+<span class="ew-panel__hint">Lihat Masalah &amp; Solusi →</span>
+</div>
 
-Mengoperasikan beban kerja Apache Tomcat skala produksi di atas arsitektur kontainer heterogen—khususnya pada ekosistem **Windows Containers**—menghadirkan tantangan operasional dan tata kelola keamanan yang unik:
+<div class="ew-panel ew-panel--interactive" role="button" tabindex="0" data-modal="modal-platform" aria-haspopup="dialog">
+<span class="ew-panel__tag">Multi-Platform</span>
+<h3 class="ew-panel__title">Dukungan Penuh Linux &amp; Windows Server</h3>
+<p class="ew-panel__text">Dapat berjalan langsung di Windows Server (Docker Engine) dan Enterprise Linux (Podman), tanpa perlu instalasi interpreter atau runtime tambahan.</p>
+<span class="ew-panel__hint">Lihat Masalah &amp; Solusi →</span>
+</div>
+</div>
+</div>
 
-1. **Kompleksitas Hak Akses & Keamanan Runtime:**  
-   Banyak operator tergoda menjalankan kontainer dengan akun istimewa `ContainerAdministrator` untuk menghindari kendala perizinan bind-mount. `tcctl` secara otomatis menegakkan eksekusi di bawah akun non-root `ContainerUser` dengan mengunci konfigurasi XML (`conf/`) sebagai *Read-Only* (`:ro`).
-2. **Ketiadaan Validasi Keamanan Pre-Flight:**  
-   Konfigurasi bawaan Tomcat kerap membiarkan port shutdown (`8005`) terbuka dan membocorkan header versi server. `tcctl` menyematkan mesin audit statis 9 aturan CIS Benchmark yang memverifikasi kepatuhan XML sebelum kontainer diizinkan berjalan.
-3. **Pembaruan Berisiko Downtime (Upgrade Java/Tomcat):**  
-   Pola pembaruan tradisional langsung mematikan kontainer lama sebelum kontainer baru dipastikan sehat. `tcctl` mengotomasi alur *Temporary Staging Rollout* di port penampung sementara (9080) dengan validasi *health probe* sebelum melakukan promosi instan ke port kanonikal (8080).
-4. **Friksi Ketergantungan Tooling pada Windows Target:**  
-   Server Windows di lingkungan tertutup sering kali tidak memiliki Git CLI atau MinGit. `tcctl` mengintegrasikan klien REST API native untuk rekonsiliasi GitOps murni langsung ke repositori Gitea tanpa memerlukan instalasi Git eksternal (*Zero-Git Dependency*).
-5. **Fragmentasi Manajemen Sertifikat HTTPS:**  
-   Alih-alih mengandalkan perintah `keytool` atau OpenSSL manual yang rumit dan rawan salah ketik, `tcctl` menyediakan mesin kriptografi terintegrasi untuk *bootstrapping* keystore PKCS#12, validasi modulus RSA, dan pemantauan kedaluwarsa sertifikat.
+<!-- Modal 1: Staging & Rolling Update -->
+<div id="modal-staging" class="ew-modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="title-staging">
+<div class="ew-modal-window">
+<button type="button" class="ew-modal-close-btn" aria-label="Tutup" data-close-modal>&times;</button>
+<div class="ew-modal-header">
+<span class="ew-modal-tag">Zero-Downtime Deployment</span>
+<h3 id="title-staging" class="ew-modal-title">Rilis Staging &amp; Rolling Update Aman</h3>
+</div>
+<div class="ew-modal-body">
+<div class="ew-diag-wrap">
+  <div class="ew-diag-track ew-diag-track--bad">
+    <div class="ew-diag-badge ew-diag-badge--bad">🔴 Tanpa tcctl (Alur Konvensional)</div>
+    <div class="ew-diag-flow">
+      <div class="ew-diag-node">
+        <span class="ew-diag-node__icon">📤</span>
+        <span class="ew-diag-node__title">Deploy Langsung</span>
+        <span class="ew-diag-node__desc">Port live (:8080)</span>
+      </div>
+      <span class="ew-diag-arrow ew-diag-arrow--bad">→</span>
+      <div class="ew-diag-node ew-diag-node--alert">
+        <span class="ew-diag-node__icon">💥</span>
+        <span class="ew-diag-node__title">Startup Error</span>
+        <span class="ew-diag-node__desc">DB lock / app crash</span>
+      </div>
+      <span class="ew-diag-arrow ew-diag-arrow--bad">→</span>
+      <div class="ew-diag-node ew-diag-node--alert">
+        <span class="ew-diag-node__icon">⛔</span>
+        <span class="ew-diag-node__title">502 Bad Gateway</span>
+        <span class="ew-diag-node__desc">Layanan down total</span>
+      </div>
+      <span class="ew-diag-arrow ew-diag-arrow--bad">→</span>
+      <div class="ew-diag-node">
+        <span class="ew-diag-node__icon">⏳</span>
+        <span class="ew-diag-node__title">Rollback Manual</span>
+        <span class="ew-diag-node__desc">MTTR ~45 menit</span>
+      </div>
+    </div>
+    <div class="ew-diag-takeaway ew-diag-takeaway--bad">
+      <span>⚠️ Dampak: Transaksi pengguna terputus mendadak &amp; SLA layanan terlanggar.</span>
+    </div>
+  </div>
 
----
+  <div class="ew-diag-track ew-diag-track--good">
+    <div class="ew-diag-badge ew-diag-badge--good">🟢 Dengan tcctl (Otomasi Terproteksi)</div>
+    <div class="ew-diag-flow">
+      <div class="ew-diag-node">
+        <span class="ew-diag-node__icon">🧪</span>
+        <span class="ew-diag-node__title">Staging Deploy</span>
+        <span class="ew-diag-node__desc">Port isolasi (:9080)</span>
+      </div>
+      <span class="ew-diag-arrow ew-diag-arrow--good">→</span>
+      <div class="ew-diag-node ew-diag-node--success">
+        <span class="ew-diag-node__icon">🩺</span>
+        <span class="ew-diag-node__title">Health Probing</span>
+        <span class="ew-diag-node__desc">Deep validation</span>
+      </div>
+      <span class="ew-diag-arrow ew-diag-arrow--good">→</span>
+      <div class="ew-diag-node ew-diag-node--success">
+        <span class="ew-diag-node__icon">⚡</span>
+        <span class="ew-diag-node__title">Atomic Cutover</span>
+        <span class="ew-diag-node__desc">Switch port :8080</span>
+      </div>
+      <span class="ew-diag-arrow ew-diag-arrow--good">→</span>
+      <div class="ew-diag-node ew-diag-node--success">
+        <span class="ew-diag-node__icon">🚀</span>
+        <span class="ew-diag-node__title">Zero Downtime</span>
+        <span class="ew-diag-node__desc">0 ms interupsi</span>
+      </div>
+    </div>
+    <div class="ew-diag-takeaway ew-diag-takeaway--good">
+      <span>✓ Manfaat: Rilis aman 100%, otomatis rollback dalam hitungan detik jika inisialisasi gagal.</span>
+    </div>
+  </div>
+</div>
+</div>
+<div class="ew-modal-footer">
+<button type="button" class="ew-btn ew-btn--ghost" data-close-modal>Tutup</button>
+</div>
+</div>
+</div>
 
-## 🏛️ Arsitektur Super Module: 7 Pilar Tata Kelola
+<!-- Modal 2: Tata Kelola GitOps -->
+<div id="modal-gitops" class="ew-modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="title-gitops">
+<div class="ew-modal-window">
+<button type="button" class="ew-modal-close-btn" aria-label="Tutup" data-close-modal>&times;</button>
+<div class="ew-modal-header">
+<span class="ew-modal-tag">Tata Kelola GitOps</span>
+<h3 id="title-gitops" class="ew-modal-title">Sinkronisasi Konfigurasi &amp; Proteksi Drift</h3>
+</div>
+<div class="ew-modal-body">
+<div class="ew-diag-wrap">
+  <div class="ew-diag-track ew-diag-track--bad">
+    <div class="ew-diag-badge ew-diag-badge--bad">🔴 Tanpa tcctl (Perubahan Manual)</div>
+    <div class="ew-diag-flow">
+      <div class="ew-diag-node">
+        <span class="ew-diag-node__icon">🛠️</span>
+        <span class="ew-diag-node__title">Edit di Server</span>
+        <span class="ew-diag-node__desc">SSH / server.xml</span>
+      </div>
+      <span class="ew-diag-arrow ew-diag-arrow--bad">→</span>
+      <div class="ew-diag-node ew-diag-node--alert">
+        <span class="ew-diag-node__icon">⚠️</span>
+        <span class="ew-diag-node__title">Config Drift</span>
+        <span class="ew-diag-node__desc">Tidak di-commit Git</span>
+      </div>
+      <span class="ew-diag-arrow ew-diag-arrow--bad">→</span>
+      <div class="ew-diag-node ew-diag-node--alert">
+        <span class="ew-diag-node__icon">🔄</span>
+        <span class="ew-diag-node__title">Deploy Ulang</span>
+        <span class="ew-diag-node__desc">Setelan darurat hilang</span>
+      </div>
+      <span class="ew-diag-arrow ew-diag-arrow--bad">→</span>
+      <div class="ew-diag-node">
+        <span class="ew-diag-node__icon">💥</span>
+        <span class="ew-diag-node__title">Insiden Berulang</span>
+        <span class="ew-diag-node__desc">Audit trail nihil</span>
+      </div>
+    </div>
+    <div class="ew-diag-takeaway ew-diag-takeaway--bad">
+      <span>⚠️ Dampak: Parameter server tidak seragam antar node &amp; sulit diinvestigasi.</span>
+    </div>
+  </div>
 
-`tcctl` mengonsolidasikan 7 pilar rekayasa platform ke dalam satu biner statis tunggal tanpa ketergantungan *runtime* (`libc` murni independen via `CGO_ENABLED=0`):
+  <div class="ew-diag-track ew-diag-track--good">
+    <div class="ew-diag-badge ew-diag-badge--good">🟢 Dengan tcctl (Tata Kelola GitOps)</div>
+    <div class="ew-diag-flow">
+      <div class="ew-diag-node">
+        <span class="ew-diag-node__icon">🐙</span>
+        <span class="ew-diag-node__title">Git Repository</span>
+        <span class="ew-diag-node__desc">Single source of truth</span>
+      </div>
+      <span class="ew-diag-arrow ew-diag-arrow--good">→</span>
+      <div class="ew-diag-node ew-diag-node--success">
+        <span class="ew-diag-node__icon">🔒</span>
+        <span class="ew-diag-node__title">conf:ro Mode</span>
+        <span class="ew-diag-node__desc">Terkunci read-only</span>
+      </div>
+      <span class="ew-diag-arrow ew-diag-arrow--good">→</span>
+      <div class="ew-diag-node ew-diag-node--success">
+        <span class="ew-diag-node__icon">🤖</span>
+        <span class="ew-diag-node__title">GitOps Sync</span>
+        <span class="ew-diag-node__desc">Rekonsiliasi otomatis</span>
+      </div>
+      <span class="ew-diag-arrow ew-diag-arrow--good">→</span>
+      <div class="ew-diag-node ew-diag-node--success">
+        <span class="ew-diag-node__icon">✅</span>
+        <span class="ew-diag-node__title">100% Konsisten</span>
+        <span class="ew-diag-node__desc">Riwayat audit jelas</span>
+      </div>
+    </div>
+    <div class="ew-diag-takeaway ew-diag-takeaway--good">
+      <span>✓ Manfaat: Mencegah modifikasi sembarangan &amp; konfigurasi selalu identik di semua server.</span>
+    </div>
+  </div>
+</div>
+</div>
+<div class="ew-modal-footer">
+<button type="button" class="ew-btn ew-btn--ghost" data-close-modal>Tutup</button>
+</div>
+</div>
+</div>
 
-{{< mermaid >}}
-flowchart TD
-    %% Styling Classes
-    classDef core fill:#0f172a,stroke:#38bdf8,stroke-width:2px,color:#38bdf8;
-    classDef module fill:#1e3a8a,stroke:#60a5fa,stroke-width:1.5px,color:#ffffff;
-    classDef runtime fill:#064e3b,stroke:#34d399,stroke-width:1.5px,color:#ffffff;
-    classDef storage fill:#312e81,stroke:#a78bfa,stroke-width:1.5px,color:#ffffff;
+<!-- Modal 3: Keamanan & Audit -->
+<div id="modal-security" class="ew-modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="title-security">
+<div class="ew-modal-window">
+<button type="button" class="ew-modal-close-btn" aria-label="Tutup" data-close-modal>&times;</button>
+<div class="ew-modal-header">
+<span class="ew-modal-tag">Keamanan &amp; Kepatuhan</span>
+<h3 id="title-security" class="ew-modal-title">Kepatuhan CIS Benchmark &amp; Pemindaian CVE</h3>
+</div>
+<div class="ew-modal-body">
+<div class="ew-diag-wrap">
+  <div class="ew-diag-track ew-diag-track--bad">
+    <div class="ew-diag-badge ew-diag-badge--bad">🔴 Tanpa tcctl (Baseline Rentan)</div>
+    <div class="ew-diag-flow">
+      <div class="ew-diag-node">
+        <span class="ew-diag-node__icon">🔓</span>
+        <span class="ew-diag-node__title">Root Privilege</span>
+        <span class="ew-diag-node__desc">Default administrator</span>
+      </div>
+      <span class="ew-diag-arrow ew-diag-arrow--bad">→</span>
+      <div class="ew-diag-node ew-diag-node--alert">
+        <span class="ew-diag-node__icon">⚠️</span>
+        <span class="ew-diag-node__title">Port Shutdown</span>
+        <span class="ew-diag-node__desc">Port 8005 terbuka</span>
+      </div>
+      <span class="ew-diag-arrow ew-diag-arrow--bad">→</span>
+      <div class="ew-diag-node ew-diag-node--alert">
+        <span class="ew-diag-node__icon">❓</span>
+        <span class="ew-diag-node__title">CVE Image</span>
+        <span class="ew-diag-node__desc">Tanpa scan otomatis</span>
+      </div>
+      <span class="ew-diag-arrow ew-diag-arrow--bad">→</span>
+      <div class="ew-diag-node">
+        <span class="ew-diag-node__icon">❌</span>
+        <span class="ew-diag-node__title">Temuan Audit</span>
+        <span class="ew-diag-node__desc">Audit manual berminggu-minggu</span>
+      </div>
+    </div>
+    <div class="ew-diag-takeaway ew-diag-takeaway--bad">
+      <span>⚠️ Dampak: Risiko celah keamanan tinggi &amp; tidak memenuhi regulasi OJK / PCI-DSS.</span>
+    </div>
+  </div>
 
-    subgraph CLI ["Core Operator Engine"]
-        TCCTL["⚙️ tcctl (Single Static Go Binary)"]:::core
-    end
+  <div class="ew-diag-track ew-diag-track--good">
+    <div class="ew-diag-badge ew-diag-badge--good">🟢 Dengan tcctl (Hardening Otomatis)</div>
+    <div class="ew-diag-flow">
+      <div class="ew-diag-node">
+        <span class="ew-diag-node__icon">🛡️</span>
+        <span class="ew-diag-node__title">Non-Root User</span>
+        <span class="ew-diag-node__desc">ContainerUser/tcuser</span>
+      </div>
+      <span class="ew-diag-arrow ew-diag-arrow--good">→</span>
+      <div class="ew-diag-node ew-diag-node--success">
+        <span class="ew-diag-node__icon">🔒</span>
+        <span class="ew-diag-node__title">9 Aturan CIS</span>
+        <span class="ew-diag-node__desc">Hardening otomatis</span>
+      </div>
+      <span class="ew-diag-arrow ew-diag-arrow--good">→</span>
+      <div class="ew-diag-node ew-diag-node--success">
+        <span class="ew-diag-node__icon">🔍</span>
+        <span class="ew-diag-node__title">Trivy CVE Scan</span>
+        <span class="ew-diag-node__desc">Deteksi celah pra-rilis</span>
+      </div>
+      <span class="ew-diag-arrow ew-diag-arrow--good">→</span>
+      <div class="ew-diag-node ew-diag-node--success">
+        <span class="ew-diag-node__icon">📋</span>
+        <span class="ew-diag-node__title">Siap Audit</span>
+        <span class="ew-diag-node__desc">Bukti kepatuhan instan</span>
+      </div>
+    </div>
+    <div class="ew-diag-takeaway ew-diag-takeaway--good">
+      <span>✓ Manfaat: Keamanan kontainer terstandardisasi &amp; lolos audit regulasi perbankan.</span>
+    </div>
+  </div>
+</div>
+</div>
+<div class="ew-modal-footer">
+<button type="button" class="ew-btn ew-btn--ghost" data-close-modal>Tutup</button>
+</div>
+</div>
+</div>
 
-    subgraph PILLARS ["7 Pilar Modul Tata Kelola Enterprise"]
-        M1["🛡️ hardening<br/>(CIS Benchmark 9 Rules Audit)"]:::module
-        M2["🔎 va<br/>(Trivy Vulnerability Scanner)"]:::module
-        M3["📊 monitoring<br/>(Synthetic Health + JMX :9404)"]:::module
-        M4["🚀 deploy<br/>(Staging Rollout + bin/setenv)"]:::module
-        M5["🔄 gitops<br/>(Zero-Git REST API Reconciler)"]:::module
-        M6["🔒 ssl<br/>(PKCS#12 + OpenSSL PEM Engine)"]:::module
-        M7["⚡ serve<br/>(Embedded REST API Daemon :8089)"]:::module
-    end
+<!-- Modal 4: Multi-Platform -->
+<div id="modal-platform" class="ew-modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="title-platform">
+<div class="ew-modal-window">
+<button type="button" class="ew-modal-close-btn" aria-label="Tutup" data-close-modal>&times;</button>
+<div class="ew-modal-header">
+<span class="ew-modal-tag">Multi-Platform</span>
+<h3 id="title-platform" class="ew-modal-title">Dukungan Penuh Linux &amp; Windows Server</h3>
+</div>
+<div class="ew-modal-body">
+<div class="ew-diag-wrap">
+  <div class="ew-diag-track ew-diag-track--bad">
+    <div class="ew-diag-badge ew-diag-badge--bad">🔴 Tanpa tcctl (Skrip Terfragmentasi)</div>
+    <div class="ew-diag-flow">
+      <div class="ew-diag-node">
+        <span class="ew-diag-node__icon">🪟</span>
+        <span class="ew-diag-node__title">PowerShell</span>
+        <span class="ew-diag-node__desc">Windows Server</span>
+      </div>
+      <span class="ew-diag-arrow ew-diag-arrow--bad">≠</span>
+      <div class="ew-diag-node">
+        <span class="ew-diag-node__icon">🐧</span>
+        <span class="ew-diag-node__title">Bash Script</span>
+        <span class="ew-diag-node__desc">Enterprise Linux</span>
+      </div>
+      <span class="ew-diag-arrow ew-diag-arrow--bad">→</span>
+      <div class="ew-diag-node ew-diag-node--alert">
+        <span class="ew-diag-node__icon">🧩</span>
+        <span class="ew-diag-node__title">Modul Runtime</span>
+        <span class="ew-diag-node__desc">Beda versi tiap host</span>
+      </div>
+      <span class="ew-diag-arrow ew-diag-arrow--bad">→</span>
+      <div class="ew-diag-node">
+        <span class="ew-diag-node__icon">😫</span>
+        <span class="ew-diag-node__title">Overhead Tinggi</span>
+        <span class="ew-diag-node__desc">Rawan human error</span>
+      </div>
+    </div>
+    <div class="ew-diag-takeaway ew-diag-takeaway--bad">
+      <span>⚠️ Dampak: Pemeliharaan skrip ganda &amp; alur deployment berbeda antar OS.</span>
+    </div>
+  </div>
 
-    subgraph RUNTIME ["Multi-OS Container Engine"]
-        ENG1["🪟 Windows Server (Docker Engine / windowsfilter)"]:::runtime
-        ENG2["🐧 Enterprise Linux (Podman Rootless / Bridge)"]:::runtime
-    end
+  <div class="ew-diag-track ew-diag-track--good">
+    <div class="ew-diag-badge ew-diag-badge--good">🟢 Dengan tcctl (Single Executable)</div>
+    <div class="ew-diag-flow">
+      <div class="ew-diag-node">
+        <span class="ew-diag-node__icon">📦</span>
+        <span class="ew-diag-node__title">1 Biner Go</span>
+        <span class="ew-diag-node__desc">Tanpa runtime tambahan</span>
+      </div>
+      <span class="ew-diag-arrow ew-diag-arrow--good">→</span>
+      <div class="ew-diag-node ew-diag-node--success">
+        <span class="ew-diag-node__icon">🪟</span>
+        <span class="ew-diag-node__title">Windows Docker</span>
+        <span class="ew-diag-node__desc">Sintaks identik</span>
+      </div>
+      <span class="ew-diag-arrow ew-diag-arrow--good">＝</span>
+      <div class="ew-diag-node ew-diag-node--success">
+        <span class="ew-diag-node__icon">🐧</span>
+        <span class="ew-diag-node__title">Linux Podman</span>
+        <span class="ew-diag-node__desc">Sintaks identik</span>
+      </div>
+      <span class="ew-diag-arrow ew-diag-arrow--good">→</span>
+      <div class="ew-diag-node ew-diag-node--success">
+        <span class="ew-diag-node__icon">🎯</span>
+        <span class="ew-diag-node__title">1 Standar CI/CD</span>
+        <span class="ew-diag-node__desc">Operasional ringkas</span>
+      </div>
+    </div>
+    <div class="ew-diag-takeaway ew-diag-takeaway--good">
+      <span>✓ Manfaat: Alur rilis 100% konsisten lintas OS tanpa perlu memelihara skrip terpisah.</span>
+    </div>
+  </div>
+</div>
+</div>
+<div class="ew-modal-footer">
+<button type="button" class="ew-btn ew-btn--ghost" data-close-modal>Tutup</button>
+</div>
+</div>
+</div>
 
-    subgraph STORAGE ["Host Bind-Mount Hierarchy (TC-ADR-0009 / TN-006)"]
-        DIR["C:/tomcats/ atau D:/tomcats/[instance]/<br/>• bin/ (setenv.bat / setenv.sh JVM Tuning)<br/>• conf/ (server.xml, web.xml, SSL Certs :ro)<br/>• webapps/ (Application Artifacts)<br/>• logs/ (Catalina + Access Logs)"]:::storage
-    end
+<script>
+(function () {
+  function openModal(id) {
+    var modal = document.getElementById(id);
+    if (!modal) return;
+    modal.classList.add('is-active');
+    document.body.style.overflow = 'hidden';
+    var closeBtn = modal.querySelector('.ew-modal-close-btn');
+    if (closeBtn) closeBtn.focus();
+  }
 
-    TCCTL --> M1
-    TCCTL --> M2
-    TCCTL --> M3
-    TCCTL --> M4
-    TCCTL --> M5
-    TCCTL --> M6
-    TCCTL --> M7
-    M4 --> RUNTIME
-    M5 --> RUNTIME
-    RUNTIME --> STORAGE
-{{< /mermaid >}}
+  function closeModal(modal) {
+    if (!modal) return;
+    modal.classList.remove('is-active');
+    if (!document.querySelector('.ew-modal-backdrop.is-active')) {
+      document.body.style.overflow = '';
+    }
+  }
 
----
+  document.querySelectorAll('[data-modal]').forEach(function (btn) {
+    function handleTrigger(e) {
+      if (e.type === 'click' || e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        var targetId = btn.getAttribute('data-modal');
+        openModal(targetId);
+      }
+    }
+    btn.addEventListener('click', handleTrigger);
+    btn.addEventListener('keydown', handleTrigger);
+  });
 
-## 🔍 Pembahasan Mendalam 7 Modul Inti
+  document.querySelectorAll('.ew-modal-backdrop').forEach(function (modal) {
+    modal.addEventListener('click', function (e) {
+      if (e.target === modal || e.target.closest('[data-close-modal]')) {
+        closeModal(modal);
+      }
+    });
+  });
 
-### 1. Security Hardening Engine (`tcctl hardening`)
-* **Tujuan:** Menjamin seluruh berkas konfigurasi XML Tomcat memenuhi standar keamanan tertinggi industri sebelum aplikasi dijalankan.
-* **Audit Statis Offline 9 Aturan CIS Benchmark:**
-  - `CIS-TC-01`: Penonaktifan port shutdown server (`port="-1"`).
-  - `CIS-TC-02`: Penyembunyian identitas dan banner versi server (`xpoweredBy="false"`).
-  - `CIS-TC-03`: Pembatasan akses resource internal dan restriksi symlink.
-  - `CIS-TC-04` s.d `09`: Penegakan Secure dan HttpOnly cookie flags, proteksi HTTP Header Security Filter, dan isolasi perizinan file.
-* **Perintah Utama:**
-  ```bash
-  # Audit kepatuhan pada direktori host bind-mount
-  tcctl hardening audit --conf C:/tomcats/payment-service/conf
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape') {
+      var activeModal = document.querySelector('.ew-modal-backdrop.is-active');
+      if (activeModal) closeModal(activeModal);
+    }
+  });
+})();
+</script>
 
-  # Ekspor laporan kepatuhan ke format JSON untuk audit eksternal
-  tcctl hardening audit --conf conf/ --json report.json
-  ```
+<div class="ew-section">
+<div class="ew-section__head"><h2 class="ew-h2">Alur Penggunaan CLI</h2><p class="ew-lead">Perintah ringkas yang mudah dijalankan langsung maupun diintegrasikan ke dalam pipeline CI/CD.</p></div>
+<p class="ew-code-label">1. Rilis Aplikasi pada Port Staging dengan Validasi Otomatis</p>
+<pre class="ew-code">tcctl deploy --image tomcat:10-jdk17 --staging-port 9080 --live-port 8080</pre>
+<p class="ew-code-label">2. Audit Konfigurasi Terhadap Standar CIS Benchmark</p>
+<pre class="ew-code">tcctl va audit --conf /opt/tomcat/conf</pre>
+<p class="ew-code-label">3. Sinkronisasi Konfigurasi dari Repositori Git</p>
+<pre class="ew-code">tcctl gitops sync --repo https://git.internal/tomcat-baseline --interval 5m</pre>
+</div>
 
----
+<div class="ew-section">
+<div class="ew-section__head"><h2 class="ew-h2">Skenario Implementasi</h2></div>
+<div class="ew-grid-2">
+<div class="ew-panel"><h3 class="ew-panel__title">Mencegah Kegagalan Rilis di Server Produksi</h3><p class="ew-panel__text">Memastikan traffic pengguna hanya dialihkan setelah versi aplikasi terbaru terbukti sehat di port staging, menjaga layanan tetap berjalan lancar tanpa interupsi.</p></div>
+<div class="ew-panel"><h3 class="ew-panel__title">Kesiapan Audit Keamanan &amp; Regulasi</h3><p class="ew-panel__text">Menyediakan bukti kepatuhan otomatis melalui audit CIS Benchmark dan riwayat pemindaian kerentanan untuk kebutuhan audit kepatuhan industri perbankan dan finansial.</p></div>
+</div>
+</div>
 
-### 2. Vulnerability Assessment Quality Gate (`tcctl va`)
-* **Tujuan:** Mencegah citra kontainer yang memiliki celah keamanan kritis (*Common Vulnerabilities and Exposures / CVE*) masuk ke lingkungan produksi.
-* **Mekanisme Kerja:**
-  - Mendeteksi ketersediaan biner `trivy` lokal di host; jika tidak ditemukan, secara otomatis menggunakan *fallback* pemanggilan kontainer `docker.io/aquasec/trivy:latest`.
-  - Memindai paket OS dan library Java (arsip `.jar` internal Tomcat dan agent telemetri).
-  - Berfungsi sebagai **Quality Gate** pada pipeline CI (Gitea Actions / Jenkins); build akan otomatis digagalkan (*exit code 1*) jika ditemukan celah dengan tingkat keparahan `HIGH` atau `CRITICAL` yang sudah memiliki patch perbaikan.
-* **Perintah Utama:**
-  ```bash
-  tcctl va scan --image localhost:3000/gitadm/tomcat:9.0-6fa9ce9 --severity HIGH,CRITICAL
-  ```
+<div class="ew-section">
+<div class="ew-section__head"><h2 class="ew-h2">Arsitektur Operasional</h2></div>
+<div class="ew-steps">
+<div class="ew-step"><p class="ew-step__title">Eksekusi Mandiri</p><p class="ew-step__text">Dijalankan langsung di server host atau dipanggil otomatis dari runner CI/CD (GitLab CI, GitHub Actions, Jenkins).</p></div>
+<div class="ew-step"><p class="ew-step__title">Manajemen Kontainer</p><p class="ew-step__text">Terhubung langsung dengan Docker Engine pada Windows Server atau Podman pada Enterprise Linux.</p></div>
+<div class="ew-step"><p class="ew-step__title">Proteksi Konfigurasi</p><p class="ew-step__text">File konfigurasi dipasang dalam mode read-only dan disinkronkan secara teratur dari repositori Git.</p></div>
+</div>
+</div>
 
----
-
-### 3. Live Observability & Telemetry (`tcctl monitoring`)
-* **Tujuan:** Memvalidasi status kesehatan fungsional aplikasi dan telemetri runtime secara real-time.
-* **Kemampuan:**
-  - **Synthetic Health Probing:** Menguji ketersediaan port HTTP (`8080`) dan HTTPS (`8443`) dengan validasi respons status HTTP 200 OK.
-  - **Prometheus JMX Scraper:** Mengambil metrik performa internal JVM dan Tomcat Connector secara instan dari port `9404` tanpa memerlukan tools Java JDK pihak ketiga (`jconsole`/`jps`).
-* **Perintah Utama:**
-  ```bash
-  tcctl monitoring probe --name payment-service --port 8080 --https-port 8443
-  tcctl monitoring jmx --port 9404
-  ```
-
----
-
-### 4. Zero-Downtime Deployment & Dynamic JVM Tuning (`tcctl deploy`)
-* **Tujuan:** Menyediakan orkestrasi deployment kontainer yang aman, terisolasi, dan bebas dari jeda kegagalan layanan (*zero-downtime*).
-* **Fitur Utama:**
-  - **Temporary Staging Rollout (TC-ADR-0006):** Saat pembaruan versi dilakukan, kontainer baru diluncurkan terlebih dahulu sebagai penampung sementara (`<instance>-staging`) di port `9080`. Setelah *health probe* memastikan aplikasi merespons dengan benar, kontainer lama dihentikan dan kontainer baru dipromosikan ke port `8080` kanonikal.
-  - **Dynamic JVM Tuning via `bin/setenv` (TC-ADR-0010):** Membaca parameter memori dari berkas `setenv.bat` (Windows) atau `setenv.sh` (Linux) di host, lalu menyuntikkannya secara dinamis via variabel lingkungan `-e CATALINA_OPTS="..."` dengan rasio ramah kontainer (`-XX:MaxRAMPercentage=75.0`).
-  - **Discovery Citra Interaktif:** Memindai citra Tomcat lokal dan menyajikan menu pemilihan otomatis jika parameter `--image` tidak ditentukan.
-* **Perintah Utama:**
-  ```powershell
-  # Deployment instan interaktif
-  tcctl deploy run --name payment-service --port 8080 --https-port 8443
-
-  # Zero-Downtime Staging Rollout ke versi Java baru
-  tcctl deploy rollout --name payment-service --image tomcat:9.0-jdk21 --port 8080 --staging-port 9080
-  ```
-
----
-
-### 5. Pure Pull-Based Autonomous GitOps (`tcctl gitops`)
-* **Tujuan:** Menghadirkan model pengiriman berkelanjutan deklaratif modern tanpa membuka lubang port inbound SSH/WinRM pada server target.
-* **Keunggulan Arsitektur (Zero-Git Dependency):**
-  - Berkomunikasi langsung dengan remote Git (Gitea) menggunakan protokol HTTPS REST API native (`/api/v1/repos/...`), sehingga server target Windows **tidak perlu menginstal Git CLI maupun MinGit**.
-  - **Otomasi Terjadwal Mandiri:** Mendaftarkan tugas periodik lokal—**Windows Task Scheduler** (`tcctl-gitops-reconciler`) pada Windows Server dan `systemd --user timer` pada Linux—yang mengeksekusi rekonsiliasi setiap 5 menit.
-  - **Continuous Self-Healing:** Jika kontainer mati mendadak atau konfigurasi diubah di luar prosedur, reconciler otomatis mendeteksi deviasi (*drift*) dan memulihkan kontainer sesuai spesifikasi deklaratif `tomcat-spec.yaml`.
-* **Perintah Utama:**
-  ```powershell
-  # Inisialisasi lingkungan GitOps & registrasi Task Scheduler
-  tcctl.exe gitops init --repo http://localhost:3000/gitadm/tomcat-gitops.git --branch main --timer
-
-  # Eksekusi sinkronisasi deklaratif manual
-  tcctl.exe gitops sync --work-dir "C:/Program Files/tcctl/gitops"
-
-  # Ekspor status rekonsiliasi ke JSON untuk monitoring eksternal
-  tcctl.exe gitops status --json-out "C:/temp/gitops-status.json"
-  ```
-
----
-
-### 6. Cryptographic TLS/SSL Governance (`tcctl ssl`)
-* **Tujuan:** Menghilangkan kerumitan pembuatan dan rotasi sertifikat keamanan HTTPS pada Apache Tomcat.
-* **Fitur Utama:**
-  - **Dual Keystore Engine:** Mendukung format standar industri **RFC 7292 PKCS#12** (`keystore.p12`) dan konektor **OpenSSL Native PEM** (`server.crt` & `server.key`).
-  - **Bootstrapping Otomatis:** Men-generate sertifikat *self-signed* siap pakai saat kontainer pertama kali di-deploy.
-  - **CSR & External CA Import:** Membuat berkas *Certificate Signing Request* (CSR PKCS#10) untuk diajukan ke Corporate Enterprise CA, serta memvalidasi kesesuaian pasangan kunci privat via verifikasi modulus RSA sebelum dipasang ke Tomcat.
-* **Perintah Utama:**
-  ```powershell
-  tcctl ssl generate --domain payment.internal.corp --days 365
-  tcctl ssl check --path "C:/tomcats/payment-service/conf/ssl"
-  ```
-
----
-
-### 7. Embedded REST API Daemon (`tcctl serve`)
-* **Tujuan:** Menjembatani operator CLI dengan portal *Self-Service*, Internal Developer Platform (IDP), atau sistem orkestrasi eksternal.
-* **Karakteristik Desain:**
-  - Server HTTP REST API *in-memory* ultra-ramping (< 25 MB RAM) yang ditanam langsung di dalam biner `tcctl` tanpa ketergantungan framework web eksternal.
-  - Dilengkapi pengamanan **API Key Authentication** via header `X-API-Key` dan dukungan konfigurasi CORS.
-  - Menyediakan endpoint lengkap untuk memicu *deploy*, *rollout*, audit *hardening*, dan pemantauan status kontainer secara terprogram.
-* **Perintah Utama:**
-  ```bash
-  tcctl serve --port 8089 --api-key "secret-corp-token" --cors
-  ```
-
----
-
-## 🏛️ Invarian Arsitektur & Landasan Keputusan (ADR)
-
-Seluruh rancangan modul pada `tcctl` berlandaskan pada keputusan arsitektur resmi (*Architectural Decision Records*):
-
-| Landasan ADR | Judul Keputusan Arsitektur | Dampak Implementasi pada `tcctl` |
-| :--- | :--- | :--- |
-| **TC-ADR-0006** | *Refactor Zero-Downtime Rollout to Temporary Staging Containers* | Mengeliminasi konvensi suffix kaku (`-blue`/`-green`) dan beralih ke kontainer sementara (`<name>-staging`) port 9080 dengan promosi kanonikal atomik. |
-| **TC-ADR-0007** | *Adoption of Pure Pull-Based GitOps via Autonomous Host Reconciler* | Menghilangkan ketergantungan push SSH dari server CI; mengalihkan eksekusi CD ke reconciler lokal via Gitea REST API dan Windows Task Scheduler. |
-| **TC-ADR-0009** | *Standardize Enterprise Drive Separation & Host Bind-Mount Hierarchy* | Membakukan lokasi persistensi ke `<Drive>:/tomcats/` (`D:` utama, `C:` cadangan) dan mengunci direktori konfigurasi `conf/` sebagai *Read-Only* (`:ro`). |
-| **TC-ADR-0010** | *Host bin Bind-Mount and Dynamic JVM Tuning* | Mengisolasi skrip `setenv.bat`/`setenv.sh` di host, membaca parameter memori JVM, dan menyuntikkannya ke dalam kontainer melalui `-e CATALINA_OPTS="..."`. |
-
----
-
-## 📚 Panduan Terkait & Referensi Lengkap
-
-* [Panduan Praktis: Implementasi Pure Pull-Based GitOps dan Otomasi CI Promotion]({{< relref "how-to/implement-pure-pull-based-gitops-and-ci-promotion-tomcat" >}})
-* [Panduan Praktis: Deploy Kontainer Apache Tomcat di Windows Server Menggunakan tcctl]({{< relref "how-to/deploy-tomcat-container-windows-server-tcctl" >}})
-* [Panduan Praktis: Build Image Container Apache Tomcat + Prometheus JMX Exporter di Windows NanoServer]({{< relref "how-to/build-tomcat-jmx-nanoserver-image" >}})
-* [Katalog Paket & Download Biner Operator tcctl (Windows & Linux)]({{< relref "packages/tcctl" >}})
-* [Dokumentasi Lengkap Build & Instalasi Biner (INSTALL.md)](https://github.com/edkas07-oss/tcctl/blob/main/INSTALL.md)
-* [Catatan Rekayasa Platform Tomcat di DevOps Handbook (TN-001 s.d TN-010)](http://localhost:8282/projects/tomcat/engineering-journal/platform-foundation-and-hardening/TN-004-design-pure-pull-based-gitops-temporary-staging-rollout-and-self-destructing-bootstrap/)
+<div class="ew-section">
+<div class="ew-section__head"><h2 class="ew-h2">Dukungan Platform</h2></div>
+<div class="ew-platform-strip"><span class="ew-fs-badge ew-fs--blue">Windows Server (Docker Engine)</span><span class="ew-fs-badge ew-fs--blue">Enterprise Linux (Podman / Docker)</span><span class="ew-fs-badge ew-fs--slate">Tanpa Dependensi Runtime</span></div>
+<p class="ew-lead" style="margin-top:1rem;">Didesain sebagai kakas biner statis mandiri dalam bahasa Go untuk memberikan performa deterministik dan keseragaman manajemen rilis di berbagai klaster host server.</p>
+</div>

@@ -403,11 +403,11 @@ docker rm -f test-prometheus
 
 ---
 
-## 🔄 Integrasi GitOps dengan Operator `tmctl`
+## 🔄 Integrasi Deployment & Otomasi Kontainer
 
-Dengan tersedianya image Windows NanoServer di registry, alur pembaruan dan operasional seluruh cluster server Windows kini terhubung mulus dengan deklarasi GitOps.
+Dengan tersedianya image Windows NanoServer di registry, alur pembaruan dan operasional seluruh cluster server Windows kini terhubung mulus dengan deklarasi deployment.
 
-Pada berkas `monitoring-spec.yaml` repository GitOps Anda:
+Contoh berkas spesifikasi kontainer atau deployment script:
 
 ```yaml
 version: "1.0"
@@ -429,12 +429,12 @@ services:
     ports:
       - "8025:8025"
   diagnostic_service:
-    image: "registry.corp.internal:5000/monitoring/tomcat-diagnostic-service:latest"
+    image: "registry.corp.internal:5000/monitoring/diagnostic-service:latest"
     ports:
       - "8443:8443"
 ```
 
-Operator **`tmctl`** di server target akan secara berkala mengecek perubahan spec manifest melalui task scheduler (`tmctl gitops sync`), melakukan `docker pull` image Windows baru, dan me-recreate container monitoring secara idempoten tanpa kehilangan data pada volume persisten.
+Otomasi deployment di server target dapat secara berkala mengecek perubahan spec manifest, melakukan `docker pull` image Windows baru, dan me-recreate container monitoring secara idempoten tanpa kehilangan data pada volume persisten.
 
 ---
 

@@ -85,11 +85,11 @@ Auto-restart sering kali menyembunyikan masalah degradasi bertahap, seperti *slo
 
 ## 🏛️ Solusi & Desain Arsitektur: Kebijakan Zero Destructive Auto-Remediation
 
-Untuk mengatasi dilema di atas, pada proyek **Tomcat Monitoring Platform** kami merumuskan dan menerapkan kebijakan **Zero Automatic Remediation** (`TM-ADR-0014`) yang didukung oleh pemisahan peran secara tegas (*Separation of Concerns*).
+Untuk mengatasi dilema di atas, pendekatan keandalan modern merumuskan dan menerapkan kebijakan **Zero Automatic Remediation** yang didukung oleh pemisahan peran secara tegas (*Separation of Concerns*).
 
 ### 1. Prinsip Batasan Hanya-Baca (*Read-Only Boundary & Least-Privilege Isolation*)
 
-Layanan diagnostik kami (**Tomcat Diagnostic Service**) dirancang murni sebagai **sistem penasihat independen (*read-only advisory engine*)**, bukan eksekutor tindakan.
+Layanan diagnostik dirancang murni sebagai **sistem penasihat independen (*read-only advisory engine*)**, bukan eksekutor tindakan.
 
 {{< mermaid >}}
 flowchart TD
@@ -134,11 +134,11 @@ flowchart TD
 Dalam arsitektur ini:
 - **Rootless & Non-Root Execution:** Container Diagnostic Service berjalan sepenuhnya tanpa hak root (`USER 10001:10001`), tanpa privilege khusus, dan tanpa mounting socket container runtime host.
 - **Strict Read-Only Volumes:** Akses ke direktori log aplikasi di-mount menggunakan opsi `:ro,z` (`/run/tomcat-diagnostic/logs:ro,z`), menjamin container tidak memiliki kemampuan menghapus atau mengubah berkas log.
-- **Normalized Host Event Spool:** Pengumpulan event level container/host (seperti exit code `137` OOMKilled atau lifecycle event) didelegasikan ke daemon terisolasi (*Restricted Event Collector / `tm-agent`*, `TM-ADR-0008`) yang menulis berkas JSON berukuran terbatas dengan izin ketat `0700/0600`.
+- **Normalized Host Event Spool:** Pengumpulan event level container/host (seperti exit code `137` OOMKilled atau lifecycle event) didelegasikan ke daemon pengumpul event terisolasi yang menulis berkas JSON berukuran terbatas dengan izin ketat `0700/0600`.
 
 ### 2. Otoritas Notifikasi Tunggal (*Canonical Incident Notification Authority*)
 
-Sering kali tim operasional mengalami *alert fatigue* akibat menerima email teks mentah dari Alertmanager yang hanya berisi formula PromQL tanpa konteks. Melalui `TM-ADR-0016`, kami menetapkan Diagnostic Service sebagai **satu-satunya pengirim notifikasi resmi (*Single Source of Truth*)** untuk seluruh insiden monitoring.
+Sering kali tim operasional mengalami *alert fatigue* akibat menerima email teks mentah dari Alertmanager yang hanya berisi formula PromQL tanpa konteks. Praktik terbaik adalah menetapkan Diagnostic Service sebagai **satu-satunya pengirim notifikasi resmi (*Single Source of Truth*)** untuk seluruh insiden monitoring.
 
 Alertmanager dikonfigurasi murni sebagai *router* webhook HTTPS menuju Diagnostic Service. Diagnostic Service kemudian mengumpulkan bukti dari multi-sumber (*Prometheus telemetry, log snippets, crash dumps, lifecycle spool*), mengevaluasi aturan deterministik, dan menerbitkan **Canonical 7-Section SRE Incident Report**.
 
@@ -212,10 +212,10 @@ Sistem observabilitas tidak boleh "mengarang" penyebab jika bukti pendukung tida
 > Memberitahukan operator bahwa *"Sistem belum dapat memastikan penyebab pasti, periksa daftar bukti berikut"* jauh lebih bernilai daripada memberikan diagnosis keliru yang mengarahkan operator ke langkah mitigasi yang salah.
 
 ### 2. Pertahankan Lingkaran Pembelajaran Berkelanjutan (*Continuous Learning Loop*)
-Jangan biarkan pengetahuan pasca-insiden (*post-mortem*) hanya berhenti sebagai dokumen PDF yang terlupakan. Dalam platform kami:
+Jangan biarkan pengetahuan pasca-insiden (*post-mortem*) hanya berhenti sebagai dokumen PDF yang terlupakan:
 1. **Insiden Terjadi:** Kasus kegagalan baru diinvestigasi oleh tim SRE.
 2. **Kodifikasi Aturan:** SRE menulis satu berkas JSON rulepack yang memuat regex pattern dan SOP perbaikan.
-3. **Hot-Ingest:** Rule diunggah via CLI `tmctl` atau REST API berotentikasi Bearer Token.
+3. **Hot-Ingest:** Rule diunggah via CLI operator atau REST API berotentikasi Bearer Token.
 4. **Otomatisasi Triage:** Ketika insiden serupa terulang di masa depan, sistem langsung mengenali polanya dalam hitungan detik dan menyajikan SOP yang tepat.
 
 ```text

@@ -146,8 +146,8 @@ Mengadopsi Windows Containers mentransformasikan cara Tomcat dikelola di lingkun
 │ HOST: Windows Server 2022 (LTSC)    │   │ CONTROL PLANE: Named Pipe    │
 │ NT Kernel Build: 10.0.20348         │   │ \\.\pipe\docker_engine       │
 ├─────────────────────────────────────┤   ├──────────────────────────────┤
-│ Docker Engine (dockerd.exe)         │   │ Operator CLI: tmctl          │
-│ Windows Job Object Manager          │   │ Event Daemon: tm-agent       │
+│ Docker Engine (dockerd.exe)         │   │ Container CLI / Orchestrator │
+│ Windows Job Object Manager          │   │ Health Monitoring Tool       │
 └──────────────────┬──────────────────┘   └──────────────────────────────┘
                    │
                    ▼ Mode: Process Isolation (--isolation=process)
@@ -199,88 +199,88 @@ Siklus hidup dikendalikan secara mutlak oleh Docker Engine melalui **Windows Nam
 3. Jika worker thread tetap mengalami hang setelah batas waktu 30 detik habis, Docker Engine mengeksekusi **hard termination deterministik** melalui panggilan sistem HCS.
 4. Kontainer keluar secara bersih dengan exit code terdefinisi. **Tidak ada lagi kemungkinan tersangkut di status `STOP_PENDING`**.
 
-Operator tooling (seperti CLI `tmctl`) dapat mengorkestrasi restart atau rollback dengan jaminan deterministik tanpa perlu intervensi manual membunuh PID di Task Manager.
-
-### 3. Penegakan Keamanan Non-Admin via `ContainerUser`
-
-Di dalam base image Windows NanoServer, Microsoft menyediakan akun non-administratif bawaan bernama **`ContainerUser`** (memiliki SID kanonikal `S-1-5-93-2-1`).
-
-Dengan menyetel instruksi `USER ContainerUser` di dalam Dockerfile:
-* Runtime Tomcat berjalan tanpa hak administratif.
-* Container berjalan di dalam **NTFS Silo**, yang memisahkan registry dan direktori sistem container dari host.
-* Jika terjadi eksploitasi RCE pada Tomcat, penyerang terperangkap di dalam sandbox NanoServer tanpa izin menulis ke `C:\Windows\System32` atau mengakses volume host yang tidak di-mount.
-
-```dockerfile
-# Cuplikan Dockerfile: Standardisasi Least-Privilege NanoServer
-FROM mcr.microsoft.com/windows/nanoserver:ltsc2022
-
-# Menyetel direktori kerja terisolasi
-WORKDIR C:/app
-
-# Menyalin runtime Tomcat dan JRE mandiri
-COPY --chown=ContainerUser:ContainerUser ./dist/tomcat C:/app/tomcat
-COPY --chown=ContainerUser:ContainerUser ./dist/jre C:/app/jre
-
-# Menjalankan runtime dengan akun non-admin
-USER ContainerUser
-
-EXPOSE 8080 9404
-ENTRYPOINT ["C:\\app\\jre\\bin\\java.exe", "-jar", "C:\\app\\tomcat\\bin\\bootstrap.jar"]
-CMD ["start"]
-```
-
----
-
-## 💡 Pelajaran Praktis & Mitigasi Batasan Windows Containers (SRE Best Practices)
-
-Meskipun keunggulannya sangat signifikan, migrasi ke Windows Containers bukan tanpa tantangan. Ada tiga aturan rekayasa spesifik Windows yang wajib diotomasi agar tidak menimbulkan masalah baru di produksi.
-
-### 1. Menjinakkan Batasan *Strict Kernel Matching* LTSC
-
-Berbeda dengan Linux yang memiliki stabilitas antarmuka syscall kernel (Linux Kernel ABI), kontainer Windows dalam mode **Process Isolation** (`--isolation=process`) menuntut **kecocokan 100% antara nomor build kernel host dan base image kontainer**.
-
-| Versi Host OS Windows Server | Nomor Build NT Kernel | Wajib Base Image NanoServer | Status Kompatibilitas |
-| :--- | :--- | :--- | :--- |
-| **Windows Server 2019** | `10.0.17763` | `mcr.microsoft.com/windows/nanoserver:1809` | ✅ Process Isolation Native |
-| **Windows Server 2022** | `10.0.20348` | `mcr.microsoft.com/windows/nanoserver:ltsc2022` | ✅ Process Isolation Native |
-| **Windows Server 2025** | `10.0.26100` | `mcr.microsoft.com/windows/nanoserver:ltsc2025` | ✅ Process Isolation Native |
-
-> [!WARNING]
-> Menjalankan container `nanoserver:ltsc2022` di atas host Windows Server 2019 dengan *Process Isolation* akan langsung gagal dengan error `hcsshim::CreateComputeSystem: The container operating system does not match the host operating system`.
-
-**Mitigasi Otomasi:**  
-Gunakan fakta Ansible (`ansible_kernel`) di pipeline deployment untuk menentukan tag base image secara dinamis:
-
-```yaml
-# Cuplikan Playbook Ansible Fleet Provisioning
-- name: Tentukan Base Image Windows Container Berdasarkan Kernel Host
-  ansible.builtin.set_fact:
-    windows_base_image: >-
-      {{
-        'mcr.microsoft.com/windows/nanoserver:1809' if ('17763' in ansible_kernel)
-        else ('mcr.microsoft.com/windows/nanoserver:ltsc2025' if ('26100' in ansible_kernel)
-        else 'mcr.microsoft.com/windows/nanoserver:ltsc2022')
-      }}
-```
-
-### 2. Aturan "Zero `/tmp`" & Standardisasi Storage (`TM-ADR-0030`)
-
-Banyak library Java servlet dan Tomcat wrapper mengasumsikan keberadaan path Unix `/tmp` untuk menampung file upload sementara atau *scratch buffer*. Di Windows NanoServer, path `/tmp` tidak ada dan akan memicu `java.io.IOException: The system cannot find the path specified`.
-
-**Mitigasi:**  
-Selalu deklarasikan parameter JVM `java.io.tmpdir` secara eksplisit menuju path Windows valid (misal `C:\temp`), dan pastikan folder tersebut telah dibuat dengan izin tulis bagi `ContainerUser`:
-
-```bash
-# Tambahkan pada argumen JVM Tomcat di entrypoint container:
--Djava.io.tmpdir=C:\temp
-```
-
-### 3. Otomatisasi Izin NTFS DACL untuk Bind Mount (`TM-ADR-0031`)
-
-Ketika me-mount direktori host Windows ke dalam container (misalnya untuk menyimpan file bukti insiden spool atau log persisten), kontainer sering gagal menulis dengan error `Access is Denied`. Hal ini terjadi karena akun `ContainerUser` di dalam kontainer menggunakan Security Identifier (SID) terisolasi: **`S-1-5-93-2-1`**.
-
-**Mitigasi:**  
-Sebelum kontainer dijalankan, pipeline otomasi host (Ansible atau PowerShell setup script) wajib memberikan izin modifikasi pada folder mount host menggunakan utility `icacls`:
+202: Operator tooling dapat mengorkestrasi restart atau rollback dengan jaminan deterministik tanpa perlu intervensi manual membunuh PID di Task Manager.
+203: 
+204: ### 3. Penegakan Keamanan Non-Admin via `ContainerUser`
+205: 
+206: Di dalam base image Windows NanoServer, Microsoft menyediakan akun non-administratif bawaan bernama **`ContainerUser`** (memiliki SID kanonikal `S-1-5-93-2-1`).
+207: 
+208: Dengan menyetel instruksi `USER ContainerUser` di dalam Dockerfile:
+209: * Runtime Tomcat berjalan tanpa hak administratif.
+210: * Container berjalan di dalam **NTFS Silo**, yang memisahkan registry dan direktori sistem container dari host.
+211: * Jika terjadi eksploitasi RCE pada Tomcat, penyerang terperangkap di dalam sandbox NanoServer tanpa izin menulis ke `C:\Windows\System32` atau mengakses volume host yang tidak di-mount.
+212: 
+213: ```dockerfile
+214: # Cuplikan Dockerfile: Standardisasi Least-Privilege NanoServer
+215: FROM mcr.microsoft.com/windows/nanoserver:ltsc2022
+216: 
+217: # Menyetel direktori kerja terisolasi
+218: WORKDIR C:/app
+219: 
+220: # Menyalin runtime Tomcat dan JRE mandiri
+221: COPY --chown=ContainerUser:ContainerUser ./dist/tomcat C:/app/tomcat
+222: COPY --chown=ContainerUser:ContainerUser ./dist/jre C:/app/jre
+223: 
+224: # Menjalankan runtime dengan akun non-admin
+225: USER ContainerUser
+226: 
+227: EXPOSE 8080 9404
+228: ENTRYPOINT ["C:\\app\\jre\\bin\\java.exe", "-jar", "C:\\app\\tomcat\\bin\\bootstrap.jar"]
+229: CMD ["start"]
+230: ```
+231: 
+232: ---
+233: 
+234: ## 💡 Pelajaran Praktis & Mitigasi Batasan Windows Containers (SRE Best Practices)
+235: 
+236: Meskipun keunggulannya sangat signifikan, migrasi ke Windows Containers bukan tanpa tantangan. Ada tiga aturan rekayasa spesifik Windows yang wajib diotomasi agar tidak menimbulkan masalah baru di produksi.
+237: 
+238: ### 1. Menjinakkan Batasan *Strict Kernel Matching* LTSC
+239: 
+240: Berbeda dengan Linux yang memiliki stabilitas antarmuka syscall kernel (Linux Kernel ABI), kontainer Windows dalam mode **Process Isolation** (`--isolation=process`) menuntut **kecocokan 100% antara nomor build kernel host dan base image kontainer**.
+241: 
+242: | Versi Host OS Windows Server | Nomor Build NT Kernel | Wajib Base Image NanoServer | Status Kompatibilitas |
+243: | :--- | :--- | :--- | :--- |
+244: | **Windows Server 2019** | `10.0.17763` | `mcr.microsoft.com/windows/nanoserver:1809` | ✅ Process Isolation Native |
+245: | **Windows Server 2022** | `10.0.20348` | `mcr.microsoft.com/windows/nanoserver:ltsc2022` | ✅ Process Isolation Native |
+246: | **Windows Server 2025** | `10.0.26100` | `mcr.microsoft.com/windows/nanoserver:ltsc2025` | ✅ Process Isolation Native |
+247: 
+248: > [!WARNING]
+249: > Menjalankan container `nanoserver:ltsc2022` di atas host Windows Server 2019 dengan *Process Isolation* akan langsung gagal dengan error `hcsshim::CreateComputeSystem: The container operating system does not match the host operating system`.
+250: 
+251: **Mitigasi Otomasi:**  
+252: Gunakan fakta Ansible (`ansible_kernel`) di pipeline deployment untuk menentukan tag base image secara dinamis:
+253: 
+254: ```yaml
+255: # Cuplikan Playbook Ansible Fleet Provisioning
+256: - name: Tentukan Base Image Windows Container Berdasarkan Kernel Host
+257:   ansible.builtin.set_fact:
+258:     windows_base_image: >-
+259:       {{
+260:         'mcr.microsoft.com/windows/nanoserver:1809' if ('17763' in ansible_kernel)
+261:         else ('mcr.microsoft.com/windows/nanoserver:ltsc2025' if ('26100' in ansible_kernel)
+262:         else 'mcr.microsoft.com/windows/nanoserver:ltsc2022')
+263:       }}
+264: ```
+265: 
+266: ### 2. Aturan "Zero `/tmp`" & Standardisasi Storage
+267: 
+268: Banyak library Java servlet dan Tomcat wrapper mengasumsikan keberadaan path Unix `/tmp` untuk menampung file upload sementara atau *scratch buffer*. Di Windows NanoServer, path `/tmp` tidak ada dan akan memicu `java.io.IOException: The system cannot find the path specified`.
+269: 
+270: **Mitigasi:**  
+271: Selalu deklarasikan parameter JVM `java.io.tmpdir` secara eksplisit menuju path Windows valid (misal `C:\temp`), dan pastikan folder tersebut telah dibuat dengan izin tulis bagi `ContainerUser`:
+272: 
+273: ```bash
+274: # Tambahkan pada argumen JVM Tomcat di entrypoint container:
+275: -Djava.io.tmpdir=C:\temp
+276: ```
+277: 
+278: ### 3. Otomatisasi Izin NTFS DACL untuk Bind Mount
+279: 
+280: Ketika me-mount direktori host Windows ke dalam container (misalnya untuk menyimpan file bukti insiden spool atau log persisten), kontainer sering gagal menulis dengan error `Access is Denied`. Hal ini terjadi karena akun `ContainerUser` di dalam kontainer menggunakan Security Identifier (SID) terisolasi: **`S-1-5-93-2-1`**.
+281: 
+282: **Mitigasi:**  
+283: Sebelum kontainer dijalankan, pipeline otomasi host (Ansible atau PowerShell setup script) wajib memberikan izin modifikasi pada folder mount host menggunakan utility `icacls`:
 
 ```powershell
 # Memberikan izin NTFS eksplisit kepada ContainerUser sebelum container dinyalakan

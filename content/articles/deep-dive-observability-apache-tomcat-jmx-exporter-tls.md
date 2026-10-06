@@ -159,7 +159,7 @@ Skrip `entrypoint.sh` bertindak sebagai *orchestrator guard* yang memvalidasi ke
 
 ```bash
 #!/usr/bin/env bash
-# Snippet: docker/linux/entrypoint.sh (Architecture Reference: TM-ADR-0002 & TM-ADR-0026)
+# Snippet: docker/linux/entrypoint.sh
 set -euo pipefail
 
 readonly AGENT_JAR=/opt/jmx-exporter/jmx_prometheus_javaagent.jar
@@ -502,6 +502,5 @@ Mengamankan antarmuka observabilitas bukanlah sekadar langkah opsional, melainka
 ## 📚 Referensi & Panduan Terkait
 
 - [Panduan Build Image Container Apache Tomcat + Prometheus JMX Exporter di Windows NanoServer]({{< relref "how-to/build-tomcat-jmx-nanoserver-image" >}})
-- [Panduan Deploy Kontainer Apache Tomcat Hardened di Windows Server]({{< relref "how-to/deploy-tomcat-container-windows-server-tcctl" >}})
 - [Prometheus JMX Exporter Repository (GitHub)](https://github.com/prometheus/jmx_exporter)
 - [Apache Tomcat Official Architecture Documentation](https://tomcat.apache.org/)
